@@ -78,13 +78,17 @@ class BootBridgeApp(Gtk.Window):
         self.update_kvm_badge()
         header.pack_end(self.kvm_badge)
 
-        # Main Outer Container
+        # Main Outer Scrolled Container
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        self.add(scrolled_window)
+
         main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         main_box.set_margin_top(16)
         main_box.set_margin_bottom(16)
         main_box.set_margin_start(16)
         main_box.set_margin_end(16)
-        self.add(main_box)
+        scrolled_window.add(main_box)
 
         # Dependency Warning Card (Visible only if dependencies missing)
         self.dep_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
