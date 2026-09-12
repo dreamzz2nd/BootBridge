@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🌁 BootBridge
+# BootBridge
 
 ### *Lightweight, Safe & Zero-Reboot Physical Dual-Boot Launcher for Linux*
 
@@ -15,38 +15,38 @@
   <b>BootBridge</b> is a specialized Linux desktop application designed to safely run your existing physical dual-booted Windows installation inside a Virtual Machine (QEMU/KVM) directly from your Linux desktop—<b>without rebooting your computer</b>.
 </p>
 
-[Key Features](#-key-features) •
-[Comparison](#-comparison-matrix) •
-[Architecture](#-system-architecture) •
-[Installation](#-installation-guide) •
-[Usage Guide](#-usage-guide) •
-[Troubleshooting](#-troubleshooting--faq)
+[Key Features](#key-features) •
+[Comparison](#comparison-matrix) •
+[Architecture](#system-architecture) •
+[Installation](#installation-guide) •
+[Usage Guide](#usage-guide) •
+[Troubleshooting](#troubleshooting--faq)
 
 </div>
 
 ---
 
-## 📌 Table of Contents
+## Table of Contents
 
-- [Overview](#-overview)
-- [Key Features](#-key-features)
-- [Comparison Matrix](#-comparison-matrix)
-- [System Architecture](#-system-architecture)
-- [System Requirements](#-system-requirements)
-- [Installation Guide](#-installation-guide)
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Comparison Matrix](#comparison-matrix)
+- [System Architecture](#system-architecture)
+- [System Requirements](#system-requirements)
+- [Installation Guide](#installation-guide)
   - [1. Install Dependencies](#1-install-system-dependencies)
   - [2. Clone & Setup](#2-clone--setup-repository)
   - [3. Desktop Menu Integration](#3-optional-desktop-menu-integration)
-- [Usage Guide](#-usage-guide)
-- [Troubleshooting & FAQ](#-troubleshooting--faq)
+- [Usage Guide](#usage-guide)
+- [Troubleshooting & FAQ](#troubleshooting--faq)
   - [Disabling Windows Fast Startup](#1-disabling-windows-fast-startup-critical)
   - [Fixing "Preparing Automatic Repair"](#2-fixing-preparing-automatic-repair)
-- [Keyboard Shortcuts Reference](#-keyboard-shortcuts-reference)
-- [Contributing & License](#-contributing--license)
+- [Keyboard Shortcuts Reference](#keyboard-shortcuts-reference)
+- [Contributing & License](#contributing--license)
 
 ---
 
-## 🔍 Overview
+## Overview
 
 Traditionally, dual-boot users must completely shut down Linux and restart their computer to access their Windows installation. **BootBridge** eliminates this workflow friction by leveraging **Linux KVM (Kernel-based Virtual Machine)** and **QEMU raw block device passthrough**.
 
@@ -54,33 +54,33 @@ With BootBridge, your physical Windows partition is booted natively inside a hig
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-- 🚀 **Zero-Reboot Dual Booting**: Boot your physical Windows drive inside Linux at near-native speed.
-- 🛡️ **Mount Safety Guard**: Built-in protection protocol that verifies disk mount states, warns against shared host partition access, and safely unmounts Linux-mounted NTFS drives to prevent data corruption.
-- ⚙️ **KVM & Hyper-V Acceleration**: Configures KVM hardware virtualization with a comprehensive suite of Hyper-V CPU enlightenments (`hv_relaxed`, `hv_spinlocks`, `hv_vapic`, `hv_time`, `hv_synic`, `hv_stimer`, `hv_reset`, `hv_vpindex`, `hv_runtime`, `hv_tlbflush`, `hv_ipi`) to prevent Windows kernel timer desynchronization and BSODs.
-- 🖥️ **QXL Paravirtualized Graphics**: Employs QXL graphics acceleration for flawless OVMF UEFI GOP framebuffer rendering without visual artifacts or stride glitches.
-- 📊 **Hardware Auto-Recommendation**: Dynamically analyzes host total RAM and CPU core count, calculating optimal safe default allocations with visual scale markers (`⭐ Recommended`).
-- ⚡ **One-Click NTFS Repair (`ntfsfix`)**: Integrated graphical utility to clear dirty volume flags and Fast Startup hibernation locks with elevated permissions.
-- 🔒 **TPM 2.0 Emulator (`swtpm`)**: Automatic integration with `swtpm` daemon for full Windows 11 compatibility.
-- 🖥️ **Fullscreen Mode & Interactive Shortcuts**: One-click direct fullscreen mode and interactive keyboard shortcut reference (`Ctrl + Alt + F` / `Ctrl + Alt + G`).
+- **Zero-Reboot Dual Booting**: Boot your physical Windows drive inside Linux at near-native speed.
+- **Mount Safety Guard**: Built-in protection protocol that verifies disk mount states, warns against shared host partition access, and safely unmounts Linux-mounted NTFS drives to prevent data corruption.
+- **KVM & Hyper-V Acceleration**: Configures KVM hardware virtualization with a comprehensive suite of Hyper-V CPU enlightenments (`hv_relaxed`, `hv_spinlocks`, `hv_vapic`, `hv_time`, `hv_synic`, `hv_stimer`, `hv_reset`, `hv_vpindex`, `hv_runtime`, `hv_tlbflush`, `hv_ipi`) to prevent Windows kernel timer desynchronization and BSODs.
+- **QXL Paravirtualized Graphics**: Employs QXL graphics acceleration for flawless OVMF UEFI GOP framebuffer rendering without visual artifacts or stride glitches.
+- **Hardware Auto-Recommendation**: Dynamically analyzes host total RAM and CPU core count, calculating optimal safe default allocations with visual scale markers (`Recommended`).
+- **One-Click NTFS Repair (`ntfsfix`)**: Integrated graphical utility to clear dirty volume flags and Fast Startup hibernation locks with elevated permissions.
+- **TPM 2.0 Emulator (`swtpm`)**: Automatic integration with `swtpm` daemon for full Windows 11 compatibility.
+- **Fullscreen Mode & Interactive Shortcuts**: One-click direct fullscreen mode and interactive keyboard shortcut reference (`Ctrl + Alt + F` / `Ctrl + Alt + G`).
 
 ---
 
-## 📊 Comparison Matrix
+## Comparison Matrix
 
 | Feature | Native Reboot Dual-Boot | Standard VirtualBox / VMware | BootBridge (QEMU/KVM Passthrough) |
 | :--- | :---: | :---: | :---: |
-| **Reboot Required** | Yes ❌ | No ✅ | **No** ✅ |
-| **Uses Physical Installed Windows**| Yes ✅ | No (Requires duplicate OS install) ❌ | **Yes** ✅ |
-| **Performance** | 100% Native | 60% - 80% Virtualized | **90% - 98% Near-Native** 🚀 |
-| **Data Synchronization** | Manual / Dual Boot | Guest Additions | **Native Direct Storage Access** 💾 |
-| **Data Safety Protection** | None | N/A | **Automated Mount Protection Guard** 🛡️ |
-| **Hyper-V Enlightenments** | N/A | Limited | **Full KVM Hyper-V Suite** ⚙️ |
+| **Reboot Required** | Yes | No | **No** |
+| **Uses Physical Installed Windows**| Yes | No (Requires duplicate OS install) | **Yes** |
+| **Performance** | 100% Native | 60% - 80% Virtualized | **90% - 98% Near-Native** |
+| **Data Synchronization** | Manual / Dual Boot | Guest Additions | **Native Direct Storage Access** |
+| **Data Safety Protection** | None | N/A | **Automated Mount Protection Guard** |
+| **Hyper-V Enlightenments** | N/A | Limited | **Full KVM Hyper-V Suite** |
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```mermaid
 flowchart TD
@@ -122,7 +122,7 @@ flowchart TD
 
 ---
 
-## 💻 System Requirements
+## System Requirements
 
 | Component | Minimum Specification | Recommended Specification |
 | :--- | :--- | :--- |
@@ -134,29 +134,29 @@ flowchart TD
 
 ---
 
-## 🛠️ Installation Guide
+## Installation Guide
 
 ### 1. Install System Dependencies
 
 Select your Linux distribution package manager to install the required virtualization stack:
 
-#### 🔹 Ubuntu / Linux Mint / Pop!_OS / Debian
+#### Ubuntu / Linux Mint / Pop!_OS / Debian
 ```bash
 sudo apt update
 sudo apt install -y qemu-system-x86-64 ovmf qemu-utils swtpm python3-gi python3-gi-cairo
 ```
 
-#### 🔹 Fedora / RHEL
+#### Fedora / RHEL
 ```bash
 sudo dnf install -y qemu-system-x86 edk2-ovmf qemu-img swtpm python3-gobject
 ```
 
-#### 🔹 Arch Linux / Manjaro
+#### Arch Linux / Manjaro
 ```bash
 sudo pacman -S --needed qemu-desktop ovmf qemu-img swtpm python-gobject
 ```
 
-#### 🔹 openSUSE
+#### openSUSE
 ```bash
 sudo zypper install qemu-x86 qemu-ovmf-x86_64 swtpm python3-gobject
 ```
@@ -193,7 +193,7 @@ update-desktop-database ~/.local/share/applications/
 
 ---
 
-## 🚀 Usage Guide
+## Usage Guide
 
 1. **Launch BootBridge**:
    Run the launcher script from terminal or click **BootBridge** in your application launcher menu:
@@ -205,18 +205,18 @@ update-desktop-database ~/.local/share/applications/
    Choose the physical drive containing your Windows installation from the **Target Disk** dropdown menu (e.g., `/dev/nvme0n1` or `/dev/sda`).
 
 3. **Verify Safety Guard Status**:
-   - If NTFS partitions are currently mounted by Linux, click **`🔓 Safe Unmount Linux Partitions`**.
-   - If Windows was hibernated or locked by Fast Startup, click **`⚡ Reset Status NTFS / Fast Startup`**.
+   - If NTFS partitions are currently mounted by Linux, click **`Safe Unmount Linux Partitions`**.
+   - If Windows was hibernated or locked by Fast Startup, click **`Reset Status NTFS / Fast Startup`**.
 
 4. **Review Hardware Allocation**:
-   - BootBridge automatically sets the **⭐ Recommended** RAM allocation (e.g. 3 GB for 8 GB systems) and CPU cores to keep your Linux host system responsive.
+   - BootBridge automatically sets the **Recommended** RAM allocation (e.g. 3 GB for 8 GB systems) and CPU cores to keep your Linux host system responsive.
 
 5. **Launch VM**:
-   Click **`▶ START WINDOWS VM`**. The QEMU window will open and boot into your physical Windows desktop.
+   Click **`START WINDOWS VM`**. The QEMU window will open and boot into your physical Windows desktop.
 
 ---
 
-## 💡 Troubleshooting & FAQ
+## Troubleshooting & FAQ
 
 ### 1. Disabling Windows Fast Startup (CRITICAL)
 
@@ -241,7 +241,7 @@ If Windows enters *Preparing Automatic Repair* on the first launch inside QEMU:
 [Automatic Repair Screen] -> Advanced options -> Troubleshoot -> Startup Settings -> Restart -> Press 4 (Enable Safe Mode)
 ```
 
-1. On the repair screen, click **Advanced options** → **Troubleshoot** → **Startup Settings** → **Restart**.
+1. On the repair screen, click **Advanced options** -> **Troubleshoot** -> **Startup Settings** -> **Restart**.
 2. Press **`4`** or **`F4`** on your keyboard to select **Enable Safe Mode**.
 3. Once Windows boots into Safe Mode inside QEMU, Windows automatically adjusts its kernel drivers for QEMU virtual hardware.
 4. Restart the VM from within Windows, and it will boot normally into full desktop mode.
@@ -254,12 +254,12 @@ If Windows enters *Preparing Automatic Repair* on the first launch inside QEMU:
 | :--- | :--- | :--- |
 | **Vertical static lines / Glitch graphics** | Stride mismatch in legacy `std` VGA driver with UEFI | Select **Native GTK Window (QXL 2D/3D)** in Display Engine |
 | **INACCESSIBLE_BOOT_DEVICE (BSOD 0x7B)** | Missing legacy IDE controller drivers | BootBridge automatically uses **AHCI SATA** / **NVMe** passthrough |
-| **System Heavy Lag / 90%+ RAM Usage** | VM RAM allocation set too high for host system | Set RAM Allocation to the **`⭐ Recommended`** marker (e.g., 3 GB) |
+| **System Heavy Lag / 90%+ RAM Usage** | VM RAM allocation set too high for host system | Set RAM Allocation to the **`Recommended`** marker (e.g., 3 GB) |
 | **Windows 11 TPM Error** | Missing TPM 2.0 module | Install `swtpm` package (`sudo apt install swtpm`) |
 
 ---
 
-## ⌨️ Keyboard Shortcuts Reference
+## Keyboard Shortcuts Reference
 
 When the QEMU VM window is focused, use the following shortcuts for seamless interactivity:
 
@@ -267,17 +267,17 @@ When the QEMU VM window is focused, use the following shortcuts for seamless int
 | :--- | :--- | :--- |
 | **`Ctrl + Alt + F`** | **Toggle Fullscreen** | Switches between windowed and full-screen mode instantly |
 | **`Ctrl + Alt + G`** | **Release Mouse / Input** | Releases mouse cursor and keyboard focus back to Linux host |
-| **`View → Zoom to Fit`** | **Auto-Scale Display** | Dynamically scales Windows display resolution to window bounds |
-| **`Machine → Send Key`** | **Send System Keys** | Sends `Ctrl+Alt+Del`, `PrintScreen`, or `Pause` commands to Windows |
-| **`Machine → Reset`** | **Hard Reset** | Performs an emergency hardware reset if Windows freezes |
+| **`View -> Zoom to Fit`** | **Auto-Scale Display** | Dynamically scales Windows display resolution to window bounds |
+| **`Machine -> Send Key`** | **Send System Keys** | Sends `Ctrl+Alt+Del`, `PrintScreen`, or `Pause` commands to Windows |
+| **`Machine -> Reset`** | **Hard Reset** | Performs an emergency hardware reset if Windows freezes |
 
 ---
 
-## 🤝 Contributing & License
+## Contributing & License
 
 Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on submitting pull requests and reporting issues.
 
-### 📄 License
+### License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
@@ -285,7 +285,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 <div align="center">
 
-Developed with ❤️ by **[Rizky Ibrahim Nasrullah (dreamzz2nd)](https://github.com/dreamzz2nd)**
+Developed by **[Rizky Ibrahim Nasrullah (dreamzz2nd)](https://github.com/dreamzz2nd)**
 
 *BootBridge is an independent open-source tool and is not affiliated with Microsoft Corporation or QEMU/KVM maintainers.*
 

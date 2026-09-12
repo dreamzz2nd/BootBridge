@@ -101,8 +101,8 @@ TRANSLATIONS = {
         ),
         "settings_card_title": "Tampilan & Preferensi Aplikasi",
         "theme_setting": "Mode Tema UI:",
-        "theme_dark": "🌙 Mode Gelap (Postman Studio Dark)",
-        "theme_light": "☀️ Mode Terang (Postman Studio Light)",
+        "theme_dark": "Mode Gelap (Postman Studio Dark)",
+        "theme_light": "Mode Terang (Postman Studio Light)",
         "lang_setting": "Bahasa Aplikasi:",
         "sys_info_title": "Spesifikasi & Info Hypervisor Host",
         "progress_ready": "Siap menjalankan Windows VM",
@@ -171,8 +171,8 @@ TRANSLATIONS = {
         ),
         "settings_card_title": "Appearance & Application Preferences",
         "theme_setting": "UI Theme Mode:",
-        "theme_dark": "🌙 Dark Mode (Postman Studio Dark)",
-        "theme_light": "☀️ Light Mode (Postman Studio Light)",
+        "theme_dark": "Dark Mode (Postman Studio Dark)",
+        "theme_light": "Light Mode (Postman Studio Light)",
         "lang_setting": "Application Language:",
         "sys_info_title": "Host System & Hypervisor Specifications",
         "progress_ready": "Ready to launch Windows VM",
@@ -657,8 +657,8 @@ class BootBridgeApp(Gtk.Window):
         sett_grid.attach(self.sett_lang_lbl, 0, 1, 1, 1)
 
         self.sett_lang_combo = Gtk.ComboBoxText()
-        self.sett_lang_combo.append("id", "🇮🇩 Bahasa Indonesia")
-        self.sett_lang_combo.append("en", "🇬🇧 English")
+        self.sett_lang_combo.append("id", "Bahasa Indonesia")
+        self.sett_lang_combo.append("en", "English")
         self.sett_lang_combo.set_active_id(self.current_lang)
         self.sett_lang_combo.connect("changed", self.on_language_changed)
         sett_grid.attach(self.sett_lang_combo, 1, 1, 1, 1)
