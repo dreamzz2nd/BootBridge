@@ -300,6 +300,12 @@ class BootBridgeApp(Gtk.Window):
         help_expander.add(help_card)
         main_box.pack_start(help_expander, False, False, 0)
 
+        # Smooth Loading State Progress Bar
+        self.progress_bar = Gtk.ProgressBar()
+        self.progress_bar.set_show_text(True)
+        self.progress_bar.set_text("Ready to launch Windows VM")
+        main_box.pack_start(self.progress_bar, False, False, 0)
+
         # Controls & Launch Bar
         controls_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         
@@ -499,6 +505,8 @@ class BootBridgeApp(Gtk.Window):
         if success:
             self.start_btn.set_sensitive(False)
             self.stop_btn.set_sensitive(True)
+            self.progress_bar.set_fraction(0.5)
+            self.progress_bar.set_text("Booting Windows VM... Initializing KVM Hypervisor ⚡")
 
     def on_stop_vm_clicked(self, widget):
         self.launcher.stop_vm()
@@ -508,9 +516,13 @@ class BootBridgeApp(Gtk.Window):
             if status == "RUNNING":
                 self.start_btn.set_sensitive(False)
                 self.stop_btn.set_sensitive(True)
+                self.progress_bar.set_fraction(1.0)
+                self.progress_bar.set_text("Windows VM Active & Running 🟢")
             else:
                 self.start_btn.set_sensitive(True)
                 self.stop_btn.set_sensitive(False)
+                self.progress_bar.set_fraction(0.0)
+                self.progress_bar.set_text("Ready to launch Windows VM")
         GLib.idle_add(update_ui)
 
     def log_message(self, message):
