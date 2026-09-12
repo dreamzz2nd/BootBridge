@@ -155,18 +155,12 @@ class BootBridgeApp(Gtk.Window):
         self.safety_status_label.set_line_wrap(True)
         self.safety_card.pack_start(self.safety_status_label, False, False, 0)
 
-        # Safe Unmount & NTFS Repair Button Box
+        # Safe Unmount Button Box
         self.unmount_btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         self.unmount_btn = Gtk.Button(label="🔓 Safe Unmount Linux Partitions")
         self.unmount_btn.get_style_context().add_class("btn-warning")
         self.unmount_btn.connect("clicked", self.on_unmount_clicked)
         self.unmount_btn_box.pack_start(self.unmount_btn, False, False, 0)
-
-        self.fix_ntfs_btn = Gtk.Button(label="⚡ Reset Status NTFS / Fast Startup")
-        self.fix_ntfs_btn.get_style_context().add_class("btn-warning")
-        self.fix_ntfs_btn.connect("clicked", self.on_fix_ntfs_clicked)
-        self.unmount_btn_box.pack_start(self.fix_ntfs_btn, False, False, 0)
-
         self.safety_card.pack_start(self.unmount_btn_box, False, False, 0)
 
         main_box.pack_start(self.safety_card, False, False, 0)
@@ -185,120 +179,35 @@ class BootBridgeApp(Gtk.Window):
         grid.set_column_spacing(16)
         grid.set_row_spacing(12)
 
-        # Dynamic hardware recommendation calculation
-        try:
-            with open("/proc/meminfo", "r") as f:
-                total_kb = int([line.split()[1] for line in f if "MemTotal" in line][0])
-            total_ram_mb = total_kb // 1024
-        except Exception:
-            total_ram_mb = 8192
-
-        if total_ram_mb <= 4096:
-            rec_ram_mb = 2048
-        elif total_ram_mb <= 8192:
-            rec_ram_mb = 3072
-        elif total_ram_mb <= 16384:
-            rec_ram_mb = 6144
-        else:
-            rec_ram_mb = 8192
-
-        max_cores = multiprocessing.cpu_count()
-        if max_cores <= 2:
-            rec_cores = 1
-        elif max_cores <= 4:
-            rec_cores = 2
-        elif max_cores <= 8:
-            rec_cores = 4
-        else:
-            rec_cores = max_cores // 2
-
-        # RAM Slider with Recommended Mark Placeholder
-        ram_lbl = Gtk.Label(label="RAM Allocation:")
-        ram_lbl.set_xalign(0)
-        grid.attach(ram_lbl, 0, 0, 1, 1)
-
-        max_slider_ram = max(rec_ram_mb, min(16384, (total_ram_mb // 1024) * 1024))
-        self.ram_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 1024, max_slider_ram, 1024)
-        self.ram_scale.set_value(rec_ram_mb)
+        # RAM Slider
+        grid.attach(Gtk.Label(label="RAM Allocation:"), 0, 0, 1, 1)
+        self.ram_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 1024, 16384, 1024)
+        self.ram_scale.set_value(4096)
         self.ram_scale.set_digits(0)
         self.ram_scale.set_hexpand(True)
         self.ram_scale.set_draw_value(True)
-        self.ram_scale.add_mark(rec_ram_mb, Gtk.PositionType.BOTTOM, f"⭐ Rec ({int(rec_ram_mb/1024)} GB)")
-        self.ram_scale.connect("format-value", lambda scale, val: f"{int(val/1024)} GB ({int(val)} MB)" + (" ⭐ Recommended" if int(val) == rec_ram_mb else ""))
+        self.ram_scale.connect("format-value", lambda scale, val: f"{int(val/1024)} GB ({int(val)} MB)")
         grid.attach(self.ram_scale, 1, 0, 1, 1)
 
-        # CPU Cores Slider with Recommended Mark Placeholder
-        cpu_lbl = Gtk.Label(label="CPU Cores:")
-        cpu_lbl.set_xalign(0)
-        grid.attach(cpu_lbl, 0, 1, 1, 1)
-
-        self.cpu_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 1, max_cores, 1)
-        self.cpu_scale.set_value(rec_cores)
-        self.cpu_scale.set_digits(0)
-        self.cpu_scale.set_hexpand(True)
-        self.cpu_scale.set_draw_value(True)
-        self.cpu_scale.add_mark(rec_cores, Gtk.PositionType.BOTTOM, f"⭐ Rec ({rec_cores} Cores)")
-        self.cpu_scale.connect("format-value", lambda scale, val: f"{int(val)} Core" + ("s" if int(val) > 1 else "") + (" ⭐ Recommended" if int(val) == rec_cores else ""))
-        grid.attach(self.cpu_scale, 1, 1, 1, 1)
+        # CPU Cores
+        grid.attach(Gtk.Label(label="CPU Cores:"), 0, 1, 1, 1)
+        max_cores = multiprocessing.cpu_count()
+        default_cores = min(4, max_cores)
+        self.cpu_spin = Gtk.SpinButton.new_with_range(1, max_cores, 1)
+        self.cpu_spin.set_value(default_cores)
+        grid.attach(self.cpu_spin, 1, 1, 1, 1)
 
         # Display Backend
         grid.attach(Gtk.Label(label="Display Engine:"), 0, 2, 1, 1)
         self.display_combo = Gtk.ComboBoxText()
-        self.display_combo.append("gtk", "Native GTK Window (QXL 2D/3D)")
+        self.display_combo.append("gtk", "Native GTK Window (VirtIO 3D)")
         self.display_combo.append("sdl", "SDL Hardware Window")
         self.display_combo.append("spice", "SPICE Protocol (Remote/Local)")
         self.display_combo.set_active(0)
         grid.attach(self.display_combo, 1, 2, 1, 1)
 
-        # Fullscreen Toggle Checkbox
-        self.fullscreen_chk = Gtk.CheckButton(label="🖥️ Jalankan VM Langsung dalam Mode Layar Penuh (Fullscreen)")
-        grid.attach(self.fullscreen_chk, 0, 3, 2, 1)
-
         config_card.pack_start(grid, False, False, 0)
         main_box.pack_start(config_card, False, False, 0)
-
-        # Card 4: VM Keyboard Shortcuts & Features Guide
-        shortcut_expander = Gtk.Expander(label="⌨️ Fitur Canggih & Shortcut Layar VM (Fullscreen, Mouse, Keys)")
-        shortcut_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        shortcut_card.get_style_context().add_class("card")
-
-        shortcut_text = Gtk.Label()
-        shortcut_text.set_xalign(0)
-        shortcut_text.set_line_wrap(True)
-        shortcut_text.set_markup(
-            "<b>Daftar Fitur & Shortcut QEMU VM yang Bisa Kamu Gunakan:</b>\n\n"
-            "• 🖥️ <b>Toggle Fullscreen:</b> Tekan <b><tt>Ctrl + Alt + F</tt></b> di dalam jendela VM untuk masuk/keluar mode Fullscreen kapan saja.\n"
-            "• 🖱️ <b>Lepas / Tangkap Mouse:</b> Tekan <b><tt>Ctrl + Alt + G</tt></b> jika kursor kaku atau ingin melepas kursor dari VM.\n"
-            "• 📐 <b>Layar Auto-Fit:</b> Di bar atas jendela VM, klik <b><i>View → Zoom to Fit</i></b> agar tampilan Windows pas secara otomatis dengan resolusi layar.\n"
-            "• ⌨️ <b>Kirim Ctrl+Alt+Del:</b> Di bar atas jendela VM, klik <b><i>Machine → Send Key → Ctrl-Alt-Del</i></b> untuk membuka Task Manager / Lock Screen.\n"
-            "• 🔄 <b>Hard Reset VM:</b> Di bar atas jendela VM, klik <b><i>Machine → Reset</i></b> jika Windows macet."
-        )
-        shortcut_card.pack_start(shortcut_text, False, False, 0)
-        shortcut_expander.add(shortcut_card)
-        main_box.pack_start(shortcut_expander, False, False, 0)
-
-        # Card 4: Troubleshooting & Boot Help Guide
-        help_expander = Gtk.Expander(label="💡 Windows Boot Troubleshooting & Fix Guide")
-        help_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        help_card.get_style_context().add_class("card")
-
-        help_text = Gtk.Label()
-        help_text.set_xalign(0)
-        help_text.set_line_wrap(True)
-        help_text.set_markup(
-            "<b>Jika Windows stuck di 'Preparing Automatic Repair':</b>\n\n"
-            "1. <b>Matikan Fast Startup / Hibernasi di Windows:</b>\n"
-            "   Di OS Windows fisik, buka CMD (Run as Administrator) dan ketik:\n"
-            "   <tt>powercfg /h off</tt>\n"
-            "   Lalu matikan Windows secara penuh (Shutdown, bukan Sleep/Hibernate).\n\n"
-            "2. <b>Reset Status NTFS:</b> Klik tombol <i>'Reset Status NTFS'</i> di bagian Guard di atas untuk membersihkan dirty flag.\n\n"
-            "3. <b>Boot ke Safe Mode sekali:</b>\n"
-            "   Di layar Automatic Repair VM -> <i>Advanced Options</i> -> <i>Troubleshoot</i> -> <i>Startup Settings</i> -> <i>Restart</i> -> Tekan <b>4</b> (Enable Safe Mode).\n"
-            "   Saat Safe Mode terbuka, Windows akan menyesuaikan driver virtual QEMU secara otomatis!"
-        )
-        help_card.pack_start(help_text, False, False, 0)
-        help_expander.add(help_card)
-        main_box.pack_start(help_expander, False, False, 0)
 
         # Controls & Launch Bar
         controls_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
@@ -435,7 +344,7 @@ class BootBridgeApp(Gtk.Window):
             self.unmount_btn_box.show_all()
         else:
             msg_lines.append("<span foreground='#3fb950'><b>✅ MOUNT GUARD: UNMOUNTED</b></span> (Aman untuk Booting)")
-            self.unmount_btn_box.show_all()
+            self.unmount_btn_box.hide()
 
         if safety["is_host_disk"]:
             msg_lines.append("<span foreground='#58a6ff'><b>🛡️ DUAL-BOOT ISOLATION:</b></span> Disk ini juga berisi OS Linux Host.")
@@ -464,36 +373,20 @@ class BootBridgeApp(Gtk.Window):
         # Refresh disk status
         GLib.timeout_add(1000, self.refresh_disks)
 
-    def on_fix_ntfs_clicked(self, widget):
-        if not self.selected_disk:
-            return
-
-        ntfs_parts = [p for p in self.selected_disk.get("partitions", []) if p.get("fstype") == "ntfs"]
-        if not ntfs_parts:
-            self.log_message("Tidak ditemukan partisi NTFS pada disk yang dipilih.")
-            return
-
-        for p in ntfs_parts:
-            self.log_message(f"Fixing NTFS dirty flag for partition {p['path']}...")
-            success, msg = SafetyChecker.fix_ntfs_dirty_flag(p["path"])
-            self.log_message(msg)
-
     def on_start_vm_clicked(self, widget):
         if not self.selected_disk:
             return
 
         ram_mb = int(self.ram_scale.get_value())
-        cpu_cores = int(self.cpu_scale.get_value() if hasattr(self, "cpu_scale") else self.cpu_spin.get_value())
+        cpu_cores = int(self.cpu_spin.get_value())
         display = self.display_combo.get_active_id() or "gtk"
 
-        fullscreen = self.fullscreen_chk.get_active()
-        self.log_message(f"Initiating VM boot for physical disk {self.selected_disk['path']} (Fullscreen={fullscreen})...")
+        self.log_message(f"Initiating VM boot for physical disk {self.selected_disk['path']}...")
         success = self.launcher.start_vm(
             disk_path=self.selected_disk["path"],
             ram_mb=ram_mb,
             cpu_cores=cpu_cores,
-            display_type=display,
-            fullscreen=fullscreen
+            display_type=display
         )
 
         if success:

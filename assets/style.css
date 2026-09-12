@@ -150,15 +150,3 @@ scale highlight {
     background-color: #1f6feb;
     border-radius: 4px;
 }
-
-scale mark {
-    color: #d29922;
-    font-weight: 600;
-    font-size: 11px;
-}
-
-scale mark indicator {
-    background-color: #d29922;
-    min-width: 3px;
-    min-height: 8px;
-}

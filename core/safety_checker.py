@@ -7,10 +7,10 @@ class SafetyChecker:
     """Performs pre-flight safety validation before launching Windows VM."""
 
     OVMF_SEARCH_PATHS = [
-        "/usr/share/OVMF/OVMF_CODE_4M.fd",
-        "/usr/share/OVMF/OVMF_CODE.fd",
         "/usr/share/OVMF/OVMF_CODE_4M.ms.fd",
+        "/usr/share/OVMF/OVMF_CODE_4M.fd",
         "/usr/share/OVMF/OVMF_CODE_4M.secboot.fd",
+        "/usr/share/OVMF/OVMF_CODE.fd",
         "/usr/share/OVMF/OVMF_CODE.secboot.fd",
         "/usr/share/edk2/x64/OVMF_CODE.fd",
         "/usr/share/edk2-ovmf/x64/OVMF_CODE.fd",
@@ -20,9 +20,9 @@ class SafetyChecker:
     ]
 
     OVMF_VARS_SEARCH_PATHS = [
+        "/usr/share/OVMF/OVMF_VARS_4M.ms.fd",
         "/usr/share/OVMF/OVMF_VARS_4M.fd",
         "/usr/share/OVMF/OVMF_VARS.fd",
-        "/usr/share/OVMF/OVMF_VARS_4M.ms.fd",
         "/usr/share/edk2/x64/OVMF_VARS.fd",
         "/usr/share/edk2-ovmf/x64/OVMF_VARS.fd",
         "/usr/share/edk2/ovmf/OVMF_VARS.fd",
@@ -32,7 +32,7 @@ class SafetyChecker:
 
     @classmethod
     def check_system_dependencies(cls):
-        """Checks for required system packages: QEMU, OVMF firmware, KVM, pkexec, swtpm."""
+        """Checks for required system packages: QEMU, OVMF firmware, KVM, pkexec."""
         status = {
             "qemu_installed": False,
             "qemu_path": None,
@@ -42,9 +42,8 @@ class SafetyChecker:
             "kvm_available": os.path.exists("/dev/kvm"),
             "pkexec_installed": bool(shutil.which("pkexec")),
             "udisksctl_installed": bool(shutil.which("udisksctl")),
-            "swtpm_installed": bool(shutil.which("swtpm")),
             "missing_packages": [],
-            "install_command": "sudo apt install -y qemu-system-x86-64 ovmf qemu-utils swtpm"
+            "install_command": "sudo apt install -y qemu-system-x86-64 ovmf qemu-utils"
         }
 
         # Check QEMU
@@ -137,19 +136,6 @@ class SafetyChecker:
                 return False, f"Gagal unmount {part_path}: {res.stderr or res_root.stderr}"
         except Exception as e:
             return False, f"Error saat unmount {part_path}: {str(e)}"
-
-    @staticmethod
-    def fix_ntfs_dirty_flag(part_path):
-        """Runs ntfsfix via pkexec to clear NTFS dirty & hibernation volume flags."""
-        try:
-            cmd = ["pkexec", "ntfsfix", part_path]
-            res = subprocess.run(cmd, capture_output=True, text=True)
-            if res.returncode == 0:
-                return True, f"Berhasil mereset status NTFS pada {part_path}. Dirty/hibernation flag cleared!"
-            else:
-                return False, f"Gagal mereset NTFS {part_path}: {res.stderr or res.stdout}"
-        except Exception as e:
-            return False, f"Error ntfsfix: {str(e)}"
 
 if __name__ == "__main__":
     deps = SafetyChecker.check_system_dependencies()
