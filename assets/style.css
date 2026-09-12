@@ -1,71 +1,89 @@
-/* BootBridge Modern macOS / Libadwaita Dark Theme CSS */
+/* BootBridge Studio Light Mode Theme CSS */
 
 window {
-    background-color: #171a21;
-    color: #f0f4f8;
-    font-family: 'Inter', 'SF Pro Text', 'Ubuntu', 'Segoe UI', sans-serif;
+    background-color: #f8fafc;
+    color: #0f172a;
+    font-family: 'Inter', 'SF Pro Text', 'Ubuntu', 'Segoe UI', -apple-system, sans-serif;
 }
 
 headerbar {
-    background: linear-gradient(180deg, #222733 0%, #1a1e27 100%);
-    border-bottom: 1px solid #2d3345;
-    padding: 8px 14px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 8px 16px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
 }
 
 .header-title {
     font-weight: 700;
     font-size: 15px;
-    color: #ffffff;
-    letter-spacing: 0.3px;
+    color: #0f172a;
+    letter-spacing: -0.2px;
 }
 
 .header-subtitle {
     font-size: 11px;
-    color: #94a3b8;
+    color: #64748b;
 }
 
-/* Card Container Styling - macOS & Libadwaita Elevation */
+/* Card Containers - Crisp White Studio Cards */
 .card {
-    background-color: #202531;
-    border: 1px solid #2d3446;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 20px;
-    margin-bottom: 14px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-    transition: all 0.2s ease;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    transition: all 0.2s ease-in-out;
 }
 
 .card:hover {
-    border-color: #3b4256;
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
 }
 
 .card-title {
     font-size: 15px;
     font-weight: 700;
-    color: #38bdf8;
-    margin-bottom: 10px;
+    color: #0f766e;
+    margin-bottom: 8px;
+    letter-spacing: -0.2px;
 }
 
 .card-subtitle {
     font-size: 12px;
-    color: #94a3b8;
+    color: #64748b;
 }
 
-/* Status Indicators & Dots */
-.status-dot-green {
-    color: #4ade80;
-    font-weight: bold;
+/* Badges & Status Pills */
+.badge {
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 11px;
+    font-weight: 600;
 }
 
-.status-dot-yellow {
-    color: #facc15;
-    font-weight: bold;
+.badge-success {
+    background-color: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
 }
 
-.status-dot-red {
-    color: #f87171;
-    font-weight: bold;
+.badge-warning {
+    background-color: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+
+.badge-error {
+    background-color: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.badge-info {
+    background-color: #f0f9ff;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
 }
 
 /* Action Buttons */
@@ -77,70 +95,73 @@ button {
 }
 
 button.btn-primary {
-    background: linear-gradient(180deg, #16a34a 0%, #15803d 100%);
+    background: #0f766e;
     color: #ffffff;
-    border: 1px solid #22c55e;
+    border: 1px solid #0f766e;
     border-radius: 10px;
     font-weight: 700;
-    font-size: 15px;
+    font-size: 14px;
     padding: 12px 24px;
-    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);
 }
 
 button.btn-primary:hover {
-    background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
-    box-shadow: 0 6px 18px rgba(34, 197, 94, 0.5);
+    background: #0d9488;
+    border-color: #0d9488;
+    box-shadow: 0 6px 16px rgba(13, 148, 136, 0.35);
 }
 
 button.btn-primary:disabled {
-    background: #1e2430;
-    color: #64748b;
-    border-color: #334155;
+    background: #e2e8f0;
+    color: #94a3b8;
+    border-color: #cbd5e1;
     box-shadow: none;
 }
 
 button.btn-danger {
-    background: linear-gradient(180deg, #dc2626 0%, #b91c1c 100%);
+    background: #dc2626;
     color: #ffffff;
-    border: 1px solid #ef4444;
+    border: 1px solid #dc2626;
     border-radius: 10px;
     font-weight: 600;
     font-size: 13px;
     padding: 10px 18px;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
 }
 
 button.btn-danger:hover {
-    background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%);
+    background: #b91c1c;
 }
 
 button.btn-warning {
-    background: linear-gradient(180deg, #d97706 0%, #b45309 100%);
+    background: #d97706;
     color: #ffffff;
-    border: 1px solid #f59e0b;
+    border: 1px solid #d97706;
     border-radius: 10px;
     font-weight: 600;
     font-size: 13px;
     padding: 10px 18px;
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.2);
 }
 
 button.btn-warning:hover {
-    background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+    background: #b45309;
 }
 
-/* Progress Bar Smooth Styling */
+/* Progress Bar */
 progressbar trough {
-    background-color: #1a1e28;
+    background-color: #e2e8f0;
     border-radius: 8px;
-    border: 1px solid #334155;
+    border: 1px solid #cbd5e1;
     min-height: 8px;
 }
 
 progressbar progress {
-    background: linear-gradient(90deg, #38bdf8 0%, #818cf8 100%);
+    background: #0f766e;
     border-radius: 8px;
 }
 
-/* Log View Drawer */
+/* Log View Terminal Drawer */
 .log-view {
     background-color: #0f172a;
     color: #38bdf8;
@@ -148,36 +169,40 @@ progressbar progress {
     font-size: 11px;
     border-radius: 10px;
     border: 1px solid #1e293b;
-    padding: 10px;
+    padding: 12px;
 }
 
-/* Form Controls & Combobox */
+/* Form Controls & Inputs */
 combobox button {
-    background-color: #1e2430;
-    border: 1px solid #334155;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
     border-radius: 8px;
-    color: #f1f5f9;
+    color: #0f172a;
     padding: 6px 12px;
 }
 
+combobox button:hover {
+    border-color: #0f766e;
+}
+
 scale trough {
-    background-color: #1e2430;
+    background-color: #e2e8f0;
     border-radius: 6px;
 }
 
 scale highlight {
-    background: linear-gradient(90deg, #0284c7 0%, #38bdf8 100%);
+    background: #0f766e;
     border-radius: 6px;
 }
 
 scale mark {
-    color: #f59e0b;
+    color: #d97706;
     font-weight: 600;
     font-size: 11px;
 }
 
 scale mark indicator {
-    background-color: #f59e0b;
+    background-color: #d97706;
     min-width: 3px;
     min-height: 8px;
     border-radius: 2px;
@@ -185,11 +210,11 @@ scale mark indicator {
 
 checkbutton check {
     border-radius: 6px;
-    border: 1px solid #475569;
-    background-color: #1e2430;
+    border: 1px solid #cbd5e1;
+    background-color: #ffffff;
 }
 
 checkbutton check:checked {
-    background-color: #0284c7;
-    border-color: #38bdf8;
+    background-color: #0f766e;
+    border-color: #0f766e;
 }

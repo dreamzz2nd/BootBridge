@@ -418,7 +418,7 @@ class BootBridgeApp(Gtk.Window):
             if p.get("label"):
                 p_text += f" Label: <i>'{p['label']}'</i>"
             if p.get("is_mounted"):
-                p_text += f" <span foreground='#f85149'>[MOUNTED: {p['mountpoint']}]</span>"
+                p_text += f" <span foreground='#dc2626'>[MOUNTED: {p['mountpoint']}]</span>"
 
             p_lbl = Gtk.Label()
             p_lbl.set_markup(p_text)
@@ -436,15 +436,15 @@ class BootBridgeApp(Gtk.Window):
         is_safe = safety["is_safe"]
 
         if safety["unmount_required"]:
-            msg_lines.append("<span foreground='#f85149'><b>⚠️ MOUNT PROTECTION ACTIVE:</b></span> Partisi Windows sedang di-mount oleh Linux.")
+            msg_lines.append("<span foreground='#dc2626'><b>⚠️ MOUNT PROTECTION ACTIVE:</b></span> Partisi Windows sedang di-mount oleh Linux.")
             msg_lines.append("Harap unmount terlebih dahulu untuk mencegah kerusakan file NTFS.")
             self.unmount_btn_box.show_all()
         else:
-            msg_lines.append("<span foreground='#3fb950'><b>✅ MOUNT GUARD: UNMOUNTED</b></span> (Aman untuk Booting)")
+            msg_lines.append("<span foreground='#16a34a'><b>✅ MOUNT GUARD: UNMOUNTED</b></span> (Aman untuk Booting)")
             self.unmount_btn_box.show_all()
 
         if safety["is_host_disk"]:
-            msg_lines.append("<span foreground='#58a6ff'><b>🛡️ DUAL-BOOT ISOLATION:</b></span> Disk ini juga berisi OS Linux Host.")
+            msg_lines.append("<span foreground='#0284c7'><b>🛡️ DUAL-BOOT ISOLATION:</b></span> Disk ini juga berisi OS Linux Host.")
             msg_lines.append("BootBridge mengamankan passthrough agar Windows VM berjalan terisolasi.")
 
         self.safety_status_label.set_markup("\n".join(msg_lines))
