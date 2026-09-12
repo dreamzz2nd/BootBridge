@@ -155,12 +155,18 @@ class BootBridgeApp(Gtk.Window):
         self.safety_status_label.set_line_wrap(True)
         self.safety_card.pack_start(self.safety_status_label, False, False, 0)
 
-        # Safe Unmount Button Box
+        # Safe Unmount & NTFS Repair Button Box
         self.unmount_btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         self.unmount_btn = Gtk.Button(label="🔓 Safe Unmount Linux Partitions")
         self.unmount_btn.get_style_context().add_class("btn-warning")
         self.unmount_btn.connect("clicked", self.on_unmount_clicked)
         self.unmount_btn_box.pack_start(self.unmount_btn, False, False, 0)
+
+        self.fix_ntfs_btn = Gtk.Button(label="⚡ Reset Status NTFS / Fast Startup")
+        self.fix_ntfs_btn.get_style_context().add_class("btn-warning")
+        self.fix_ntfs_btn.connect("clicked", self.on_fix_ntfs_clicked)
+        self.unmount_btn_box.pack_start(self.fix_ntfs_btn, False, False, 0)
+
         self.safety_card.pack_start(self.unmount_btn_box, False, False, 0)
 
         main_box.pack_start(self.safety_card, False, False, 0)
@@ -179,10 +185,18 @@ class BootBridgeApp(Gtk.Window):
         grid.set_column_spacing(16)
         grid.set_row_spacing(12)
 
-        # RAM Slider
+        # RAM Slider (Auto-calculated safe default based on system total RAM)
         grid.attach(Gtk.Label(label="RAM Allocation:"), 0, 0, 1, 1)
+        try:
+            with open("/proc/meminfo", "r") as f:
+                total_kb = int([line.split()[1] for line in f if "MemTotal" in line][0])
+            total_mb = total_kb // 1024
+            default_ram = min(4096, max(2048, (total_mb // 2 // 1024) * 1024))
+        except Exception:
+            default_ram = 3072
+
         self.ram_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 1024, 16384, 1024)
-        self.ram_scale.set_value(4096)
+        self.ram_scale.set_value(default_ram)
         self.ram_scale.set_digits(0)
         self.ram_scale.set_hexpand(True)
         self.ram_scale.set_draw_value(True)
@@ -208,6 +222,29 @@ class BootBridgeApp(Gtk.Window):
 
         config_card.pack_start(grid, False, False, 0)
         main_box.pack_start(config_card, False, False, 0)
+
+        # Card 4: Troubleshooting & Boot Help Guide
+        help_expander = Gtk.Expander(label="💡 Windows Boot Troubleshooting & Fix Guide")
+        help_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        help_card.get_style_context().add_class("card")
+
+        help_text = Gtk.Label()
+        help_text.set_xalign(0)
+        help_text.set_line_wrap(True)
+        help_text.set_markup(
+            "<b>Jika Windows stuck di 'Preparing Automatic Repair':</b>\n\n"
+            "1. <b>Matikan Fast Startup / Hibernasi di Windows:</b>\n"
+            "   Di OS Windows fisik, buka CMD (Run as Administrator) dan ketik:\n"
+            "   <tt>powercfg /h off</tt>\n"
+            "   Lalu matikan Windows secara penuh (Shutdown, bukan Sleep/Hibernate).\n\n"
+            "2. <b>Reset Status NTFS:</b> Klik tombol <i>'Reset Status NTFS'</i> di bagian Guard di atas untuk membersihkan dirty flag.\n\n"
+            "3. <b>Boot ke Safe Mode sekali:</b>\n"
+            "   Di layar Automatic Repair VM -> <i>Advanced Options</i> -> <i>Troubleshoot</i> -> <i>Startup Settings</i> -> <i>Restart</i> -> Tekan <b>4</b> (Enable Safe Mode).\n"
+            "   Saat Safe Mode terbuka, Windows akan menyesuaikan driver virtual QEMU secara otomatis!"
+        )
+        help_card.pack_start(help_text, False, False, 0)
+        help_expander.add(help_card)
+        main_box.pack_start(help_expander, False, False, 0)
 
         # Controls & Launch Bar
         controls_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
@@ -344,7 +381,7 @@ class BootBridgeApp(Gtk.Window):
             self.unmount_btn_box.show_all()
         else:
             msg_lines.append("<span foreground='#3fb950'><b>✅ MOUNT GUARD: UNMOUNTED</b></span> (Aman untuk Booting)")
-            self.unmount_btn_box.hide()
+            self.unmount_btn_box.show_all()
 
         if safety["is_host_disk"]:
             msg_lines.append("<span foreground='#58a6ff'><b>🛡️ DUAL-BOOT ISOLATION:</b></span> Disk ini juga berisi OS Linux Host.")
@@ -372,6 +409,20 @@ class BootBridgeApp(Gtk.Window):
 
         # Refresh disk status
         GLib.timeout_add(1000, self.refresh_disks)
+
+    def on_fix_ntfs_clicked(self, widget):
+        if not self.selected_disk:
+            return
+
+        ntfs_parts = [p for p in self.selected_disk.get("partitions", []) if p.get("fstype") == "ntfs"]
+        if not ntfs_parts:
+            self.log_message("Tidak ditemukan partisi NTFS pada disk yang dipilih.")
+            return
+
+        for p in ntfs_parts:
+            self.log_message(f"Fixing NTFS dirty flag for partition {p['path']}...")
+            success, msg = SafetyChecker.fix_ntfs_dirty_flag(p["path"])
+            self.log_message(msg)
 
     def on_start_vm_clicked(self, widget):
         if not self.selected_disk:

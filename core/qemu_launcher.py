@@ -20,6 +20,33 @@ class QEMULauncher:
         self.monitor_thread = None
         self.vars_copy_path = None
 
+    def _setup_swtpm(self):
+        """Launches swtpm daemon in socket mode if swtpm package is installed."""
+        if not shutil.which("swtpm"):
+            return None
+        try:
+            tpm_dir = os.path.join(tempfile.gettempdir(), "bootbridge_tpm")
+            os.makedirs(tpm_dir, exist_ok=True)
+            sock_path = os.path.join(tpm_dir, "swtpm-sock")
+            
+            subprocess.run(["pkill", "-f", sock_path], capture_output=True)
+            time.sleep(0.1)
+
+            swtpm_cmd = [
+                "swtpm", "socket",
+                "--tpmstate", f"dir={tpm_dir}",
+                "--ctrl", f"type=unixio,path={sock_path}",
+                "--tpm2"
+            ]
+            self.swtpm_proc = subprocess.Popen(swtpm_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            time.sleep(0.2)
+            if os.path.exists(sock_path):
+                self.log_callback("TPM 2.0 Emulator (swtpm) initialized successfully.")
+                return sock_path
+        except Exception as e:
+            self.log_callback(f"Warning setting up swtpm: {e}")
+        return None
+
     def build_command(self, disk_path, ram_mb=4096, cpu_cores=4, display_type="gtk", 
                       ovmf_code=None, ovmf_vars=None, is_shared_host_disk=False):
         """
@@ -33,14 +60,25 @@ class QEMULauncher:
 
         cmd = [qemu_bin]
 
+        is_secboot = bool(ovmf_code and ("secboot" in ovmf_code or "ms.fd" in ovmf_code))
+
         # Machine & KVM Acceleration
         if deps.get("kvm_available"):
-            cmd.extend(["-enable-kvm", "-machine", "q35,accel=kvm"])
+            if is_secboot:
+                cmd.extend(["-enable-kvm", "-machine", "q35,smm=on,accel=kvm", "-global", "driver=cfi.pflash01,property=secure,value=on"])
+            else:
+                cmd.extend(["-enable-kvm", "-machine", "q35,accel=kvm"])
         else:
             cmd.extend(["-machine", "q35"])
 
-        # CPU Configuration
-        cmd.extend(["-cpu", "host,kvm=on" if deps.get("kvm_available") else "max"])
+        # CPU Configuration with Hyper-V enlightenments for Windows stability
+        if deps.get("kvm_available"):
+            cmd.extend([
+                "-cpu", "host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time,hv_synic,hv_stimer,hv_reset,hv_vpindex,hv_runtime,hv_tlbflush,hv_ipi,kvm=on"
+            ])
+        else:
+            cmd.extend(["-cpu", "max"])
+
         cmd.extend(["-smp", f"cores={cpu_cores},threads=1,sockets=1"])
 
         # RAM Memory
@@ -52,31 +90,50 @@ class QEMULauncher:
         # UEFI Firmware (OVMF)
         if ovmf_code and os.path.exists(ovmf_code):
             if "OVMF_CODE" in ovmf_code:
-                cmd.extend(["-drive", f"if=pflash,format=raw,readonly=on,file={ovmf_code}"])
+                cmd.extend(["-drive", f"if=pflash,unit=0,format=raw,readonly=on,file={ovmf_code}"])
                 if ovmf_vars and os.path.exists(ovmf_vars):
                     try:
                         tmp_dir = tempfile.gettempdir()
                         self.vars_copy_path = os.path.join(tmp_dir, "bootbridge_ovmf_vars.fd")
-                        if not os.path.exists(self.vars_copy_path):
+                        if not os.path.exists(self.vars_copy_path) or os.path.getsize(self.vars_copy_path) == 0:
                             shutil.copyfile(ovmf_vars, self.vars_copy_path)
-                        cmd.extend(["-drive", f"if=pflash,format=raw,file={self.vars_copy_path}"])
+                        cmd.extend(["-drive", f"if=pflash,unit=1,format=raw,file={self.vars_copy_path}"])
                     except Exception as e:
                         self.log_callback(f"Warning OVMF vars copy failed: {e}")
             else: # Combined single-file OVMF firmware
                 cmd.extend(["-bios", ovmf_code])
 
-        # Physical Disk Passthrough
-        cmd.extend(["-drive", f"file={disk_path},format=raw,media=disk,index=0,cache=writeback"])
+        # TPM 2.0 (swtpm) emulator integration
+        tpm_sock = self._setup_swtpm()
+        if tpm_sock:
+            cmd.extend([
+                "-chardev", f"socket,id=chrtpm,path={tpm_sock}",
+                "-tpmdev", "emulator,id=tpm0,chardev=chrtpm",
+                "-device", "tpm-tis,tpmdev=tpm0"
+            ])
 
-        # VGA Graphics & Display
+        # Physical Disk Passthrough (Native NVMe device for NVMe SSD, AHCI/SATA for sdX)
+        if "nvme" in disk_path.lower():
+            cmd.extend([
+                "-drive", f"file={disk_path},format=raw,if=none,id=drive0,cache=none,aio=native,discard=unmap",
+                "-device", "nvme,drive=drive0,serial=bootbridge_nvme"
+            ])
+        else:
+            cmd.extend([
+                "-device", "ahci,id=ahci",
+                "-drive", f"file={disk_path},format=raw,if=none,id=drive0,cache=none,aio=native",
+                "-device", "ide-hd,bus=ahci.0,drive=drive0"
+            ])
+
+        # VGA Graphics & Display (QXL paravirtual display adapter for OVMF UEFI GOP compatibility)
         if display_type == "gtk":
-            cmd.extend(["-vga", "virtio", "-display", "gtk"])
+            cmd.extend(["-vga", "qxl", "-display", "gtk"])
         elif display_type == "sdl":
-            cmd.extend(["-vga", "virtio", "-display", "sdl"])
+            cmd.extend(["-vga", "qxl", "-display", "sdl"])
         elif display_type == "spice":
             cmd.extend(["-vga", "qxl", "-spice", "port=5900,disable-ticketing=on", "-display", "none"])
         else: # Default fallback GTK
-            cmd.extend(["-vga", "virtio", "-display", "gtk"])
+            cmd.extend(["-vga", "qxl", "-display", "gtk"])
 
         # USB Tablet Pointer (prevents mouse lock inside VM window)
         cmd.extend(["-usb", "-device", "usb-tablet"])
@@ -84,8 +141,8 @@ class QEMULauncher:
         # Audio (Intel HDA)
         cmd.extend(["-device", "intel-hda", "-device", "hda-duplex"])
 
-        # Network NAT (VirtIO)
-        cmd.extend(["-netdev", "user,id=net0", "-device", "virtio-net-pci,netdev=net0"])
+        # Network NAT (Intel e1000e network card - built into Windows out-of-the-box)
+        cmd.extend(["-netdev", "user,id=net0", "-device", "e1000e,netdev=net0"])
 
         return cmd
 
