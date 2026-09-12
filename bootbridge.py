@@ -34,7 +34,7 @@ def load_config():
                 return json.load(f)
         except Exception:
             pass
-    return {"language": "id"}
+    return {"language": "id", "theme": "dark"}
 
 def save_config(config):
     try:
@@ -53,6 +53,7 @@ TRANSLATIONS = {
         "nav_hardware": "Konfigurasi Hardware",
         "nav_guides": "Panduan & Shortcut",
         "nav_diagnostics": "Konsol Diagnostik",
+        "nav_settings": "Pengaturan & Tema",
         "app_subtitle": "Peluncur VM Dual-Boot Windows Fisik yang Aman & Ringan",
         "kvm_active": "KVM: AKTIF",
         "kvm_disabled": "KVM: NONAKTIF",
@@ -98,6 +99,12 @@ TRANSLATIONS = {
             "   Di layar Automatic Repair VM -> <i>Advanced Options</i> -> <i>Troubleshoot</i> -> <i>Startup Settings</i> -> <i>Restart</i> -> Tekan <b>4</b> (Enable Safe Mode).\n"
             "   Saat Safe Mode terbuka, Windows akan menyesuaikan driver virtual QEMU secara otomatis!"
         ),
+        "settings_card_title": "Tampilan & Preferensi Aplikasi",
+        "theme_setting": "Mode Tema UI:",
+        "theme_dark": "🌙 Mode Gelap (Postman Studio Dark)",
+        "theme_light": "☀️ Mode Terang (Postman Studio Light)",
+        "lang_setting": "Bahasa Aplikasi:",
+        "sys_info_title": "Spesifikasi & Info Hypervisor Host",
         "progress_ready": "Siap menjalankan Windows VM",
         "progress_booting": "Memulai Windows VM... Mengaktifkan Hypervisor KVM",
         "progress_running": "Windows VM Berjalan & Aktif",
@@ -105,6 +112,7 @@ TRANSLATIONS = {
         "stop_btn": "HENTIKAN VM",
         "log_title": "Output Log Konsol & Diagnostik Langsung",
         "menu_language": "Bahasa:",
+        "menu_theme": "Tema:",
         "menu_about": "Tentang BootBridge",
         "about_comments": "Peluncur VM Windows fisik dual-boot yang aman dan ringan untuk Linux melalui passthrough QEMU/KVM.",
     },
@@ -115,6 +123,7 @@ TRANSLATIONS = {
         "nav_hardware": "Resource Config",
         "nav_guides": "Help & Shortcuts",
         "nav_diagnostics": "Live Diagnostics",
+        "nav_settings": "Settings & Theme",
         "app_subtitle": "Safe & Lightweight Dual-Boot Physical Windows VM Launcher",
         "kvm_active": "KVM: ACCELERATED",
         "kvm_disabled": "KVM: DISABLED",
@@ -160,6 +169,12 @@ TRANSLATIONS = {
             "   In VM Automatic Repair screen -> <i>Advanced Options</i> -> <i>Troubleshoot</i> -> <i>Startup Settings</i> -> <i>Restart</i> -> Press <b>4</b> (Enable Safe Mode).\n"
             "   When Safe Mode opens, Windows will automatically adapt QEMU virtual drivers!"
         ),
+        "settings_card_title": "Appearance & Application Preferences",
+        "theme_setting": "UI Theme Mode:",
+        "theme_dark": "🌙 Dark Mode (Postman Studio Dark)",
+        "theme_light": "☀️ Light Mode (Postman Studio Light)",
+        "lang_setting": "Application Language:",
+        "sys_info_title": "Host System & Hypervisor Specifications",
         "progress_ready": "Ready to launch Windows VM",
         "progress_booting": "Booting Windows VM... Initializing KVM Hypervisor",
         "progress_running": "Windows VM Active & Running",
@@ -167,6 +182,7 @@ TRANSLATIONS = {
         "stop_btn": "STOP VM",
         "log_title": "Live Diagnostics & QEMU Console Output",
         "menu_language": "Language:",
+        "menu_theme": "Theme:",
         "menu_about": "About BootBridge",
         "about_comments": "Lightweight & safe dual-boot physical Windows launcher for Linux via QEMU/KVM passthrough.",
     }
@@ -217,6 +233,8 @@ class BootBridgeApp(Gtk.Window):
         # Load Saved Config & Preferences
         self.config = load_config()
         self.current_lang = self.config.get("language", "id")
+        self.current_theme = self.config.get("theme", "dark")
+        self.css_provider = None
 
         # State Variables
         self.disks = []
@@ -224,7 +242,7 @@ class BootBridgeApp(Gtk.Window):
         self.deps = SafetyChecker.check_system_dependencies()
         self.launcher = QEMULauncher(log_callback=self.log_message, status_callback=self.on_vm_status_changed)
 
-        # Load Custom CSS Styling
+        # Load Custom CSS Styling (Dark or Light)
         self.load_css()
 
         # Build GUI Layout
@@ -241,18 +259,30 @@ class BootBridgeApp(Gtk.Window):
         return text
 
     def load_css(self):
-        css_path = os.path.join(BASE_DIR, "assets", "style.css")
+        theme = self.config.get("theme", "dark")
+        css_filename = "style_dark.css" if theme == "dark" else "style_light.css"
+        css_path = os.path.join(BASE_DIR, "assets", css_filename)
+
+        if self.css_provider:
+            try:
+                Gtk.StyleContext.remove_provider_for_screen(
+                    Gdk.Screen.get_default(),
+                    self.css_provider
+                )
+            except Exception:
+                pass
+        
+        self.css_provider = Gtk.CssProvider()
         if os.path.exists(css_path):
             try:
-                provider = Gtk.CssProvider()
-                provider.load_from_path(css_path)
+                self.css_provider.load_from_path(css_path)
                 Gtk.StyleContext.add_provider_for_screen(
                     Gdk.Screen.get_default(),
-                    provider,
+                    self.css_provider,
                     Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
                 )
             except Exception as e:
-                print(f"[BootBridge] Warning loading CSS: {e}")
+                print(f"[BootBridge] Warning loading CSS ({css_filename}): {e}")
 
     def build_ui(self):
         # HeaderBar
@@ -283,20 +313,36 @@ class BootBridgeApp(Gtk.Window):
         popover_box.set_margin_start(12)
         popover_box.set_margin_end(12)
 
-        # Language Selector Box
+        # Theme Selector Row in Popover Menu
+        theme_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        theme_icon = Gtk.Image.new_from_icon_name("preferences-desktop-theme-symbolic", Gtk.IconSize.BUTTON)
+        self.menu_theme_lbl = Gtk.Label(label=self.tr("menu_theme"))
+        
+        self.pop_theme_combo = Gtk.ComboBoxText()
+        self.pop_theme_combo.append("dark", "🌙 Dark")
+        self.pop_theme_combo.append("light", "☀️ Light")
+        self.pop_theme_combo.set_active_id(self.current_theme)
+        self.pop_theme_combo.connect("changed", self.on_theme_changed)
+
+        theme_box.pack_start(theme_icon, False, False, 0)
+        theme_box.pack_start(self.menu_theme_lbl, False, False, 0)
+        theme_box.pack_start(self.pop_theme_combo, True, True, 0)
+        popover_box.pack_start(theme_box, False, False, 0)
+
+        # Language Selector Row in Popover Menu
         lang_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         lang_icon = Gtk.Image.new_from_icon_name("preferences-desktop-locale-symbolic", Gtk.IconSize.BUTTON)
         self.menu_lang_lbl = Gtk.Label(label=self.tr("menu_language"))
         
-        self.lang_combo = Gtk.ComboBoxText()
-        self.lang_combo.append("id", "🇮🇩 Bahasa Indonesia")
-        self.lang_combo.append("en", "🇬🇧 English")
-        self.lang_combo.set_active_id(self.current_lang)
-        self.lang_combo.connect("changed", self.on_language_changed)
+        self.pop_lang_combo = Gtk.ComboBoxText()
+        self.pop_lang_combo.append("id", "🇮🇩 Bahasa")
+        self.pop_lang_combo.append("en", "🇬🇧 English")
+        self.pop_lang_combo.set_active_id(self.current_lang)
+        self.pop_lang_combo.connect("changed", self.on_language_changed)
 
         lang_box.pack_start(lang_icon, False, False, 0)
         lang_box.pack_start(self.menu_lang_lbl, False, False, 0)
-        lang_box.pack_start(self.lang_combo, True, True, 0)
+        lang_box.pack_start(self.pop_lang_combo, True, True, 0)
         popover_box.pack_start(lang_box, False, False, 0)
 
         popover_box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 2)
@@ -340,7 +386,8 @@ class BootBridgeApp(Gtk.Window):
             ("safety", "security-high-symbolic", "nav_safety"),
             ("hardware", "preferences-system-symbolic", "nav_hardware"),
             ("guides", "input-keyboard-symbolic", "nav_guides"),
-            ("diagnostics", "utilities-terminal-symbolic", "nav_diagnostics")
+            ("diagnostics", "utilities-terminal-symbolic", "nav_diagnostics"),
+            ("settings", "emblem-system-symbolic", "nav_settings")
         ]
 
         self.nav_labels = {}
@@ -631,6 +678,77 @@ class BootBridgeApp(Gtk.Window):
 
         self.stack.add_named(page_log_box, "diagnostics")
 
+        # ------------------------------------------
+        # Page 6: Dedicated Settings Page (Theme & Language)
+        # ------------------------------------------
+        page_sett_scroll = Gtk.ScrolledWindow()
+        page_sett_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        page_sett_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+        page_sett_box.set_margin_top(16)
+        page_sett_box.set_margin_bottom(16)
+        page_sett_box.set_margin_start(16)
+        page_sett_box.set_margin_end(16)
+        page_sett_scroll.add(page_sett_box)
+
+        # Settings Card 1: Appearance & Language
+        sett_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+        sett_card.get_style_context().add_class("card")
+
+        sett_title_box, self.sett_title_lbl = make_card_header("emblem-system-symbolic", self.tr("settings_card_title"))
+        sett_card.pack_start(sett_title_box, False, False, 0)
+
+        sett_grid = Gtk.Grid()
+        sett_grid.set_column_spacing(16)
+        sett_grid.set_row_spacing(14)
+
+        # Theme Selector
+        self.sett_theme_lbl = Gtk.Label(label=self.tr("theme_setting"))
+        self.sett_theme_lbl.set_xalign(0)
+        sett_grid.attach(self.sett_theme_lbl, 0, 0, 1, 1)
+
+        self.sett_theme_combo = Gtk.ComboBoxText()
+        self.sett_theme_combo.append("dark", self.tr("theme_dark"))
+        self.sett_theme_combo.append("light", self.tr("theme_light"))
+        self.sett_theme_combo.set_active_id(self.current_theme)
+        self.sett_theme_combo.connect("changed", self.on_theme_changed)
+        sett_grid.attach(self.sett_theme_combo, 1, 0, 1, 1)
+
+        # Language Selector
+        self.sett_lang_lbl = Gtk.Label(label=self.tr("lang_setting"))
+        self.sett_lang_lbl.set_xalign(0)
+        sett_grid.attach(self.sett_lang_lbl, 0, 1, 1, 1)
+
+        self.sett_lang_combo = Gtk.ComboBoxText()
+        self.sett_lang_combo.append("id", "🇮🇩 Bahasa Indonesia")
+        self.sett_lang_combo.append("en", "🇬🇧 English")
+        self.sett_lang_combo.set_active_id(self.current_lang)
+        self.sett_lang_combo.connect("changed", self.on_language_changed)
+        sett_grid.attach(self.sett_lang_combo, 1, 1, 1, 1)
+
+        sett_card.pack_start(sett_grid, False, False, 0)
+        page_sett_box.pack_start(sett_card, False, False, 0)
+
+        # Settings Card 2: System Hypervisor Specs
+        sys_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        sys_card.get_style_context().add_class("card")
+
+        sys_title_box, self.sys_title_lbl = make_card_header("computer-symbolic", self.tr("sys_info_title"))
+        sys_card.pack_start(sys_title_box, False, False, 0)
+
+        sys_info_lbl = Gtk.Label()
+        sys_info_lbl.set_xalign(0)
+        sys_info_lbl.set_markup(
+            f"• <b>Host Cores:</b> {multiprocessing.cpu_count()} CPU Threads\n"
+            f"• <b>Memory RAM:</b> {int(total_ram_mb/1024)} GB Total\n"
+            f"• <b>KVM Acceleration:</b> {'Supported &amp; Enabled' if self.deps.get('kvm_available') else 'Disabled / Unavailable'}\n"
+            f"• <b>QEMU Package:</b> {'Installed' if self.deps.get('qemu_installed') else 'Missing'}\n"
+            f"• <b>OVMF Firmware:</b> {'Installed' if self.deps.get('ovmf_installed') else 'Missing'}"
+        )
+        sys_card.pack_start(sys_info_lbl, False, False, 0)
+        page_sett_box.pack_start(sys_card, False, False, 0)
+
+        self.stack.add_named(page_sett_scroll, "settings")
+
         # Select first row in sidebar
         first_row = self.sidebar_list.get_row_at_index(0)
         if first_row:
@@ -675,12 +793,34 @@ class BootBridgeApp(Gtk.Window):
         self.cpu_scale.add_mark(self.rec_cores, Gtk.PositionType.BOTTOM, f"{rec_lbl} ({self.rec_cores} Cores)")
         self.cpu_scale.connect("format-value", lambda scale, val: f"{int(val)} Core" + ("s" if int(val) > 1 else "") + (f" ({rec_lbl})" if int(val) == self.rec_cores else ""))
 
+    def on_theme_changed(self, combo):
+        new_theme = combo.get_active_id()
+        if new_theme and new_theme != self.current_theme:
+            self.current_theme = new_theme
+            self.config["theme"] = new_theme
+            save_config(self.config)
+            
+            # Sync other combo if different
+            if hasattr(self, "pop_theme_combo") and self.pop_theme_combo.get_active_id() != new_theme:
+                self.pop_theme_combo.set_active_id(new_theme)
+            if hasattr(self, "sett_theme_combo") and self.sett_theme_combo.get_active_id() != new_theme:
+                self.sett_theme_combo.set_active_id(new_theme)
+
+            self.load_css()
+
     def on_language_changed(self, combo):
         new_lang = combo.get_active_id()
         if new_lang and new_lang != self.current_lang:
             self.current_lang = new_lang
             self.config["language"] = new_lang
             save_config(self.config)
+
+            # Sync other combo if different
+            if hasattr(self, "pop_lang_combo") and self.pop_lang_combo.get_active_id() != new_lang:
+                self.pop_lang_combo.set_active_id(new_lang)
+            if hasattr(self, "sett_lang_combo") and self.sett_lang_combo.get_active_id() != new_lang:
+                self.sett_lang_combo.set_active_id(new_lang)
+
             self.apply_language()
 
     def apply_language(self):
@@ -714,9 +854,14 @@ class BootBridgeApp(Gtk.Window):
         if hasattr(self, "help_title_lbl"): self.help_title_lbl.set_text(self.tr("help_title"))
         if hasattr(self, "help_text"): self.help_text.set_markup(self.tr("help_markup"))
         if hasattr(self, "log_title_lbl"): self.log_title_lbl.set_text(self.tr("log_title"))
+        if hasattr(self, "sett_title_lbl"): self.sett_title_lbl.set_text(self.tr("settings_card_title"))
+        if hasattr(self, "sett_theme_lbl"): self.sett_theme_lbl.set_text(self.tr("theme_setting"))
+        if hasattr(self, "sett_lang_lbl"): self.sett_lang_lbl.set_text(self.tr("lang_setting"))
+        if hasattr(self, "sys_title_lbl"): self.sys_title_lbl.set_text(self.tr("sys_info_title"))
         if hasattr(self, "start_btn_lbl"): self.start_btn_lbl.set_text(self.tr("start_btn"))
         if hasattr(self, "stop_btn_lbl"): self.stop_btn_lbl.set_text(self.tr("stop_btn"))
         if hasattr(self, "menu_lang_lbl"): self.menu_lang_lbl.set_text(self.tr("menu_language"))
+        if hasattr(self, "menu_theme_lbl"): self.menu_theme_lbl.set_text(self.tr("menu_theme"))
         if hasattr(self, "about_btn_lbl"): self.about_btn_lbl.set_text(self.tr("menu_about"))
 
         if hasattr(self, "ram_scale"):
@@ -743,9 +888,9 @@ class BootBridgeApp(Gtk.Window):
 
     def update_kvm_badge(self):
         if self.deps.get("kvm_available"):
-            self.kvm_badge.set_markup(f"<span foreground='#2e7d32'><b>{self.tr('kvm_active')}</b></span>")
+            self.kvm_badge.set_markup(f"<span foreground='#73c991'><b>{self.tr('kvm_active')}</b></span>")
         else:
-            self.kvm_badge.set_markup(f"<span foreground='#d29922'><b>{self.tr('kvm_disabled')}</b></span>")
+            self.kvm_badge.set_markup(f"<span foreground='#ffb74d'><b>{self.tr('kvm_disabled')}</b></span>")
 
     def update_dependency_ui(self):
         missing = self.deps.get("missing_packages", [])
@@ -816,7 +961,7 @@ class BootBridgeApp(Gtk.Window):
             if p.get("label"):
                 p_text += f" Label: <i>'{p['label']}'</i>"
             if p.get("is_mounted"):
-                p_text += f" <span foreground='#e53935'>[MOUNTED: {p['mountpoint']}]</span>"
+                p_text += f" <span foreground='#ef5350'>[MOUNTED: {p['mountpoint']}]</span>"
 
             p_lbl = Gtk.Label()
             p_lbl.set_markup(p_text)
@@ -836,18 +981,18 @@ class BootBridgeApp(Gtk.Window):
         if safety["unmount_required"]:
             hdr = self.tr("mount_active_hdr")
             body = self.tr("mount_active_msg")
-            msg_lines.append(f"<span foreground='#e53935'><b>{hdr}</b></span> {body}")
+            msg_lines.append(f"<span foreground='#ef5350'><b>{hdr}</b></span> {body}")
             self.unmount_btn_box.show_all()
         else:
             hdr = self.tr("mount_safe_hdr")
             body = self.tr("mount_safe_msg")
-            msg_lines.append(f"<span foreground='#2e7d32'><b>{hdr}</b></span> {body}")
+            msg_lines.append(f"<span foreground='#73c991'><b>{hdr}</b></span> {body}")
             self.unmount_btn_box.show_all()
 
         if safety["is_host_disk"]:
             hdr = self.tr("dualboot_iso_hdr")
             body = self.tr("dualboot_iso_msg")
-            msg_lines.append(f"<span foreground='#1565c0'><b>{hdr}</b></span> {body}")
+            msg_lines.append(f"<span foreground='#64b5f6'><b>{hdr}</b></span> {body}")
 
         self.safety_status_label.set_markup("\n".join(msg_lines))
 

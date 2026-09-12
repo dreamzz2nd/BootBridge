@@ -1,0 +1,282 @@
+/* BootBridge Postman Studio Dark Theme CSS */
+
+window {
+    background-color: #1c1c1c;
+    color: #e0e0e0;
+    font-family: 'Inter', 'Segoe UI', 'Ubuntu', sans-serif;
+}
+
+headerbar {
+    background: #252525;
+    border-bottom: 1px solid #333333;
+    padding: 8px 16px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+headerbar label.title {
+    font-weight: 700;
+    font-size: 15px;
+    color: #ffffff;
+}
+
+headerbar label.subtitle {
+    font-size: 11px;
+    color: #9e9e9e;
+}
+
+/* Postman Left Navigation Sidebar (Dark) */
+.sidebar {
+    background-color: #181818;
+    border-right: 1px solid #2d2d2d;
+    padding: 16px 8px;
+    min-width: 210px;
+}
+
+.sidebar-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #757575;
+    letter-spacing: 0.8px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+}
+
+.sidebar-list {
+    background-color: transparent;
+    border: none;
+}
+
+.sidebar-list row {
+    padding: 0;
+    margin-bottom: 4px;
+    border-radius: 6px;
+}
+
+.sidebar-list row:hover {
+    background-color: #2a2a2a;
+}
+
+.sidebar-list row:selected {
+    background-color: #33221e;
+}
+
+.sidebar-row {
+    padding: 10px 12px;
+    color: #b0b0b0;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.sidebar-list row:selected .sidebar-row {
+    color: #ff6c37;
+    font-weight: 700;
+}
+
+/* Postman Dark Clean Cards */
+.card {
+    background-color: #262626;
+    border: 1px solid #333333;
+    border-radius: 8px;
+    padding: 18px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    transition: border-color 0.2s ease;
+}
+
+.card:hover {
+    border-color: #444444;
+}
+
+.card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ff6c37; /* Postman Coral Accent */
+    margin-bottom: 8px;
+}
+
+.card-subtitle {
+    font-size: 12px;
+    color: #9e9e9e;
+}
+
+/* Postman Status Badges (Dark) */
+.badge {
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.badge-success {
+    background-color: #1b3a24;
+    color: #73c991;
+    border: 1px solid #2e5d39;
+}
+
+.badge-warning {
+    background-color: #3e2712;
+    color: #ffb74d;
+    border: 1px solid #6d421e;
+}
+
+.badge-error {
+    background-color: #3e1a1a;
+    color: #ef5350;
+    border: 1px solid #6b2626;
+}
+
+.badge-info {
+    background-color: #12283e;
+    color: #64b5f6;
+    border: 1px solid #1e4b7a;
+}
+
+/* Postman Action Buttons */
+button {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+    border: 1px solid #404040;
+    border-radius: 6px;
+    font-weight: 600;
+    padding: 8px 16px;
+}
+
+button:hover {
+    background-color: #383838;
+    border-color: #505050;
+}
+
+button.btn-primary {
+    background-color: #ff6c37;
+    color: #ffffff;
+    border: 1px solid #ff6c37;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px 24px;
+    box-shadow: 0 2px 6px rgba(255, 108, 55, 0.3);
+}
+
+button.btn-primary:hover {
+    background-color: #e0531f;
+    border-color: #e0531f;
+    box-shadow: 0 4px 10px rgba(255, 108, 55, 0.4);
+}
+
+button.btn-primary:disabled {
+    background-color: #333333;
+    color: #666666;
+    border-color: #444444;
+    box-shadow: none;
+}
+
+button.btn-danger {
+    background-color: #c62828;
+    color: #ffffff;
+    border: 1px solid #c62828;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px 18px;
+}
+
+button.btn-danger:hover {
+    background-color: #b71c1c;
+}
+
+button.btn-warning {
+    background-color: #e65100;
+    color: #ffffff;
+    border: 1px solid #e65100;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px 18px;
+}
+
+button.btn-warning:hover {
+    background-color: #ef6c00;
+}
+
+/* Bottom Action Launcher Bar */
+.bottom-bar {
+    background-color: #212121;
+    border-top: 1px solid #2d2d2d;
+    padding: 12px 16px;
+}
+
+/* Postman Progress Bar (Dark) */
+progressbar trough {
+    background-color: #333333;
+    border-radius: 4px;
+    min-height: 6px;
+}
+
+progressbar progress {
+    background-color: #ff6c37;
+    border-radius: 4px;
+}
+
+/* Postman Console Terminal Panel */
+.log-view {
+    background-color: #141414;
+    color: #73c991;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 11px;
+    border-radius: 6px;
+    border: 1px solid #2d2d2d;
+    padding: 12px;
+}
+
+/* Form Controls & Inputs (Dark) */
+combobox button {
+    background-color: #2a2a2a;
+    border: 1px solid #404040;
+    border-radius: 6px;
+    color: #ffffff;
+    padding: 6px 12px;
+}
+
+combobox button:hover {
+    border-color: #ff6c37;
+}
+
+popover {
+    background-color: #262626;
+    border: 1px solid #404040;
+    color: #ffffff;
+}
+
+scale trough {
+    background-color: #333333;
+    border-radius: 4px;
+}
+
+scale highlight {
+    background-color: #ff6c37;
+    border-radius: 4px;
+}
+
+scale mark {
+    color: #ffb74d;
+    font-weight: 600;
+    font-size: 11px;
+}
+
+scale mark indicator {
+    background-color: #ff6c37;
+    min-width: 3px;
+    min-height: 8px;
+    border-radius: 2px;
+}
+
+checkbutton check {
+    border-radius: 4px;
+    border: 1px solid #444444;
+    background-color: #2a2a2a;
+}
+
+checkbutton check:checked {
+    background-color: #ff6c37;
+    border-color: #ff6c37;
+}
