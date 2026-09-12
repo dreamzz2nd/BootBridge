@@ -300,68 +300,6 @@ class BootBridgeApp(Gtk.Window):
         refresh_btn.connect("clicked", lambda x: self.refresh_disks())
         self.header.pack_start(refresh_btn)
 
-        # Main Menu Button & Popover
-        menu_btn = Gtk.MenuButton()
-        menu_btn.set_tooltip_text("Main Menu")
-        menu_icon = Gtk.Image.new_from_icon_name("open-menu-symbolic", Gtk.IconSize.BUTTON)
-        menu_btn.add(menu_icon)
-
-        popover = Gtk.Popover()
-        popover_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-        popover_box.set_margin_top(12)
-        popover_box.set_margin_bottom(12)
-        popover_box.set_margin_start(12)
-        popover_box.set_margin_end(12)
-
-        # Theme Selector Row in Popover Menu
-        theme_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        theme_icon = Gtk.Image.new_from_icon_name("preferences-desktop-theme-symbolic", Gtk.IconSize.BUTTON)
-        self.menu_theme_lbl = Gtk.Label(label=self.tr("menu_theme"))
-        
-        self.pop_theme_combo = Gtk.ComboBoxText()
-        self.pop_theme_combo.append("dark", "🌙 Dark")
-        self.pop_theme_combo.append("light", "☀️ Light")
-        self.pop_theme_combo.set_active_id(self.current_theme)
-        self.pop_theme_combo.connect("changed", self.on_theme_changed)
-
-        theme_box.pack_start(theme_icon, False, False, 0)
-        theme_box.pack_start(self.menu_theme_lbl, False, False, 0)
-        theme_box.pack_start(self.pop_theme_combo, True, True, 0)
-        popover_box.pack_start(theme_box, False, False, 0)
-
-        # Language Selector Row in Popover Menu
-        lang_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        lang_icon = Gtk.Image.new_from_icon_name("preferences-desktop-locale-symbolic", Gtk.IconSize.BUTTON)
-        self.menu_lang_lbl = Gtk.Label(label=self.tr("menu_language"))
-        
-        self.pop_lang_combo = Gtk.ComboBoxText()
-        self.pop_lang_combo.append("id", "🇮🇩 Bahasa")
-        self.pop_lang_combo.append("en", "🇬🇧 English")
-        self.pop_lang_combo.set_active_id(self.current_lang)
-        self.pop_lang_combo.connect("changed", self.on_language_changed)
-
-        lang_box.pack_start(lang_icon, False, False, 0)
-        lang_box.pack_start(self.menu_lang_lbl, False, False, 0)
-        lang_box.pack_start(self.pop_lang_combo, True, True, 0)
-        popover_box.pack_start(lang_box, False, False, 0)
-
-        popover_box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 2)
-
-        # About Menu Item
-        self.about_btn, self.about_btn_lbl = make_icon_button("help-about-symbolic", self.tr("menu_about"))
-        self.about_btn.connect("clicked", self.show_about_dialog)
-        popover_box.pack_start(self.about_btn, False, False, 0)
-
-        popover_box.show_all()
-        popover.add(popover_box)
-        menu_btn.set_popover(popover)
-        self.header.pack_end(menu_btn)
-
-        # KVM Status Badge in Header
-        self.kvm_badge = Gtk.Label()
-        self.update_kvm_badge()
-        self.header.pack_end(self.kvm_badge)
-
         # Main Horizontal Window Box (Sidebar + Main Content Area)
         main_h_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
         self.add(main_h_box)
@@ -887,10 +825,11 @@ class BootBridgeApp(Gtk.Window):
         dialog.destroy()
 
     def update_kvm_badge(self):
-        if self.deps.get("kvm_available"):
-            self.kvm_badge.set_markup(f"<span foreground='#73c991'><b>{self.tr('kvm_active')}</b></span>")
-        else:
-            self.kvm_badge.set_markup(f"<span foreground='#ffb74d'><b>{self.tr('kvm_disabled')}</b></span>")
+        if hasattr(self, "kvm_badge") and self.kvm_badge:
+            if self.deps.get("kvm_available"):
+                self.kvm_badge.set_markup(f"<span foreground='#73c991'><b>{self.tr('kvm_active')}</b></span>")
+            else:
+                self.kvm_badge.set_markup(f"<span foreground='#ffb74d'><b>{self.tr('kvm_disabled')}</b></span>")
 
     def update_dependency_ui(self):
         missing = self.deps.get("missing_packages", [])
