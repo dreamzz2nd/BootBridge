@@ -5,6 +5,7 @@ BootBridge - Lightweight & Safe Dual-Boot Physical Windows Launcher for Linux
 
 import os
 import sys
+import json
 import multiprocessing
 import subprocess
 
@@ -22,6 +23,143 @@ from core.disk_manager import DiskManager
 from core.safety_checker import SafetyChecker
 from core.qemu_launcher import QEMULauncher
 
+# Configuration Persistence
+CONFIG_DIR = os.path.expanduser("~/.config/bootbridge")
+CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
+
+def load_config():
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, "r") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"language": "id"}
+
+def save_config(config):
+    try:
+        os.makedirs(CONFIG_DIR, exist_ok=True)
+        with open(CONFIG_FILE, "w") as f:
+            json.dump(config, f, indent=2)
+    except Exception as e:
+        print(f"[BootBridge] Error saving config: {e}")
+
+# i18n Translations Dictionary
+TRANSLATIONS = {
+    "id": {
+        "app_subtitle": "Peluncur VM Dual-Boot Windows Fisik yang Aman & Ringan",
+        "kvm_active": "KVM: AKTIF",
+        "kvm_disabled": "KVM: NONAKTIF",
+        "dep_title": "Komponen Sistem Belum Lengkap",
+        "copy_cmd": "Salin Perintah Instalasi",
+        "dep_msg": "Aplikasi membutuhkan komponen QEMU &amp; UEFI Firmware untuk menjalankan Windows VM.\nPaket yang belum terpasang: <b>{missing}</b>\n\nSilakan jalankan perintah berikut di Terminal:\n<tt>{cmd}</tt>",
+        "disk_card_title": "Drive Penyimpanan Fisik (Dual-Boot Windows)",
+        "target_disk": "Disk Target:",
+        "win_installed": " [Windows Terdeteksi]",
+        "safety_card_title": "Proteksi & Keamanan Data File System",
+        "unmount_btn": "Unmount Partisi Linux dengan Aman",
+        "fix_ntfs_btn": "Reset Status NTFS / Fast Startup",
+        "mount_active_hdr": "PROTEKSI MOUNT AKTIF:",
+        "mount_active_msg": "Partisi Windows sedang di-mount oleh Linux. Harap unmount terlebih dahulu untuk mencegah kerusakan file NTFS.",
+        "mount_safe_hdr": "PROTEKSI MOUNT: UNMOUNTED",
+        "mount_safe_msg": "(Aman untuk Booting)",
+        "dualboot_iso_hdr": "ISOLASI DUAL-BOOT:",
+        "dualboot_iso_msg": "Disk ini juga berisi OS Linux Host. BootBridge mengamankan passthrough agar Windows VM berjalan terisolasi.",
+        "config_card_title": "Pengaturan Alokasi Resource Virtual Machine",
+        "ram_alloc": "Alokasi RAM:",
+        "cpu_cores": "Core CPU:",
+        "display_engine": "Mesin Tampilan:",
+        "fullscreen_chk": "Jalankan VM Langsung dalam Mode Layar Penuh (Fullscreen)",
+        "recommended": "Rekomendasi",
+        "shortcut_title": "Fitur Canggih & Shortcut Layar VM (Fullscreen, Mouse, Keys)",
+        "shortcut_markup": (
+            "<b>Daftar Fitur &amp; Shortcut QEMU VM yang Bisa Kamu Gunakan:</b>\n\n"
+            "• <b>Toggle Fullscreen:</b> Tekan <b><tt>Ctrl + Alt + F</tt></b> di dalam jendela VM untuk masuk/keluar mode Fullscreen kapan saja.\n"
+            "• <b>Lepas / Tangkap Mouse:</b> Tekan <b><tt>Ctrl + Alt + G</tt></b> jika kursor kaku atau ingin melepas kursor dari VM.\n"
+            "• <b>Layar Auto-Fit:</b> Di bar atas jendela VM, klik <b><i>View → Zoom to Fit</i></b> agar tampilan Windows pas secara otomatis dengan resolusi layar.\n"
+            "• <b>Kirim Ctrl+Alt+Del:</b> Di bar atas jendela VM, klik <b><i>Machine → Send Key → Ctrl-Alt-Del</i></b> untuk membuka Task Manager / Lock Screen.\n"
+            "• <b>Hard Reset VM:</b> Di bar atas jendela VM, klik <b><i>Machine → Reset</i></b> jika Windows macet."
+        ),
+        "help_title": "Panduan Troubleshooting Boot Windows",
+        "help_markup": (
+            "<b>Jika Windows stuck di 'Preparing Automatic Repair':</b>\n\n"
+            "1. <b>Matikan Fast Startup / Hibernasi di Windows:</b>\n"
+            "   Di OS Windows fisik, buka CMD (Run as Administrator) dan ketik:\n"
+            "   <tt>powercfg /h off</tt>\n"
+            "   Lalu matikan Windows secara penuh (Shutdown, bukan Sleep/Hibernate).\n\n"
+            "2. <b>Reset Status NTFS:</b> Klik tombol <i>'Reset Status NTFS'</i> di bagian Guard di atas untuk membersihkan dirty flag.\n\n"
+            "3. <b>Boot ke Safe Mode sekali:</b>\n"
+            "   Di layar Automatic Repair VM -> <i>Advanced Options</i> -> <i>Troubleshoot</i> -> <i>Startup Settings</i> -> <i>Restart</i> -> Tekan <b>4</b> (Enable Safe Mode).\n"
+            "   Saat Safe Mode terbuka, Windows akan menyesuaikan driver virtual QEMU secara otomatis!"
+        ),
+        "progress_ready": "Siap menjalankan Windows VM",
+        "progress_booting": "Memulai Windows VM... Mengaktifkan Hypervisor KVM",
+        "progress_running": "Windows VM Berjalan & Aktif",
+        "start_btn": "MULAI WINDOWS VM",
+        "stop_btn": "HENTIKAN VM",
+        "log_title": "Output Log Konsol & Diagnostik Langsung",
+        "menu_language": "Bahasa:",
+        "menu_about": "Tentang BootBridge",
+        "about_comments": "Peluncur VM Windows fisik dual-boot yang aman dan ringan untuk Linux melalui passthrough QEMU/KVM.",
+    },
+    "en": {
+        "app_subtitle": "Safe & Lightweight Dual-Boot Physical Windows VM Launcher",
+        "kvm_active": "KVM: ACCELERATED",
+        "kvm_disabled": "KVM: DISABLED",
+        "dep_title": "System Dependencies Missing",
+        "copy_cmd": "Copy Install Command",
+        "dep_msg": "The application requires QEMU &amp; UEFI Firmware components to run the Windows VM.\nMissing packages: <b>{missing}</b>\n\nPlease run the following command in Terminal:\n<tt>{cmd}</tt>",
+        "disk_card_title": "Physical Storage Drive (Dual-Boot Windows)",
+        "target_disk": "Target Disk:",
+        "win_installed": " [Windows Installed]",
+        "safety_card_title": "Safety & Data Protection Guard",
+        "unmount_btn": "Safe Unmount Linux Partitions",
+        "fix_ntfs_btn": "Reset NTFS Status / Fast Startup",
+        "mount_active_hdr": "MOUNT PROTECTION ACTIVE:",
+        "mount_active_msg": "Windows partitions are currently mounted by Linux. Please unmount them first to prevent NTFS file corruption.",
+        "mount_safe_hdr": "MOUNT GUARD: UNMOUNTED",
+        "mount_safe_msg": "(Safe to Boot)",
+        "dualboot_iso_hdr": "DUAL-BOOT ISOLATION:",
+        "dualboot_iso_msg": "This drive also contains the Host Linux OS. BootBridge secures passthrough so Windows VM runs in isolation.",
+        "config_card_title": "Virtual Machine Resource Settings",
+        "ram_alloc": "RAM Allocation:",
+        "cpu_cores": "CPU Cores:",
+        "display_engine": "Display Engine:",
+        "fullscreen_chk": "Launch VM Directly in Fullscreen Mode",
+        "recommended": "Recommended",
+        "shortcut_title": "VM Features & Screen Shortcuts (Fullscreen, Mouse, Keys)",
+        "shortcut_markup": (
+            "<b>Available QEMU VM Features &amp; Shortcuts:</b>\n\n"
+            "• <b>Toggle Fullscreen:</b> Press <b><tt>Ctrl + Alt + F</tt></b> inside VM window to toggle Fullscreen mode.\n"
+            "• <b>Release / Grab Mouse:</b> Press <b><tt>Ctrl + Alt + G</tt></b> to ungrab/release mouse pointer from VM.\n"
+            "• <b>Screen Auto-Fit:</b> On VM window menu, click <b><i>View → Zoom to Fit</i></b> to fit Windows resolution automatically.\n"
+            "• <b>Send Ctrl+Alt+Del:</b> On VM window menu, click <b><i>Machine → Send Key → Ctrl-Alt-Del</i></b> to access Task Manager / Lock Screen.\n"
+            "• <b>Hard Reset VM:</b> On VM window menu, click <b><i>Machine → Reset</i></b> if Windows hangs."
+        ),
+        "help_title": "Windows Boot Troubleshooting & Fix Guide",
+        "help_markup": (
+            "<b>If Windows is stuck at 'Preparing Automatic Repair':</b>\n\n"
+            "1. <b>Disable Fast Startup / Hibernation in Windows:</b>\n"
+            "   In physical Windows OS, open CMD (Run as Administrator) and run:\n"
+            "   <tt>powercfg /h off</tt>\n"
+            "   Then shut down Windows completely (Shutdown, not Sleep/Hibernate).\n\n"
+            "2. <b>Reset NTFS Status:</b> Click <i>'Reset NTFS Status'</i> in Safety Guard section above to clear dirty flags.\n\n"
+            "3. <b>Boot to Safe Mode once:</b>\n"
+            "   In VM Automatic Repair screen -> <i>Advanced Options</i> -> <i>Troubleshoot</i> -> <i>Startup Settings</i> -> <i>Restart</i> -> Press <b>4</b> (Enable Safe Mode).\n"
+            "   When Safe Mode opens, Windows will automatically adapt QEMU virtual drivers!"
+        ),
+        "progress_ready": "Ready to launch Windows VM",
+        "progress_booting": "Booting Windows VM... Initializing KVM Hypervisor",
+        "progress_running": "Windows VM Active & Running",
+        "start_btn": "START WINDOWS VM",
+        "stop_btn": "STOP VM",
+        "log_title": "Live Diagnostics & QEMU Console Output",
+        "menu_language": "Language:",
+        "menu_about": "About BootBridge",
+        "about_comments": "Lightweight & safe dual-boot physical Windows launcher for Linux via QEMU/KVM passthrough.",
+    }
+}
+
 def make_card_header(icon_name, title_text):
     """Creates a card header box with a GTK symbolic icon and title label."""
     box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
@@ -31,7 +169,7 @@ def make_card_header(icon_name, title_text):
     label.get_style_context().add_class("card-title")
     box.pack_start(icon, False, False, 0)
     box.pack_start(label, False, False, 0)
-    return box
+    return box, label
 
 def make_icon_button(icon_name, label_text, style_class=None):
     """Creates a GTK Button containing a GTK symbolic icon and label."""
@@ -45,7 +183,7 @@ def make_icon_button(icon_name, label_text, style_class=None):
     btn.add(box)
     if style_class:
         btn.get_style_context().add_class(style_class)
-    return btn
+    return btn, label
 
 def make_icon_expander(icon_name, title_text):
     """Creates a GTK Expander with a symbolic icon header."""
@@ -57,14 +195,18 @@ def make_icon_expander(icon_name, title_text):
     header_box.pack_start(label, False, False, 0)
     header_box.show_all()
     expander.set_label_widget(header_box)
-    return expander
+    return expander, label
 
 
 class BootBridgeApp(Gtk.Window):
     def __init__(self):
         super().__init__(title="BootBridge")
-        self.set_default_size(780, 680)
+        self.set_default_size(780, 700)
         self.set_position(Gtk.WindowPosition.CENTER)
+
+        # Load Saved Config & Preferences
+        self.config = load_config()
+        self.current_lang = self.config.get("language", "id")
 
         # State Variables
         self.disks = []
@@ -78,8 +220,15 @@ class BootBridgeApp(Gtk.Window):
         # Build GUI Layout
         self.build_ui()
 
-        # Refresh disk listing on startup
-        self.refresh_disks()
+        # Refresh disk listing & apply language
+        self.apply_language()
+
+    def tr(self, key, **kwargs):
+        lang = self.current_lang if self.current_lang in TRANSLATIONS else "id"
+        text = TRANSLATIONS[lang].get(key, TRANSLATIONS["id"].get(key, key))
+        if kwargs:
+            text = text.format(**kwargs)
+        return text
 
     def load_css(self):
         css_path = os.path.join(BASE_DIR, "assets", "style.css")
@@ -97,11 +246,11 @@ class BootBridgeApp(Gtk.Window):
 
     def build_ui(self):
         # HeaderBar
-        header = Gtk.HeaderBar()
-        header.set_show_close_button(True)
-        header.props.title = "BootBridge"
-        header.props.subtitle = "Safe & Lightweight Dual-Boot VM Launcher"
-        self.set_titlebar(header)
+        self.header = Gtk.HeaderBar()
+        self.header.set_show_close_button(True)
+        self.header.props.title = "BootBridge"
+        self.header.props.subtitle = self.tr("app_subtitle")
+        self.set_titlebar(self.header)
 
         # Refresh Button
         refresh_btn = Gtk.Button()
@@ -109,12 +258,53 @@ class BootBridgeApp(Gtk.Window):
         refresh_icon = Gtk.Image.new_from_icon_name("view-refresh-symbolic", Gtk.IconSize.BUTTON)
         refresh_btn.add(refresh_icon)
         refresh_btn.connect("clicked", lambda x: self.refresh_disks())
-        header.pack_start(refresh_btn)
+        self.header.pack_start(refresh_btn)
+
+        # Main Menu Button & Popover
+        menu_btn = Gtk.MenuButton()
+        menu_btn.set_tooltip_text("Main Menu")
+        menu_icon = Gtk.Image.new_from_icon_name("open-menu-symbolic", Gtk.IconSize.BUTTON)
+        menu_btn.add(menu_icon)
+
+        popover = Gtk.Popover()
+        popover_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        popover_box.set_margin_top(12)
+        popover_box.set_margin_bottom(12)
+        popover_box.set_margin_start(12)
+        popover_box.set_margin_end(12)
+
+        # Language Selector Box
+        lang_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        lang_icon = Gtk.Image.new_from_icon_name("preferences-desktop-locale-symbolic", Gtk.IconSize.BUTTON)
+        self.menu_lang_lbl = Gtk.Label(label=self.tr("menu_language"))
+        
+        self.lang_combo = Gtk.ComboBoxText()
+        self.lang_combo.append("id", "🇮🇩 Bahasa Indonesia")
+        self.lang_combo.append("en", "🇬🇧 English")
+        self.lang_combo.set_active_id(self.current_lang)
+        self.lang_combo.connect("changed", self.on_language_changed)
+
+        lang_box.pack_start(lang_icon, False, False, 0)
+        lang_box.pack_start(self.menu_lang_lbl, False, False, 0)
+        lang_box.pack_start(self.lang_combo, True, True, 0)
+        popover_box.pack_start(lang_box, False, False, 0)
+
+        popover_box.pack_start(Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL), False, False, 2)
+
+        # About Menu Item
+        self.about_btn, self.about_btn_lbl = make_icon_button("help-about-symbolic", self.tr("menu_about"))
+        self.about_btn.connect("clicked", self.show_about_dialog)
+        popover_box.pack_start(self.about_btn, False, False, 0)
+
+        popover_box.show_all()
+        popover.add(popover_box)
+        menu_btn.set_popover(popover)
+        self.header.pack_end(menu_btn)
 
         # KVM Status Badge in Header
         self.kvm_badge = Gtk.Label()
         self.update_kvm_badge()
-        header.pack_end(self.kvm_badge)
+        self.header.pack_end(self.kvm_badge)
 
         # Main Outer Scrolled Container
         scrolled_window = Gtk.ScrolledWindow()
@@ -133,8 +323,8 @@ class BootBridgeApp(Gtk.Window):
         self.dep_card.get_style_context().add_class("card")
         self.dep_card.get_style_context().add_class("badge-warning")
         
-        dep_title = make_card_header("dialog-warning-symbolic", "Dependency System Missing")
-        self.dep_card.pack_start(dep_title, False, False, 0)
+        dep_title_box, self.dep_title_lbl = make_card_header("dialog-warning-symbolic", self.tr("dep_title"))
+        self.dep_card.pack_start(dep_title_box, False, False, 0)
 
         self.dep_msg_label = Gtk.Label()
         self.dep_msg_label.set_xalign(0)
@@ -142,9 +332,9 @@ class BootBridgeApp(Gtk.Window):
         self.dep_card.pack_start(self.dep_msg_label, False, False, 0)
 
         dep_btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        copy_cmd_btn = make_icon_button("edit-copy-symbolic", "Copy Install Command")
-        copy_cmd_btn.connect("clicked", self.copy_install_command)
-        dep_btn_box.pack_start(copy_cmd_btn, False, False, 0)
+        self.copy_cmd_btn, self.copy_cmd_btn_lbl = make_icon_button("edit-copy-symbolic", self.tr("copy_cmd"))
+        self.copy_cmd_btn.connect("clicked", self.copy_install_command)
+        dep_btn_box.pack_start(self.copy_cmd_btn, False, False, 0)
         self.dep_card.pack_start(dep_btn_box, False, False, 0)
 
         main_box.pack_start(self.dep_card, False, False, 0)
@@ -154,14 +344,14 @@ class BootBridgeApp(Gtk.Window):
         disk_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         disk_card.get_style_context().add_class("card")
 
-        disk_title = make_card_header("drive-harddisk-symbolic", "Physical Storage Drive (Dual-Boot Windows)")
-        disk_card.pack_start(disk_title, False, False, 0)
+        disk_title_box, self.disk_title_lbl = make_card_header("drive-harddisk-symbolic", self.tr("disk_card_title"))
+        disk_card.pack_start(disk_title_box, False, False, 0)
 
         # Dropdown Combo
         combo_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
-        combo_label = Gtk.Label(label="Target Disk:")
-        combo_label.set_xalign(0)
-        combo_box.pack_start(combo_label, False, False, 0)
+        self.combo_label = Gtk.Label(label=self.tr("target_disk"))
+        self.combo_label.set_xalign(0)
+        combo_box.pack_start(self.combo_label, False, False, 0)
 
         self.disk_combo = Gtk.ComboBoxText()
         self.disk_combo.connect("changed", self.on_disk_selected)
@@ -178,8 +368,8 @@ class BootBridgeApp(Gtk.Window):
         self.safety_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         self.safety_card.get_style_context().add_class("card")
 
-        safety_title = make_card_header("security-high-symbolic", "Safety & Data Protection Guard")
-        self.safety_card.pack_start(safety_title, False, False, 0)
+        safety_title_box, self.safety_title_lbl = make_card_header("security-high-symbolic", self.tr("safety_card_title"))
+        self.safety_card.pack_start(safety_title_box, False, False, 0)
 
         # Status Indicators Grid
         self.safety_status_label = Gtk.Label(label="Checking safety...")
@@ -189,11 +379,11 @@ class BootBridgeApp(Gtk.Window):
 
         # Safe Unmount & NTFS Repair Button Box
         self.unmount_btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        self.unmount_btn = make_icon_button("drive-removable-media-symbolic", "Safe Unmount Linux Partitions", style_class="btn-warning")
+        self.unmount_btn, self.unmount_btn_lbl = make_icon_button("drive-removable-media-symbolic", self.tr("unmount_btn"), style_class="btn-warning")
         self.unmount_btn.connect("clicked", self.on_unmount_clicked)
         self.unmount_btn_box.pack_start(self.unmount_btn, False, False, 0)
 
-        self.fix_ntfs_btn = make_icon_button("system-run-symbolic", "Reset NTFS Status / Fast Startup", style_class="btn-warning")
+        self.fix_ntfs_btn, self.fix_ntfs_btn_lbl = make_icon_button("system-run-symbolic", self.tr("fix_ntfs_btn"), style_class="btn-warning")
         self.fix_ntfs_btn.connect("clicked", self.on_fix_ntfs_clicked)
         self.unmount_btn_box.pack_start(self.fix_ntfs_btn, False, False, 0)
 
@@ -205,8 +395,8 @@ class BootBridgeApp(Gtk.Window):
         config_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         config_card.get_style_context().add_class("card")
 
-        config_title = make_card_header("preferences-system-symbolic", "Virtual Machine Resource Settings")
-        config_card.pack_start(config_title, False, False, 0)
+        config_title_box, self.config_title_lbl = make_card_header("preferences-system-symbolic", self.tr("config_card_title"))
+        config_card.pack_start(config_title_box, False, False, 0)
 
         # Grid for sliders & options
         grid = Gtk.Grid()
@@ -240,10 +430,13 @@ class BootBridgeApp(Gtk.Window):
         else:
             rec_cores = max_cores // 2
 
-        # RAM Slider with Recommended Mark Placeholder
-        ram_lbl = Gtk.Label(label="RAM Allocation:")
-        ram_lbl.set_xalign(0)
-        grid.attach(ram_lbl, 0, 0, 1, 1)
+        self.rec_ram_mb = rec_ram_mb
+        self.rec_cores = rec_cores
+
+        # RAM Slider
+        self.ram_lbl = Gtk.Label(label=self.tr("ram_alloc"))
+        self.ram_lbl.set_xalign(0)
+        grid.attach(self.ram_lbl, 0, 0, 1, 1)
 
         max_slider_ram = max(rec_ram_mb, min(16384, (total_ram_mb // 1024) * 1024))
         self.ram_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 1024, max_slider_ram, 1024)
@@ -251,26 +444,27 @@ class BootBridgeApp(Gtk.Window):
         self.ram_scale.set_digits(0)
         self.ram_scale.set_hexpand(True)
         self.ram_scale.set_draw_value(True)
-        self.ram_scale.add_mark(rec_ram_mb, Gtk.PositionType.BOTTOM, f"Recommended ({int(rec_ram_mb/1024)} GB)")
-        self.ram_scale.connect("format-value", lambda scale, val: f"{int(val/1024)} GB ({int(val)} MB)" + (" (Recommended)" if int(val) == rec_ram_mb else ""))
         grid.attach(self.ram_scale, 1, 0, 1, 1)
 
-        # CPU Cores Slider with Recommended Mark Placeholder
-        cpu_lbl = Gtk.Label(label="CPU Cores:")
-        cpu_lbl.set_xalign(0)
-        grid.attach(cpu_lbl, 0, 1, 1, 1)
+        # CPU Cores Slider
+        self.cpu_lbl = Gtk.Label(label=self.tr("cpu_cores"))
+        self.cpu_lbl.set_xalign(0)
+        grid.attach(self.cpu_lbl, 0, 1, 1, 1)
 
         self.cpu_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 1, max_cores, 1)
         self.cpu_scale.set_value(rec_cores)
         self.cpu_scale.set_digits(0)
         self.cpu_scale.set_hexpand(True)
         self.cpu_scale.set_draw_value(True)
-        self.cpu_scale.add_mark(rec_cores, Gtk.PositionType.BOTTOM, f"Recommended ({rec_cores} Cores)")
-        self.cpu_scale.connect("format-value", lambda scale, val: f"{int(val)} Core" + ("s" if int(val) > 1 else "") + (" (Recommended)" if int(val) == rec_cores else ""))
         grid.attach(self.cpu_scale, 1, 1, 1, 1)
 
+        self.update_scale_marks()
+
         # Display Backend
-        grid.attach(Gtk.Label(label="Display Engine:"), 0, 2, 1, 1)
+        self.display_lbl = Gtk.Label(label=self.tr("display_engine"))
+        self.display_lbl.set_xalign(0)
+        grid.attach(self.display_lbl, 0, 2, 1, 1)
+
         self.display_combo = Gtk.ComboBoxText()
         self.display_combo.append("gtk", "Native GTK Window (QXL 2D/3D)")
         self.display_combo.append("sdl", "SDL Hardware Window")
@@ -279,69 +473,52 @@ class BootBridgeApp(Gtk.Window):
         grid.attach(self.display_combo, 1, 2, 1, 1)
 
         # Fullscreen Toggle Checkbox
-        self.fullscreen_chk = Gtk.CheckButton(label="Jalankan VM Langsung dalam Mode Layar Penuh (Fullscreen)")
+        self.fullscreen_chk = Gtk.CheckButton(label=self.tr("fullscreen_chk"))
         grid.attach(self.fullscreen_chk, 0, 3, 2, 1)
 
         config_card.pack_start(grid, False, False, 0)
         main_box.pack_start(config_card, False, False, 0)
 
         # Card 4: VM Keyboard Shortcuts & Features Guide
-        shortcut_expander = make_icon_expander("input-keyboard-symbolic", "Fitur Canggih & Shortcut Layar VM (Fullscreen, Mouse, Keys)")
+        shortcut_expander, self.shortcut_title_lbl = make_icon_expander("input-keyboard-symbolic", self.tr("shortcut_title"))
         shortcut_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         shortcut_card.get_style_context().add_class("card")
 
-        shortcut_text = Gtk.Label()
-        shortcut_text.set_xalign(0)
-        shortcut_text.set_line_wrap(True)
-        shortcut_text.set_markup(
-            "<b>Daftar Fitur &amp; Shortcut QEMU VM yang Bisa Kamu Gunakan:</b>\n\n"
-            "• <b>Toggle Fullscreen:</b> Tekan <b><tt>Ctrl + Alt + F</tt></b> di dalam jendela VM untuk masuk/keluar mode Fullscreen kapan saja.\n"
-            "• <b>Lepas / Tangkap Mouse:</b> Tekan <b><tt>Ctrl + Alt + G</tt></b> jika kursor kaku atau ingin melepas kursor dari VM.\n"
-            "• <b>Layar Auto-Fit:</b> Di bar atas jendela VM, klik <b><i>View → Zoom to Fit</i></b> agar tampilan Windows pas secara otomatis dengan resolusi layar.\n"
-            "• <b>Kirim Ctrl+Alt+Del:</b> Di bar atas jendela VM, klik <b><i>Machine → Send Key → Ctrl-Alt-Del</i></b> untuk membuka Task Manager / Lock Screen.\n"
-            "• <b>Hard Reset VM:</b> Di bar atas jendela VM, klik <b><i>Machine → Reset</i></b> jika Windows macet."
-        )
-        shortcut_card.pack_start(shortcut_text, False, False, 0)
+        self.shortcut_text = Gtk.Label()
+        self.shortcut_text.set_xalign(0)
+        self.shortcut_text.set_line_wrap(True)
+        self.shortcut_text.set_markup(self.tr("shortcut_markup"))
+        shortcut_card.pack_start(self.shortcut_text, False, False, 0)
         shortcut_expander.add(shortcut_card)
         main_box.pack_start(shortcut_expander, False, False, 0)
 
-        # Card 4: Troubleshooting & Boot Help Guide
-        help_expander = make_icon_expander("help-faq-symbolic", "Windows Boot Troubleshooting & Fix Guide")
+        # Card 5: Troubleshooting & Boot Help Guide
+        help_expander, self.help_title_lbl = make_icon_expander("help-faq-symbolic", self.tr("help_title"))
         help_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         help_card.get_style_context().add_class("card")
 
-        help_text = Gtk.Label()
-        help_text.set_xalign(0)
-        help_text.set_line_wrap(True)
-        help_text.set_markup(
-            "<b>Jika Windows stuck di 'Preparing Automatic Repair':</b>\n\n"
-            "1. <b>Matikan Fast Startup / Hibernasi di Windows:</b>\n"
-            "   Di OS Windows fisik, buka CMD (Run as Administrator) dan ketik:\n"
-            "   <tt>powercfg /h off</tt>\n"
-            "   Lalu matikan Windows secara penuh (Shutdown, bukan Sleep/Hibernate).\n\n"
-            "2. <b>Reset Status NTFS:</b> Klik tombol <i>'Reset Status NTFS'</i> di bagian Guard di atas untuk membersihkan dirty flag.\n\n"
-            "3. <b>Boot ke Safe Mode sekali:</b>\n"
-            "   Di layar Automatic Repair VM -> <i>Advanced Options</i> -> <i>Troubleshoot</i> -> <i>Startup Settings</i> -> <i>Restart</i> -> Tekan <b>4</b> (Enable Safe Mode).\n"
-            "   Saat Safe Mode terbuka, Windows akan menyesuaikan driver virtual QEMU secara otomatis!"
-        )
-        help_card.pack_start(help_text, False, False, 0)
+        self.help_text = Gtk.Label()
+        self.help_text.set_xalign(0)
+        self.help_text.set_line_wrap(True)
+        self.help_text.set_markup(self.tr("help_markup"))
+        help_card.pack_start(self.help_text, False, False, 0)
         help_expander.add(help_card)
         main_box.pack_start(help_expander, False, False, 0)
 
-        # Smooth Loading State Progress Bar
+        # Progress Bar
         self.progress_bar = Gtk.ProgressBar()
         self.progress_bar.set_show_text(True)
-        self.progress_bar.set_text("Ready to launch Windows VM")
+        self.progress_bar.set_text(self.tr("progress_ready"))
         main_box.pack_start(self.progress_bar, False, False, 0)
 
         # Controls & Launch Bar
         controls_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         
-        self.start_btn = make_icon_button("media-playback-start-symbolic", "START WINDOWS VM", style_class="btn-primary")
+        self.start_btn, self.start_btn_lbl = make_icon_button("media-playback-start-symbolic", self.tr("start_btn"), style_class="btn-primary")
         self.start_btn.connect("clicked", self.on_start_vm_clicked)
         controls_box.pack_start(self.start_btn, True, True, 0)
 
-        self.stop_btn = make_icon_button("media-playback-stop-symbolic", "STOP VM", style_class="btn-danger")
+        self.stop_btn, self.stop_btn_lbl = make_icon_button("media-playback-stop-symbolic", self.tr("stop_btn"), style_class="btn-danger")
         self.stop_btn.set_sensitive(False)
         self.stop_btn.connect("clicked", self.on_stop_vm_clicked)
         controls_box.pack_start(self.stop_btn, False, False, 0)
@@ -349,7 +526,7 @@ class BootBridgeApp(Gtk.Window):
         main_box.pack_start(controls_box, False, False, 0)
 
         # Console Logs Expander
-        expander = make_icon_expander("utilities-terminal-symbolic", "Live Diagnostics & QEMU Console Output")
+        expander, self.log_title_lbl = make_icon_expander("utilities-terminal-symbolic", self.tr("log_title"))
         log_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
 
         scrolled = Gtk.ScrolledWindow()
@@ -367,20 +544,86 @@ class BootBridgeApp(Gtk.Window):
 
         main_box.pack_start(expander, False, False, 0)
 
+    def update_scale_marks(self):
+        rec_lbl = self.tr("recommended")
+        self.ram_scale.clear_marks()
+        self.ram_scale.add_mark(self.rec_ram_mb, Gtk.PositionType.BOTTOM, f"{rec_lbl} ({int(self.rec_ram_mb/1024)} GB)")
+        self.ram_scale.connect("format-value", lambda scale, val: f"{int(val/1024)} GB ({int(val)} MB)" + (f" ({rec_lbl})" if int(val) == self.rec_ram_mb else ""))
+
+        self.cpu_scale.clear_marks()
+        self.cpu_scale.add_mark(self.rec_cores, Gtk.PositionType.BOTTOM, f"{rec_lbl} ({self.rec_cores} Cores)")
+        self.cpu_scale.connect("format-value", lambda scale, val: f"{int(val)} Core" + ("s" if int(val) > 1 else "") + (f" ({rec_lbl})" if int(val) == self.rec_cores else ""))
+
+    def on_language_changed(self, combo):
+        new_lang = combo.get_active_id()
+        if new_lang and new_lang != self.current_lang:
+            self.current_lang = new_lang
+            self.config["language"] = new_lang
+            save_config(self.config)
+            self.apply_language()
+
+    def apply_language(self):
+        if hasattr(self, "header"):
+            self.header.props.subtitle = self.tr("app_subtitle")
+        
+        self.update_kvm_badge()
+        self.update_dependency_ui()
+
+        if hasattr(self, "dep_title_lbl"): self.dep_title_lbl.set_text(self.tr("dep_title"))
+        if hasattr(self, "copy_cmd_btn_lbl"): self.copy_cmd_btn_lbl.set_text(self.tr("copy_cmd"))
+        if hasattr(self, "disk_title_lbl"): self.disk_title_lbl.set_text(self.tr("disk_card_title"))
+        if hasattr(self, "combo_label"): self.combo_label.set_text(self.tr("target_disk"))
+        if hasattr(self, "safety_title_lbl"): self.safety_title_lbl.set_text(self.tr("safety_card_title"))
+        if hasattr(self, "unmount_btn_lbl"): self.unmount_btn_lbl.set_text(self.tr("unmount_btn"))
+        if hasattr(self, "fix_ntfs_btn_lbl"): self.fix_ntfs_btn_lbl.set_text(self.tr("fix_ntfs_btn"))
+        if hasattr(self, "config_title_lbl"): self.config_title_lbl.set_text(self.tr("config_card_title"))
+        if hasattr(self, "ram_lbl"): self.ram_lbl.set_text(self.tr("ram_alloc"))
+        if hasattr(self, "cpu_lbl"): self.cpu_lbl.set_text(self.tr("cpu_cores"))
+        if hasattr(self, "display_lbl"): self.display_lbl.set_text(self.tr("display_engine"))
+        if hasattr(self, "fullscreen_chk"): self.fullscreen_chk.set_label(self.tr("fullscreen_chk"))
+        if hasattr(self, "shortcut_title_lbl"): self.shortcut_title_lbl.set_text(self.tr("shortcut_title"))
+        if hasattr(self, "shortcut_text"): self.shortcut_text.set_markup(self.tr("shortcut_markup"))
+        if hasattr(self, "help_title_lbl"): self.help_title_lbl.set_text(self.tr("help_title"))
+        if hasattr(self, "help_text"): self.help_text.set_markup(self.tr("help_markup"))
+        if hasattr(self, "log_title_lbl"): self.log_title_lbl.set_text(self.tr("log_title"))
+        if hasattr(self, "start_btn_lbl"): self.start_btn_lbl.set_text(self.tr("start_btn"))
+        if hasattr(self, "stop_btn_lbl"): self.stop_btn_lbl.set_text(self.tr("stop_btn"))
+        if hasattr(self, "menu_lang_lbl"): self.menu_lang_lbl.set_text(self.tr("menu_language"))
+        if hasattr(self, "about_btn_lbl"): self.about_btn_lbl.set_text(self.tr("menu_about"))
+
+        if hasattr(self, "ram_scale"):
+            self.update_scale_marks()
+
+        if not self.launcher.is_running and hasattr(self, "progress_bar"):
+            self.progress_bar.set_text(self.tr("progress_ready"))
+
+        self.refresh_disks()
+
+    def show_about_dialog(self, widget=None):
+        dialog = Gtk.AboutDialog()
+        dialog.set_transient_for(self)
+        dialog.set_program_name("BootBridge")
+        dialog.set_version("1.0.0")
+        dialog.set_comments(self.tr("about_comments"))
+        dialog.set_website("https://github.com/dreamzz2nd/BootBridge")
+        dialog.set_website_label("GitHub Repository")
+        dialog.set_authors(["BootBridge Development Team"])
+        dialog.set_logo_icon_name("drive-harddisk-symbolic")
+        dialog.set_copyright("Copyright © 2026 BootBridge Project")
+        dialog.run()
+        dialog.destroy()
+
     def update_kvm_badge(self):
         if self.deps.get("kvm_available"):
-            self.kvm_badge.set_markup("<span foreground='#2e7d32'><b>KVM: ACCELERATED</b></span>")
+            self.kvm_badge.set_markup(f"<span foreground='#2e7d32'><b>{self.tr('kvm_active')}</b></span>")
         else:
-            self.kvm_badge.set_markup("<span foreground='#d29922'><b>KVM: DISABLED</b></span>")
+            self.kvm_badge.set_markup(f"<span foreground='#d29922'><b>{self.tr('kvm_disabled')}</b></span>")
 
     def update_dependency_ui(self):
         missing = self.deps.get("missing_packages", [])
         if missing:
             cmd_escaped = self.deps.get('install_command', '').replace('&', '&amp;')
-            msg = f"Aplikasi membutuhkan komponen QEMU &amp; UEFI Firmware untuk menjalankan Windows VM.\n" \
-                  f"Paket yang belum terpasang: <b>{', '.join(missing)}</b>\n\n" \
-                  f"Silakan jalankan perintah berikut di Terminal:\n" \
-                  f"<tt>{cmd_escaped}</tt>"
+            msg = self.tr("dep_msg", missing=', '.join(missing), cmd=cmd_escaped)
             self.dep_msg_label.set_markup(msg)
             self.dep_card.show_all()
         else:
@@ -402,10 +645,11 @@ class BootBridgeApp(Gtk.Window):
         self.disk_combo.remove_all()
 
         windows_index = -1
+        win_suffix = self.tr("win_installed")
         for idx, disk in enumerate(self.disks):
             label = f"{disk['path']} — {disk['model']} ({disk['size_str']})"
             if disk.get("has_windows"):
-                label += " [Windows Installed]"
+                label += win_suffix
                 if windows_index == -1:
                     windows_index = idx
             self.disk_combo.append_text(label)
@@ -462,16 +706,20 @@ class BootBridgeApp(Gtk.Window):
         is_safe = safety["is_safe"]
 
         if safety["unmount_required"]:
-            msg_lines.append("<span foreground='#e53935'><b>MOUNT PROTECTION ACTIVE:</b></span> Partisi Windows sedang di-mount oleh Linux.")
-            msg_lines.append("Harap unmount terlebih dahulu untuk mencegah kerusakan file NTFS.")
+            hdr = self.tr("mount_active_hdr")
+            body = self.tr("mount_active_msg")
+            msg_lines.append(f"<span foreground='#e53935'><b>{hdr}</b></span> {body}")
             self.unmount_btn_box.show_all()
         else:
-            msg_lines.append("<span foreground='#2e7d32'><b>MOUNT GUARD: UNMOUNTED</b></span> (Aman untuk Booting)")
+            hdr = self.tr("mount_safe_hdr")
+            body = self.tr("mount_safe_msg")
+            msg_lines.append(f"<span foreground='#2e7d32'><b>{hdr}</b></span> {body}")
             self.unmount_btn_box.show_all()
 
         if safety["is_host_disk"]:
-            msg_lines.append("<span foreground='#1565c0'><b>DUAL-BOOT ISOLATION:</b></span> Disk ini juga berisi OS Linux Host.")
-            msg_lines.append("BootBridge mengamankan passthrough agar Windows VM berjalan terisolasi.")
+            hdr = self.tr("dualboot_iso_hdr")
+            body = self.tr("dualboot_iso_msg")
+            msg_lines.append(f"<span foreground='#1565c0'><b>{hdr}</b></span> {body}")
 
         self.safety_status_label.set_markup("\n".join(msg_lines))
 
@@ -485,7 +733,6 @@ class BootBridgeApp(Gtk.Window):
 
         mounted = self.selected_disk.get("mounted_partitions", [])
         for p in mounted:
-            # Skip host system root /
             if p["mountpoint"] in ["/", "/boot", "/home"]:
                 continue
             
@@ -493,7 +740,6 @@ class BootBridgeApp(Gtk.Window):
             success, msg = SafetyChecker.safe_unmount_partition(p["path"])
             self.log_message(msg)
 
-        # Refresh disk status
         GLib.timeout_add(1000, self.refresh_disks)
 
     def on_fix_ntfs_clicked(self, widget):
@@ -515,10 +761,10 @@ class BootBridgeApp(Gtk.Window):
             return
 
         ram_mb = int(self.ram_scale.get_value())
-        cpu_cores = int(self.cpu_scale.get_value() if hasattr(self, "cpu_scale") else self.cpu_spin.get_value())
+        cpu_cores = int(self.cpu_scale.get_value())
         display = self.display_combo.get_active_id() or "gtk"
-
         fullscreen = self.fullscreen_chk.get_active()
+
         self.log_message(f"Initiating VM boot for physical disk {self.selected_disk['path']} (Fullscreen={fullscreen})...")
         success = self.launcher.start_vm(
             disk_path=self.selected_disk["path"],
@@ -532,7 +778,7 @@ class BootBridgeApp(Gtk.Window):
             self.start_btn.set_sensitive(False)
             self.stop_btn.set_sensitive(True)
             self.progress_bar.set_fraction(0.5)
-            self.progress_bar.set_text("Booting Windows VM... Initializing KVM Hypervisor")
+            self.progress_bar.set_text(self.tr("progress_booting"))
 
     def on_stop_vm_clicked(self, widget):
         self.launcher.stop_vm()
@@ -543,19 +789,18 @@ class BootBridgeApp(Gtk.Window):
                 self.start_btn.set_sensitive(False)
                 self.stop_btn.set_sensitive(True)
                 self.progress_bar.set_fraction(1.0)
-                self.progress_bar.set_text("Windows VM Active & Running")
+                self.progress_bar.set_text(self.tr("progress_running"))
             else:
                 self.start_btn.set_sensitive(True)
                 self.stop_btn.set_sensitive(False)
                 self.progress_bar.set_fraction(0.0)
-                self.progress_bar.set_text("Ready to launch Windows VM")
+                self.progress_bar.set_text(self.tr("progress_ready"))
         GLib.idle_add(update_ui)
 
     def log_message(self, message):
         def append_log():
             end_iter = self.log_buffer.get_end_iter()
             self.log_buffer.insert(end_iter, f"{message}\n")
-            # Scroll to end
             mark = self.log_buffer.create_mark(None, self.log_buffer.get_end_iter(), False)
             self.log_text_view.scroll_to_mark(mark, 0.0, True, 0.0, 1.0)
         GLib.idle_add(append_log)
@@ -564,7 +809,6 @@ def main():
     app = BootBridgeApp()
     app.connect("destroy", Gtk.main_quit)
     app.show_all()
-    # Apply initial dep card visibility
     app.update_dependency_ui()
     Gtk.main()
 
