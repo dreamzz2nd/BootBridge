@@ -38,7 +38,7 @@ class SafetyChecker:
             "pkexec_installed": bool(shutil.which("pkexec")),
             "udisksctl_installed": bool(shutil.which("udisksctl")),
             "missing_packages": [],
-            "install_command": "sudo apt update && sudo apt install -y qemu-system-x86-64 ovmf qemu-utils"
+            "install_command": "sudo apt install -y qemu-system-x86-64 ovmf qemu-utils"
         }
 
         # Check QEMU

@@ -270,7 +270,11 @@ class BootBridgeApp(Gtk.Window):
         self.log_message(f"Copied install command to clipboard: {cmd}")
 
     def refresh_disks(self):
-        self.log_message("Scanning physical disks for Windows installations...")
+        self.log_message("Scanning system dependencies and physical disks...")
+        self.deps = SafetyChecker.check_system_dependencies()
+        self.update_kvm_badge()
+        self.update_dependency_ui()
+
         self.disks = DiskManager.get_physical_disks()
         self.disk_combo.remove_all()
 
