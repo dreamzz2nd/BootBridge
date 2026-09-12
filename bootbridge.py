@@ -17,7 +17,8 @@ if BASE_DIR not in sys.path:
 import gi
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
-from gi.repository import Gtk, Gdk, GLib
+gi.require_version('GdkPixbuf', '2.0')
+from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
 
 from core.disk_manager import DiskManager
 from core.safety_checker import SafetyChecker
@@ -229,6 +230,14 @@ class BootBridgeApp(Gtk.Window):
         super().__init__(title="BootBridge")
         self.set_default_size(880, 680)
         self.set_position(Gtk.WindowPosition.CENTER)
+
+        # Set Window Icon
+        icon_path = os.path.join(BASE_DIR, "assets", "bootbridge.png")
+        if os.path.exists(icon_path):
+            try:
+                self.set_icon_from_file(icon_path)
+            except Exception as e:
+                print(f"[BootBridge] Warning setting window icon: {e}")
 
         # Load Saved Config & Preferences
         self.config = load_config()
@@ -819,7 +828,17 @@ class BootBridgeApp(Gtk.Window):
         dialog.set_website("https://github.com/dreamzz2nd/BootBridge")
         dialog.set_website_label("GitHub Repository")
         dialog.set_authors(["BootBridge Development Team"])
-        dialog.set_logo_icon_name("drive-harddisk-symbolic")
+        
+        icon_path = os.path.join(BASE_DIR, "assets", "bootbridge.png")
+        if os.path.exists(icon_path):
+            try:
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(icon_path, 128, 128, True)
+                dialog.set_logo(pixbuf)
+            except Exception:
+                dialog.set_logo_icon_name("drive-harddisk-symbolic")
+        else:
+            dialog.set_logo_icon_name("drive-harddisk-symbolic")
+
         dialog.set_copyright("Copyright © 2026 BootBridge Project")
         dialog.run()
         dialog.destroy()
