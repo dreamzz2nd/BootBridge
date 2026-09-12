@@ -128,15 +128,24 @@ class QEMULauncher:
                 "-device", "ide-hd,bus=ahci.0,drive=drive0"
             ])
 
-        # VGA Graphics & Display (QXL paravirtual display adapter for OVMF UEFI GOP compatibility)
+        # VGA Graphics & Display (QXL paravirtual display adapter with auto zoom-to-fit scaling)
         if display_type == "gtk":
-            cmd.extend(["-vga", "qxl", "-display", "gtk"])
+            if fullscreen:
+                cmd.extend(["-vga", "qxl", "-display", "gtk,zoom-to-fit=on,full-screen=on"])
+            else:
+                cmd.extend(["-vga", "qxl", "-display", "gtk,zoom-to-fit=on"])
         elif display_type == "sdl":
-            cmd.extend(["-vga", "qxl", "-display", "sdl"])
+            if fullscreen:
+                cmd.extend(["-vga", "qxl", "-display", "sdl,zoom-to-fit=on", "-full-screen"])
+            else:
+                cmd.extend(["-vga", "qxl", "-display", "sdl,zoom-to-fit=on"])
         elif display_type == "spice":
             cmd.extend(["-vga", "qxl", "-spice", "port=5900,disable-ticketing=on", "-display", "none"])
         else: # Default fallback GTK
-            cmd.extend(["-vga", "qxl", "-display", "gtk"])
+            if fullscreen:
+                cmd.extend(["-vga", "qxl", "-display", "gtk,zoom-to-fit=on,full-screen=on"])
+            else:
+                cmd.extend(["-vga", "qxl", "-display", "gtk,zoom-to-fit=on"])
 
         # USB Tablet Pointer (prevents mouse lock inside VM window)
         cmd.extend(["-usb", "-device", "usb-tablet"])
