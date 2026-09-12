@@ -51,25 +51,26 @@ class QEMULauncher:
 
         # UEFI Firmware (OVMF)
         if ovmf_code and os.path.exists(ovmf_code):
-            cmd.extend(["-drive", f"if=pflash,format=raw,readonly=on,file={ovmf_code}"])
-            
-            # Copy OVMF VARS to temporary file if available to preserve NVRAM settings safely
-            if ovmf_vars and os.path.exists(ovmf_vars):
-                try:
-                    tmp_dir = tempfile.gettempdir()
-                    self.vars_copy_path = os.path.join(tmp_dir, "bootbridge_ovmf_vars.fd")
-                    if not os.path.exists(self.vars_copy_path):
-                        shutil.copyfile(ovmf_vars, self.vars_copy_path)
-                    cmd.extend(["-drive", f"if=pflash,format=raw,file={self.vars_copy_path}"])
-                except Exception as e:
-                    self.log_callback(f"Warning OVMF vars copy failed: {e}")
+            if "OVMF_CODE" in ovmf_code:
+                cmd.extend(["-drive", f"if=pflash,format=raw,readonly=on,file={ovmf_code}"])
+                if ovmf_vars and os.path.exists(ovmf_vars):
+                    try:
+                        tmp_dir = tempfile.gettempdir()
+                        self.vars_copy_path = os.path.join(tmp_dir, "bootbridge_ovmf_vars.fd")
+                        if not os.path.exists(self.vars_copy_path):
+                            shutil.copyfile(ovmf_vars, self.vars_copy_path)
+                        cmd.extend(["-drive", f"if=pflash,format=raw,file={self.vars_copy_path}"])
+                    except Exception as e:
+                        self.log_callback(f"Warning OVMF vars copy failed: {e}")
+            else: # Combined single-file OVMF firmware
+                cmd.extend(["-bios", ovmf_code])
 
         # Physical Disk Passthrough
-        cmd.extend(["-drive", f"file={disk_path},format=raw,media=disk,index=0,cache=none,aio=native"])
+        cmd.extend(["-drive", f"file={disk_path},format=raw,media=disk,index=0,cache=writeback"])
 
         # VGA Graphics & Display
         if display_type == "gtk":
-            cmd.extend(["-vga", "virtio", "-display", "gtk,gl=on"])
+            cmd.extend(["-vga", "virtio", "-display", "gtk"])
         elif display_type == "sdl":
             cmd.extend(["-vga", "virtio", "-display", "sdl"])
         elif display_type == "spice":
@@ -89,7 +90,7 @@ class QEMULauncher:
         return cmd
 
     def start_vm(self, disk_path, ram_mb=4096, cpu_cores=4, display_type="gtk", use_pkexec=True):
-        """Launches the VM process asynchronously using pkexec for physical block device access."""
+        """Launches the VM process asynchronously with elevated block device permissions."""
         if self.is_running:
             self.log_callback("Error: VM is already running.")
             return False
@@ -100,18 +101,31 @@ class QEMULauncher:
             self.log_callback(f"Run this command to install: {deps.get('install_command')}")
             return False
 
-        base_cmd = self.build_command(
+        # Grant read/write access to physical block device and its partitions if unprivileged
+        if use_pkexec and deps.get("pkexec_installed") and not os.access(disk_path, os.W_OK):
+            user = os.environ.get("USER") or "rizky"
+            self.log_callback(f"Granting device read/write permissions for {disk_path} via pkexec...")
+            res = subprocess.run(["pkexec", "setfacl", "-m", f"u:{user}:rw", disk_path], capture_output=True, text=True)
+            if res.returncode != 0:
+                subprocess.run(["pkexec", "chmod", "a+rw", disk_path], capture_output=True, text=True)
+            
+            # Apply to matching partitions (e.g. nvme0n1p1, sda1, etc.)
+            try:
+                parent_dir = os.path.dirname(disk_path)
+                base_name = os.path.basename(disk_path)
+                for item in os.listdir(parent_dir):
+                    if item.startswith(base_name) and item != base_name:
+                        part_path = os.path.join(parent_dir, item)
+                        subprocess.run(["setfacl", "-m", f"u:{user}:rw", part_path], capture_output=True, text=True)
+            except Exception as e:
+                self.log_callback(f"Partition ACL notice: {e}")
+
+        full_cmd = self.build_command(
             disk_path=disk_path,
             ram_mb=ram_mb,
             cpu_cores=cpu_cores,
             display_type=display_type
         )
-
-        # Prepend pkexec if required for block device elevated read/write permission
-        if use_pkexec and deps.get("pkexec_installed") and not os.access(disk_path, os.W_OK):
-            full_cmd = ["pkexec"] + base_cmd
-        else:
-            full_cmd = base_cmd
 
         cmd_str = " ".join(full_cmd)
         self.log_callback(f"Launching QEMU VM...\nCommand: {cmd_str}")

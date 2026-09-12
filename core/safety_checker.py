@@ -7,6 +7,8 @@ class SafetyChecker:
     """Performs pre-flight safety validation before launching Windows VM."""
 
     OVMF_SEARCH_PATHS = [
+        "/usr/share/OVMF/OVMF_CODE_4M.fd",
+        "/usr/share/OVMF/OVMF_CODE_4M.secboot.fd",
         "/usr/share/OVMF/OVMF_CODE.fd",
         "/usr/share/OVMF/OVMF_CODE.secboot.fd",
         "/usr/share/edk2/x64/OVMF_CODE.fd",
@@ -17,6 +19,7 @@ class SafetyChecker:
     ]
 
     OVMF_VARS_SEARCH_PATHS = [
+        "/usr/share/OVMF/OVMF_VARS_4M.fd",
         "/usr/share/OVMF/OVMF_VARS.fd",
         "/usr/share/edk2/x64/OVMF_VARS.fd",
         "/usr/share/edk2-ovmf/x64/OVMF_VARS.fd",
