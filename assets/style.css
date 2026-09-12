@@ -1,0 +1,152 @@
+/* BootBridge GTK3 Modern Dark CSS Theme */
+
+window {
+    background-color: #12161f;
+    color: #e6edf3;
+    font-family: 'Inter', 'Segoe UI', 'Ubuntu', sans-serif;
+}
+
+headerbar {
+    background: linear-gradient(180deg, #1f2430 0%, #171b26 100%);
+    border-bottom: 1px solid #2d3345;
+    padding: 6px 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.header-title {
+    font-weight: 700;
+    font-size: 16px;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+.header-subtitle {
+    font-size: 11px;
+    color: #8b949e;
+}
+
+.card {
+    background-color: #1a1e2b;
+    border: 1px solid #2d3446;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #58a6ff;
+    margin-bottom: 8px;
+}
+
+.card-subtitle {
+    font-size: 12px;
+    color: #8b949e;
+}
+
+/* Status Badges */
+.badge {
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.badge-success {
+    background-color: rgba(46, 160, 67, 0.2);
+    color: #3fb950;
+    border: 1px solid #2ea043;
+}
+
+.badge-warning {
+    background-color: rgba(210, 153, 34, 0.2);
+    color: #d29922;
+    border: 1px solid #bb8009;
+}
+
+.badge-error {
+    background-color: rgba(248, 81, 73, 0.2);
+    color: #f85149;
+    border: 1px solid #da3633;
+}
+
+.badge-info {
+    background-color: rgba(56, 139, 253, 0.15);
+    color: #58a6ff;
+    border: 1px solid #1f6feb;
+}
+
+/* Action Buttons */
+button.btn-primary {
+    background: linear-gradient(180deg, #238636 0%, #2e7d32 100%);
+    color: #ffffff;
+    border: 1px solid #3fb950;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 10px 20px;
+    box-shadow: 0 4px 10px rgba(46, 160, 67, 0.3);
+    transition: all 0.2s ease;
+}
+
+button.btn-primary:hover {
+    background: linear-gradient(180deg, #2ea043 0%, #238636 100%);
+    box-shadow: 0 6px 14px rgba(46, 160, 67, 0.5);
+}
+
+button.btn-primary:disabled {
+    background: #212631;
+    color: #484f58;
+    border-color: #30363d;
+    box-shadow: none;
+}
+
+button.btn-danger {
+    background: linear-gradient(180deg, #da3633 0%, #b62324 100%);
+    color: #ffffff;
+    border: 1px solid #f85149;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 8px 16px;
+}
+
+button.btn-warning {
+    background: linear-gradient(180deg, #d29922 0%, #b07d10 100%);
+    color: #ffffff;
+    border: 1px solid #e3b341;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 8px 16px;
+}
+
+/* Log Console Drawer */
+.log-view {
+    background-color: #0d1117;
+    color: #7ee787;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+    font-size: 11px;
+    border-radius: 8px;
+    border: 1px solid #21262d;
+    padding: 8px;
+}
+
+combobox {
+    background-color: #212631;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    color: #f0f6fc;
+}
+
+scale trough {
+    background-color: #212631;
+    border-radius: 4px;
+}
+
+scale highlight {
+    background-color: #1f6feb;
+    border-radius: 4px;
+}

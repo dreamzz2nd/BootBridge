@@ -1,0 +1,194 @@
+import os
+import sys
+import subprocess
+import threading
+import time
+import shutil
+import tempfile
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from core.safety_checker import SafetyChecker
+
+class QEMULauncher:
+    """Manages QEMU/KVM virtual machine creation, execution, and process control."""
+
+    def __init__(self, log_callback=None, status_callback=None):
+        self.process = None
+        self.is_running = False
+        self.log_callback = log_callback or (lambda text: print(f"[QEMU] {text}"))
+        self.status_callback = status_callback or (lambda status: None)
+        self.monitor_thread = None
+        self.vars_copy_path = None
+
+    def build_command(self, disk_path, ram_mb=4096, cpu_cores=4, display_type="gtk", 
+                      ovmf_code=None, ovmf_vars=None, is_shared_host_disk=False):
+        """
+        Constructs the qemu-system-x86_64 command line argument list.
+        """
+        deps = SafetyChecker.check_system_dependencies()
+        qemu_bin = deps.get("qemu_path") or "qemu-system-x86_64"
+        
+        ovmf_code = ovmf_code or deps.get("ovmf_code")
+        ovmf_vars = ovmf_vars or deps.get("ovmf_vars")
+
+        cmd = [qemu_bin]
+
+        # Machine & KVM Acceleration
+        if deps.get("kvm_available"):
+            cmd.extend(["-enable-kvm", "-machine", "q35,accel=kvm"])
+        else:
+            cmd.extend(["-machine", "q35"])
+
+        # CPU Configuration
+        cmd.extend(["-cpu", "host,kvm=on" if deps.get("kvm_available") else "max"])
+        cmd.extend(["-smp", f"cores={cpu_cores},threads=1,sockets=1"])
+
+        # RAM Memory
+        cmd.extend(["-m", str(ram_mb)])
+
+        # Real-Time Clock (Synchronize Windows clock with local time)
+        cmd.extend(["-rtc", "base=localtime,clock=host"])
+
+        # UEFI Firmware (OVMF)
+        if ovmf_code and os.path.exists(ovmf_code):
+            cmd.extend(["-drive", f"if=pflash,format=raw,readonly=on,file={ovmf_code}"])
+            
+            # Copy OVMF VARS to temporary file if available to preserve NVRAM settings safely
+            if ovmf_vars and os.path.exists(ovmf_vars):
+                try:
+                    tmp_dir = tempfile.gettempdir()
+                    self.vars_copy_path = os.path.join(tmp_dir, "bootbridge_ovmf_vars.fd")
+                    if not os.path.exists(self.vars_copy_path):
+                        shutil.copyfile(ovmf_vars, self.vars_copy_path)
+                    cmd.extend(["-drive", f"if=pflash,format=raw,file={self.vars_copy_path}"])
+                except Exception as e:
+                    self.log_callback(f"Warning OVMF vars copy failed: {e}")
+
+        # Physical Disk Passthrough
+        cmd.extend(["-drive", f"file={disk_path},format=raw,media=disk,index=0,cache=none,aio=native"])
+
+        # VGA Graphics & Display
+        if display_type == "gtk":
+            cmd.extend(["-vga", "virtio", "-display", "gtk,gl=on"])
+        elif display_type == "sdl":
+            cmd.extend(["-vga", "virtio", "-display", "sdl"])
+        elif display_type == "spice":
+            cmd.extend(["-vga", "qxl", "-spice", "port=5900,disable-ticketing=on", "-display", "none"])
+        else: # Default fallback GTK
+            cmd.extend(["-vga", "virtio", "-display", "gtk"])
+
+        # USB Tablet Pointer (prevents mouse lock inside VM window)
+        cmd.extend(["-usb", "-device", "usb-tablet"])
+
+        # Audio (Intel HDA)
+        cmd.extend(["-device", "intel-hda", "-device", "hda-duplex"])
+
+        # Network NAT (VirtIO)
+        cmd.extend(["-netdev", "user,id=net0", "-device", "virtio-net-pci,netdev=net0"])
+
+        return cmd
+
+    def start_vm(self, disk_path, ram_mb=4096, cpu_cores=4, display_type="gtk", use_pkexec=True):
+        """Launches the VM process asynchronously using pkexec for physical block device access."""
+        if self.is_running:
+            self.log_callback("Error: VM is already running.")
+            return False
+
+        deps = SafetyChecker.check_system_dependencies()
+        if not deps.get("qemu_installed"):
+            self.log_callback("Error: qemu-system-x86_64 is not installed on system.")
+            self.log_callback(f"Run this command to install: {deps.get('install_command')}")
+            return False
+
+        base_cmd = self.build_command(
+            disk_path=disk_path,
+            ram_mb=ram_mb,
+            cpu_cores=cpu_cores,
+            display_type=display_type
+        )
+
+        # Prepend pkexec if required for block device elevated read/write permission
+        if use_pkexec and deps.get("pkexec_installed") and not os.access(disk_path, os.W_OK):
+            full_cmd = ["pkexec"] + base_cmd
+        else:
+            full_cmd = base_cmd
+
+        cmd_str = " ".join(full_cmd)
+        self.log_callback(f"Launching QEMU VM...\nCommand: {cmd_str}")
+
+        def run_thread():
+            try:
+                self.process = subprocess.Popen(
+                    full_cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    bufsize=1
+                )
+                self.is_running = True
+                self.status_callback("RUNNING")
+
+                # Monitor stderr / stdout streams
+                def read_stream(stream, prefix):
+                    for line in iter(stream.readline, ''):
+                        if line:
+                            self.log_callback(f"[{prefix}] {line.strip()}")
+                    stream.close()
+
+                t_out = threading.Thread(target=read_stream, args=(self.process.stdout, "QEMU-OUT"))
+                t_err = threading.Thread(target=read_stream, args=(self.process.stderr, "QEMU-ERR"))
+                t_out.daemon = True
+                t_err.daemon = True
+                t_out.start()
+                t_err.start()
+
+                self.process.wait()
+                rc = self.process.returncode
+                self.is_running = False
+                self.status_callback("STOPPED")
+                self.log_callback(f"QEMU process exited with return code: {rc}")
+
+            except Exception as e:
+                self.is_running = False
+                self.status_callback("ERROR")
+                self.log_callback(f"Failed to execute QEMU process: {str(e)}")
+
+        self.monitor_thread = threading.Thread(target=run_thread)
+        self.monitor_thread.daemon = True
+        self.monitor_thread.start()
+        return True
+
+    def stop_vm(self, force=False):
+        """Stops the running VM process."""
+        if not self.process or not self.is_running:
+            self.log_callback("VM is not currently running.")
+            return True
+
+        self.log_callback("Stopping Windows VM...")
+        try:
+            if force:
+                self.process.kill()
+                self.log_callback("VM forcibly killed.")
+            else:
+                self.process.terminate()
+                # Wait up to 5 seconds for clean exit
+                threading.Thread(target=self._wait_and_kill).start()
+            return True
+        except Exception as e:
+            self.log_callback(f"Error stopping VM: {e}")
+            return False
+
+    def _wait_and_kill(self):
+        time.sleep(5)
+        if self.process and self.process.poll() is None:
+            self.log_callback("VM process did not terminate gracefully. Forcing kill...")
+            try:
+                self.process.kill()
+            except Exception:
+                pass
+
+if __name__ == "__main__":
+    launcher = QEMULauncher()
+    cmd = launcher.build_command("/dev/nvme0n1", ram_mb=4096, cpu_cores=4)
+    print("Generated QEMU Command:")
+    print(" ".join(cmd))

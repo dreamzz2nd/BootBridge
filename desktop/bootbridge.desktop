@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=BootBridge
+Comment=Safe & Lightweight Dual-Boot Windows VM Launcher for Linux
+Exec=python3 /home/rizky/Desktop/BootBridge/bootbridge.py
+Icon=computer
+Terminal=false
+Type=Application
+Categories=System;Utility;Emulator;
+Keywords=Virtualization;QEMU;DualBoot;Windows;KVM;
