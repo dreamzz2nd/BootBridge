@@ -47,6 +47,12 @@ def save_config(config):
 # i18n Translations Dictionary
 TRANSLATIONS = {
     "id": {
+        "nav_title": "NAVIGATION",
+        "nav_dashboard": "Dashboard & Drive",
+        "nav_safety": "Proteksi & Safety",
+        "nav_hardware": "Konfigurasi Hardware",
+        "nav_guides": "Panduan & Shortcut",
+        "nav_diagnostics": "Konsol Diagnostik",
         "app_subtitle": "Peluncur VM Dual-Boot Windows Fisik yang Aman & Ringan",
         "kvm_active": "KVM: AKTIF",
         "kvm_disabled": "KVM: NONAKTIF",
@@ -103,6 +109,12 @@ TRANSLATIONS = {
         "about_comments": "Peluncur VM Windows fisik dual-boot yang aman dan ringan untuk Linux melalui passthrough QEMU/KVM.",
     },
     "en": {
+        "nav_title": "NAVIGATION",
+        "nav_dashboard": "Dashboard & Drive",
+        "nav_safety": "Safety & Mounts",
+        "nav_hardware": "Resource Config",
+        "nav_guides": "Help & Shortcuts",
+        "nav_diagnostics": "Live Diagnostics",
         "app_subtitle": "Safe & Lightweight Dual-Boot Physical Windows VM Launcher",
         "kvm_active": "KVM: ACCELERATED",
         "kvm_disabled": "KVM: DISABLED",
@@ -185,23 +197,21 @@ def make_icon_button(icon_name, label_text, style_class=None):
         btn.get_style_context().add_class(style_class)
     return btn, label
 
-def make_icon_expander(icon_name, title_text):
-    """Creates a GTK Expander with a symbolic icon header."""
-    expander = Gtk.Expander()
+def make_icon_card_title(icon_name, title_text):
+    """Creates a card header box with a symbolic icon header."""
     header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
     icon = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.BUTTON)
     label = Gtk.Label(label=title_text)
+    label.get_style_context().add_class("card-title")
     header_box.pack_start(icon, False, False, 0)
     header_box.pack_start(label, False, False, 0)
-    header_box.show_all()
-    expander.set_label_widget(header_box)
-    return expander, label
+    return header_box, label
 
 
 class BootBridgeApp(Gtk.Window):
     def __init__(self):
         super().__init__(title="BootBridge")
-        self.set_default_size(780, 700)
+        self.set_default_size(880, 680)
         self.set_position(Gtk.WindowPosition.CENTER)
 
         # Load Saved Config & Preferences
@@ -306,19 +316,75 @@ class BootBridgeApp(Gtk.Window):
         self.update_kvm_badge()
         self.header.pack_end(self.kvm_badge)
 
-        # Main Outer Scrolled Container
-        scrolled_window = Gtk.ScrolledWindow()
-        scrolled_window.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-        self.add(scrolled_window)
+        # Main Horizontal Window Box (Sidebar + Main Content Area)
+        main_h_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+        self.add(main_h_box)
 
-        main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
-        main_box.set_margin_top(16)
-        main_box.set_margin_bottom(16)
-        main_box.set_margin_start(16)
-        main_box.set_margin_end(16)
-        scrolled_window.add(main_box)
+        # ==========================================
+        # LEFT NAVIGATION SIDEBAR
+        # ==========================================
+        sidebar_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        sidebar_container.get_style_context().add_class("sidebar")
 
-        # Dependency Warning Card (Visible only if dependencies missing)
+        self.sidebar_title_lbl = Gtk.Label(label=self.tr("nav_title"))
+        self.sidebar_title_lbl.set_xalign(0)
+        self.sidebar_title_lbl.get_style_context().add_class("sidebar-title")
+        sidebar_container.pack_start(self.sidebar_title_lbl, False, False, 4)
+
+        self.sidebar_list = Gtk.ListBox()
+        self.sidebar_list.get_style_context().add_class("sidebar-list")
+        self.sidebar_list.connect("row-selected", self.on_sidebar_row_selected)
+
+        self.nav_items = [
+            ("dashboard", "drive-harddisk-symbolic", "nav_dashboard"),
+            ("safety", "security-high-symbolic", "nav_safety"),
+            ("hardware", "preferences-system-symbolic", "nav_hardware"),
+            ("guides", "input-keyboard-symbolic", "nav_guides"),
+            ("diagnostics", "utilities-terminal-symbolic", "nav_diagnostics")
+        ]
+
+        self.nav_labels = {}
+        for page_id, icon_name, tr_key in self.nav_items:
+            row = Gtk.ListBoxRow()
+            row.page_id = page_id
+            box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+            box.get_style_context().add_class("sidebar-row")
+            icon = Gtk.Image.new_from_icon_name(icon_name, Gtk.IconSize.BUTTON)
+            lbl = Gtk.Label(label=self.tr(tr_key))
+            lbl.set_xalign(0)
+            box.pack_start(icon, False, False, 0)
+            box.pack_start(lbl, True, True, 0)
+            row.add(box)
+            self.sidebar_list.add(row)
+            self.nav_labels[page_id] = lbl
+
+        sidebar_container.pack_start(self.sidebar_list, True, True, 0)
+        main_h_box.pack_start(sidebar_container, False, False, 0)
+
+        # ==========================================
+        # RIGHT CONTENT PANEL (STACK + BOTTOM BAR)
+        # ==========================================
+        right_panel = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        main_h_box.pack_start(right_panel, True, True, 0)
+
+        self.stack = Gtk.Stack()
+        self.stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+        self.stack.set_transition_duration(150)
+        right_panel.pack_start(self.stack, True, True, 0)
+
+        # ------------------------------------------
+        # Page 1: Dashboard & Physical Storage Drive
+        # ------------------------------------------
+        page_dash_scroll = Gtk.ScrolledWindow()
+        page_dash_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        page_dash_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+        page_dash_box.set_margin_top(16)
+        page_dash_box.set_margin_bottom(16)
+        page_dash_box.set_margin_start(16)
+        page_dash_box.set_margin_end(16)
+        page_dash_scroll.add(page_dash_box)
+
+        # Dependency Warning Card
         self.dep_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
         self.dep_card.get_style_context().add_class("card")
         self.dep_card.get_style_context().add_class("badge-warning")
@@ -336,18 +402,16 @@ class BootBridgeApp(Gtk.Window):
         self.copy_cmd_btn.connect("clicked", self.copy_install_command)
         dep_btn_box.pack_start(self.copy_cmd_btn, False, False, 0)
         self.dep_card.pack_start(dep_btn_box, False, False, 0)
-
-        main_box.pack_start(self.dep_card, False, False, 0)
+        page_dash_box.pack_start(self.dep_card, False, False, 0)
         self.update_dependency_ui()
 
-        # Card 1: Physical Disk Selection
+        # Disk Card
         disk_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         disk_card.get_style_context().add_class("card")
 
         disk_title_box, self.disk_title_lbl = make_card_header("drive-harddisk-symbolic", self.tr("disk_card_title"))
         disk_card.pack_start(disk_title_box, False, False, 0)
 
-        # Dropdown Combo
         combo_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         self.combo_label = Gtk.Label(label=self.tr("target_disk"))
         self.combo_label.set_xalign(0)
@@ -358,26 +422,35 @@ class BootBridgeApp(Gtk.Window):
         combo_box.pack_start(self.disk_combo, True, True, 0)
         disk_card.pack_start(combo_box, False, False, 0)
 
-        # Partition Breakdown Frame
         self.part_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
         disk_card.pack_start(self.part_box, False, False, 0)
+        page_dash_box.pack_start(disk_card, False, False, 0)
 
-        main_box.pack_start(disk_card, False, False, 0)
+        self.stack.add_named(page_dash_scroll, "dashboard")
 
-        # Card 2: Safety & Mount Status
-        self.safety_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        # ------------------------------------------
+        # Page 2: Safety & Data Protection Guard
+        # ------------------------------------------
+        page_safety_scroll = Gtk.ScrolledWindow()
+        page_safety_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        page_safety_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+        page_safety_box.set_margin_top(16)
+        page_safety_box.set_margin_bottom(16)
+        page_safety_box.set_margin_start(16)
+        page_safety_box.set_margin_end(16)
+        page_safety_scroll.add(page_safety_box)
+
+        self.safety_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         self.safety_card.get_style_context().add_class("card")
 
         safety_title_box, self.safety_title_lbl = make_card_header("security-high-symbolic", self.tr("safety_card_title"))
         self.safety_card.pack_start(safety_title_box, False, False, 0)
 
-        # Status Indicators Grid
         self.safety_status_label = Gtk.Label(label="Checking safety...")
         self.safety_status_label.set_xalign(0)
         self.safety_status_label.set_line_wrap(True)
         self.safety_card.pack_start(self.safety_status_label, False, False, 0)
 
-        # Safe Unmount & NTFS Repair Button Box
         self.unmount_btn_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         self.unmount_btn, self.unmount_btn_lbl = make_icon_button("drive-removable-media-symbolic", self.tr("unmount_btn"), style_class="btn-warning")
         self.unmount_btn.connect("clicked", self.on_unmount_clicked)
@@ -386,24 +459,33 @@ class BootBridgeApp(Gtk.Window):
         self.fix_ntfs_btn, self.fix_ntfs_btn_lbl = make_icon_button("system-run-symbolic", self.tr("fix_ntfs_btn"), style_class="btn-warning")
         self.fix_ntfs_btn.connect("clicked", self.on_fix_ntfs_clicked)
         self.unmount_btn_box.pack_start(self.fix_ntfs_btn, False, False, 0)
-
         self.safety_card.pack_start(self.unmount_btn_box, False, False, 0)
 
-        main_box.pack_start(self.safety_card, False, False, 0)
+        page_safety_box.pack_start(self.safety_card, False, False, 0)
+        self.stack.add_named(page_safety_scroll, "safety")
 
-        # Card 3: VM Resource Allocation Configuration
-        config_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        # ------------------------------------------
+        # Page 3: Hardware Resource Config
+        # ------------------------------------------
+        page_hw_scroll = Gtk.ScrolledWindow()
+        page_hw_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        page_hw_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+        page_hw_box.set_margin_top(16)
+        page_hw_box.set_margin_bottom(16)
+        page_hw_box.set_margin_start(16)
+        page_hw_box.set_margin_end(16)
+        page_hw_scroll.add(page_hw_box)
+
+        config_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
         config_card.get_style_context().add_class("card")
 
         config_title_box, self.config_title_lbl = make_card_header("preferences-system-symbolic", self.tr("config_card_title"))
         config_card.pack_start(config_title_box, False, False, 0)
 
-        # Grid for sliders & options
         grid = Gtk.Grid()
         grid.set_column_spacing(16)
-        grid.set_row_spacing(12)
+        grid.set_row_spacing(14)
 
-        # Dynamic hardware recommendation calculation
         try:
             with open("/proc/meminfo", "r") as f:
                 total_kb = int([line.split()[1] for line in f if "MemTotal" in line][0])
@@ -433,7 +515,6 @@ class BootBridgeApp(Gtk.Window):
         self.rec_ram_mb = rec_ram_mb
         self.rec_cores = rec_cores
 
-        # RAM Slider
         self.ram_lbl = Gtk.Label(label=self.tr("ram_alloc"))
         self.ram_lbl.set_xalign(0)
         grid.attach(self.ram_lbl, 0, 0, 1, 1)
@@ -446,7 +527,6 @@ class BootBridgeApp(Gtk.Window):
         self.ram_scale.set_draw_value(True)
         grid.attach(self.ram_scale, 1, 0, 1, 1)
 
-        # CPU Cores Slider
         self.cpu_lbl = Gtk.Label(label=self.tr("cpu_cores"))
         self.cpu_lbl.set_xalign(0)
         grid.attach(self.cpu_lbl, 0, 1, 1, 1)
@@ -460,7 +540,6 @@ class BootBridgeApp(Gtk.Window):
 
         self.update_scale_marks()
 
-        # Display Backend
         self.display_lbl = Gtk.Label(label=self.tr("display_engine"))
         self.display_lbl.set_xalign(0)
         grid.attach(self.display_lbl, 0, 2, 1, 1)
@@ -472,46 +551,102 @@ class BootBridgeApp(Gtk.Window):
         self.display_combo.set_active(0)
         grid.attach(self.display_combo, 1, 2, 1, 1)
 
-        # Fullscreen Toggle Checkbox
         self.fullscreen_chk = Gtk.CheckButton(label=self.tr("fullscreen_chk"))
         grid.attach(self.fullscreen_chk, 0, 3, 2, 1)
 
         config_card.pack_start(grid, False, False, 0)
-        main_box.pack_start(config_card, False, False, 0)
+        page_hw_box.pack_start(config_card, False, False, 0)
+        self.stack.add_named(page_hw_scroll, "hardware")
 
-        # Card 4: VM Keyboard Shortcuts & Features Guide
-        shortcut_expander, self.shortcut_title_lbl = make_icon_expander("input-keyboard-symbolic", self.tr("shortcut_title"))
-        shortcut_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        # ------------------------------------------
+        # Page 4: Guides & Shortcuts
+        # ------------------------------------------
+        page_guides_scroll = Gtk.ScrolledWindow()
+        page_guides_scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        page_guides_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+        page_guides_box.set_margin_top(16)
+        page_guides_box.set_margin_bottom(16)
+        page_guides_box.set_margin_start(16)
+        page_guides_box.set_margin_end(16)
+        page_guides_scroll.add(page_guides_box)
+
+        # Shortcuts Card
+        shortcut_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         shortcut_card.get_style_context().add_class("card")
+
+        shortcut_header, self.shortcut_title_lbl = make_icon_card_title("input-keyboard-symbolic", self.tr("shortcut_title"))
+        shortcut_card.pack_start(shortcut_header, False, False, 0)
 
         self.shortcut_text = Gtk.Label()
         self.shortcut_text.set_xalign(0)
         self.shortcut_text.set_line_wrap(True)
         self.shortcut_text.set_markup(self.tr("shortcut_markup"))
         shortcut_card.pack_start(self.shortcut_text, False, False, 0)
-        shortcut_expander.add(shortcut_card)
-        main_box.pack_start(shortcut_expander, False, False, 0)
+        page_guides_box.pack_start(shortcut_card, False, False, 0)
 
-        # Card 5: Troubleshooting & Boot Help Guide
-        help_expander, self.help_title_lbl = make_icon_expander("help-faq-symbolic", self.tr("help_title"))
-        help_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        # Troubleshooting Card
+        help_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
         help_card.get_style_context().add_class("card")
+
+        help_header, self.help_title_lbl = make_icon_card_title("help-faq-symbolic", self.tr("help_title"))
+        help_card.pack_start(help_header, False, False, 0)
 
         self.help_text = Gtk.Label()
         self.help_text.set_xalign(0)
         self.help_text.set_line_wrap(True)
         self.help_text.set_markup(self.tr("help_markup"))
         help_card.pack_start(self.help_text, False, False, 0)
-        help_expander.add(help_card)
-        main_box.pack_start(help_expander, False, False, 0)
+        page_guides_box.pack_start(help_card, False, False, 0)
 
-        # Progress Bar
+        self.stack.add_named(page_guides_scroll, "guides")
+
+        # ------------------------------------------
+        # Page 5: Live Diagnostics Console Output
+        # ------------------------------------------
+        page_log_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        page_log_box.set_margin_top(16)
+        page_log_box.set_margin_bottom(16)
+        page_log_box.set_margin_start(16)
+        page_log_box.set_margin_end(16)
+
+        log_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        log_card.get_style_context().add_class("card")
+
+        log_header, self.log_title_lbl = make_icon_card_title("utilities-terminal-symbolic", self.tr("log_title"))
+        log_card.pack_start(log_header, False, False, 0)
+
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_min_content_height(350)
+        scrolled.set_hexpand(True)
+        scrolled.set_vexpand(True)
+
+        self.log_text_view = Gtk.TextView()
+        self.log_text_view.set_editable(False)
+        self.log_text_view.get_style_context().add_class("log-view")
+        self.log_buffer = self.log_text_view.get_buffer()
+
+        scrolled.add(self.log_text_view)
+        log_card.pack_start(scrolled, True, True, 0)
+        page_log_box.pack_start(log_card, True, True, 0)
+
+        self.stack.add_named(page_log_box, "diagnostics")
+
+        # Select first row in sidebar
+        first_row = self.sidebar_list.get_row_at_index(0)
+        if first_row:
+            self.sidebar_list.select_row(first_row)
+
+        # ==========================================
+        # BOTTOM ACTION LAUNCHER BAR (PINNED ALWAYS)
+        # ==========================================
+        bottom_bar = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        bottom_bar.get_style_context().add_class("bottom-bar")
+
         self.progress_bar = Gtk.ProgressBar()
         self.progress_bar.set_show_text(True)
         self.progress_bar.set_text(self.tr("progress_ready"))
-        main_box.pack_start(self.progress_bar, False, False, 0)
+        bottom_bar.pack_start(self.progress_bar, False, False, 0)
 
-        # Controls & Launch Bar
         controls_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         
         self.start_btn, self.start_btn_lbl = make_icon_button("media-playback-start-symbolic", self.tr("start_btn"), style_class="btn-primary")
@@ -523,26 +658,12 @@ class BootBridgeApp(Gtk.Window):
         self.stop_btn.connect("clicked", self.on_stop_vm_clicked)
         controls_box.pack_start(self.stop_btn, False, False, 0)
 
-        main_box.pack_start(controls_box, False, False, 0)
+        bottom_bar.pack_start(controls_box, False, False, 0)
+        right_panel.pack_start(bottom_bar, False, False, 0)
 
-        # Console Logs Expander
-        expander, self.log_title_lbl = make_icon_expander("utilities-terminal-symbolic", self.tr("log_title"))
-        log_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-
-        scrolled = Gtk.ScrolledWindow()
-        scrolled.set_min_content_height(120)
-        scrolled.set_hexpand(True)
-
-        self.log_text_view = Gtk.TextView()
-        self.log_text_view.set_editable(False)
-        self.log_text_view.get_style_context().add_class("log-view")
-        self.log_buffer = self.log_text_view.get_buffer()
-
-        scrolled.add(self.log_text_view)
-        log_box.pack_start(scrolled, True, True, 0)
-        expander.add(log_box)
-
-        main_box.pack_start(expander, False, False, 0)
+    def on_sidebar_row_selected(self, listbox, row):
+        if row and hasattr(row, "page_id"):
+            self.stack.set_visible_child_name(row.page_id)
 
     def update_scale_marks(self):
         rec_lbl = self.tr("recommended")
@@ -568,6 +689,13 @@ class BootBridgeApp(Gtk.Window):
         
         self.update_kvm_badge()
         self.update_dependency_ui()
+
+        if hasattr(self, "sidebar_title_lbl"):
+            self.sidebar_title_lbl.set_text(self.tr("nav_title"))
+
+        for page_id, icon_name, tr_key in getattr(self, "nav_items", []):
+            if page_id in self.nav_labels:
+                self.nav_labels[page_id].set_text(self.tr(tr_key))
 
         if hasattr(self, "dep_title_lbl"): self.dep_title_lbl.set_text(self.tr("dep_title"))
         if hasattr(self, "copy_cmd_btn_lbl"): self.copy_cmd_btn_lbl.set_text(self.tr("copy_cmd"))

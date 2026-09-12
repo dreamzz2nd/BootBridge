@@ -13,15 +13,63 @@ headerbar {
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
-.header-title {
+headerbar label.title {
     font-weight: 700;
     font-size: 15px;
     color: #212121;
 }
 
-.header-subtitle {
+headerbar label.subtitle {
     font-size: 11px;
+    color: #616161;
+}
+
+/* Postman Left Navigation Sidebar */
+.sidebar {
+    background-color: #ffffff;
+    border-right: 1px solid #e0e0e0;
+    padding: 16px 8px;
+    min-width: 210px;
+}
+
+.sidebar-title {
+    font-size: 11px;
+    font-weight: 700;
     color: #757575;
+    letter-spacing: 0.8px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+}
+
+.sidebar-list {
+    background-color: transparent;
+    border: none;
+}
+
+.sidebar-list row {
+    padding: 0;
+    margin-bottom: 4px;
+    border-radius: 6px;
+}
+
+.sidebar-list row:hover {
+    background-color: #f5f5f5;
+}
+
+.sidebar-list row:selected {
+    background-color: #fff3e0;
+}
+
+.sidebar-row {
+    padding: 10px 12px;
+    color: #424242;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.sidebar-list row:selected .sidebar-row {
+    color: #ff6c37;
+    font-weight: 700;
 }
 
 /* Postman Clean Cards */
@@ -141,6 +189,13 @@ button.btn-warning {
 
 button.btn-warning:hover {
     background-color: #ef6c00;
+}
+
+/* Bottom Action Launcher Bar */
+.bottom-bar {
+    background-color: #ffffff;
+    border-top: 1px solid #e0e0e0;
+    padding: 12px 16px;
 }
 
 /* Postman Progress Bar */
