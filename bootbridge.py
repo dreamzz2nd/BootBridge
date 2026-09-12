@@ -185,30 +185,54 @@ class BootBridgeApp(Gtk.Window):
         grid.set_column_spacing(16)
         grid.set_row_spacing(12)
 
-        # RAM Slider (Auto-calculated safe default based on system total RAM)
-        grid.attach(Gtk.Label(label="RAM Allocation:"), 0, 0, 1, 1)
+        # Dynamic hardware recommendation calculation
         try:
             with open("/proc/meminfo", "r") as f:
                 total_kb = int([line.split()[1] for line in f if "MemTotal" in line][0])
-            total_mb = total_kb // 1024
-            default_ram = min(4096, max(2048, (total_mb // 2 // 1024) * 1024))
+            total_ram_mb = total_kb // 1024
         except Exception:
-            default_ram = 3072
+            total_ram_mb = 8192
 
-        self.ram_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 1024, 16384, 1024)
-        self.ram_scale.set_value(default_ram)
+        if total_ram_mb <= 4096:
+            rec_ram_mb = 2048
+        elif total_ram_mb <= 8192:
+            rec_ram_mb = 3072
+        elif total_ram_mb <= 16384:
+            rec_ram_mb = 6144
+        else:
+            rec_ram_mb = 8192
+
+        max_cores = multiprocessing.cpu_count()
+        if max_cores <= 2:
+            rec_cores = 1
+        elif max_cores <= 4:
+            rec_cores = 2
+        elif max_cores <= 8:
+            rec_cores = 4
+        else:
+            rec_cores = max_cores // 2
+
+        # RAM Slider with Recommended Badge
+        ram_lbl = Gtk.Label(label=f"RAM Allocation (Rekomendasi: {int(rec_ram_mb/1024)} GB):")
+        ram_lbl.set_xalign(0)
+        grid.attach(ram_lbl, 0, 0, 1, 1)
+
+        max_slider_ram = max(rec_ram_mb, min(16384, (total_ram_mb // 1024) * 1024))
+        self.ram_scale = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 1024, max_slider_ram, 1024)
+        self.ram_scale.set_value(rec_ram_mb)
         self.ram_scale.set_digits(0)
         self.ram_scale.set_hexpand(True)
         self.ram_scale.set_draw_value(True)
-        self.ram_scale.connect("format-value", lambda scale, val: f"{int(val/1024)} GB ({int(val)} MB)")
+        self.ram_scale.connect("format-value", lambda scale, val: f"{int(val/1024)} GB ({int(val)} MB)" + (" ⭐ Recommended" if int(val) == rec_ram_mb else ""))
         grid.attach(self.ram_scale, 1, 0, 1, 1)
 
-        # CPU Cores
-        grid.attach(Gtk.Label(label="CPU Cores:"), 0, 1, 1, 1)
-        max_cores = multiprocessing.cpu_count()
-        default_cores = min(4, max_cores)
+        # CPU Cores Slider/Spin with Recommended Badge
+        cpu_lbl = Gtk.Label(label=f"CPU Cores (Rekomendasi: {rec_cores} Core):")
+        cpu_lbl.set_xalign(0)
+        grid.attach(cpu_lbl, 0, 1, 1, 1)
+
         self.cpu_spin = Gtk.SpinButton.new_with_range(1, max_cores, 1)
-        self.cpu_spin.set_value(default_cores)
+        self.cpu_spin.set_value(rec_cores)
         grid.attach(self.cpu_spin, 1, 1, 1, 1)
 
         # Display Backend
