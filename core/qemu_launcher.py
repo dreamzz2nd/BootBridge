@@ -48,7 +48,7 @@ class QEMULauncher:
         return None
 
     def build_command(self, disk_path, ram_mb=4096, cpu_cores=4, display_type="gtk", 
-                      ovmf_code=None, ovmf_vars=None, is_shared_host_disk=False):
+                      ovmf_code=None, ovmf_vars=None, is_shared_host_disk=False, fullscreen=False):
         """
         Constructs the qemu-system-x86_64 command line argument list.
         """
@@ -59,6 +59,9 @@ class QEMULauncher:
         ovmf_vars = ovmf_vars or deps.get("ovmf_vars")
 
         cmd = [qemu_bin]
+
+        if fullscreen:
+            cmd.append("-full-screen")
 
         is_secboot = bool(ovmf_code and ("secboot" in ovmf_code or "ms.fd" in ovmf_code))
 
@@ -146,7 +149,7 @@ class QEMULauncher:
 
         return cmd
 
-    def start_vm(self, disk_path, ram_mb=4096, cpu_cores=4, display_type="gtk", use_pkexec=True):
+    def start_vm(self, disk_path, ram_mb=4096, cpu_cores=4, display_type="gtk", use_pkexec=True, fullscreen=False):
         """Launches the VM process asynchronously with elevated block device permissions."""
         if self.is_running:
             self.log_callback("Error: VM is already running.")
@@ -181,7 +184,8 @@ class QEMULauncher:
             disk_path=disk_path,
             ram_mb=ram_mb,
             cpu_cores=cpu_cores,
-            display_type=display_type
+            display_type=display_type,
+            fullscreen=fullscreen
         )
 
         cmd_str = " ".join(full_cmd)

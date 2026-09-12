@@ -244,14 +244,38 @@ class BootBridgeApp(Gtk.Window):
         # Display Backend
         grid.attach(Gtk.Label(label="Display Engine:"), 0, 2, 1, 1)
         self.display_combo = Gtk.ComboBoxText()
-        self.display_combo.append("gtk", "Native GTK Window (VirtIO 3D)")
+        self.display_combo.append("gtk", "Native GTK Window (QXL 2D/3D)")
         self.display_combo.append("sdl", "SDL Hardware Window")
         self.display_combo.append("spice", "SPICE Protocol (Remote/Local)")
         self.display_combo.set_active(0)
         grid.attach(self.display_combo, 1, 2, 1, 1)
 
+        # Fullscreen Toggle Checkbox
+        self.fullscreen_chk = Gtk.CheckButton(label="🖥️ Jalankan VM Langsung dalam Mode Layar Penuh (Fullscreen)")
+        grid.attach(self.fullscreen_chk, 0, 3, 2, 1)
+
         config_card.pack_start(grid, False, False, 0)
         main_box.pack_start(config_card, False, False, 0)
+
+        # Card 4: VM Keyboard Shortcuts & Features Guide
+        shortcut_expander = Gtk.Expander(label="⌨️ Fitur Canggih & Shortcut Layar VM (Fullscreen, Mouse, Keys)")
+        shortcut_card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        shortcut_card.get_style_context().add_class("card")
+
+        shortcut_text = Gtk.Label()
+        shortcut_text.set_xalign(0)
+        shortcut_text.set_line_wrap(True)
+        shortcut_text.set_markup(
+            "<b>Daftar Fitur & Shortcut QEMU VM yang Bisa Kamu Gunakan:</b>\n\n"
+            "• 🖥️ <b>Toggle Fullscreen:</b> Tekan <b><tt>Ctrl + Alt + F</tt></b> di dalam jendela VM untuk masuk/keluar mode Fullscreen kapan saja.\n"
+            "• 🖱️ <b>Lepas / Tangkap Mouse:</b> Tekan <b><tt>Ctrl + Alt + G</tt></b> jika kursor kaku atau ingin melepas kursor dari VM.\n"
+            "• 📐 <b>Layar Auto-Fit:</b> Di bar atas jendela VM, klik <b><i>View → Zoom to Fit</i></b> agar tampilan Windows pas secara otomatis dengan resolusi layar.\n"
+            "• ⌨️ <b>Kirim Ctrl+Alt+Del:</b> Di bar atas jendela VM, klik <b><i>Machine → Send Key → Ctrl-Alt-Del</i></b> untuk membuka Task Manager / Lock Screen.\n"
+            "• 🔄 <b>Hard Reset VM:</b> Di bar atas jendela VM, klik <b><i>Machine → Reset</i></b> jika Windows macet."
+        )
+        shortcut_card.pack_start(shortcut_text, False, False, 0)
+        shortcut_expander.add(shortcut_card)
+        main_box.pack_start(shortcut_expander, False, False, 0)
 
         # Card 4: Troubleshooting & Boot Help Guide
         help_expander = Gtk.Expander(label="💡 Windows Boot Troubleshooting & Fix Guide")
@@ -462,12 +486,14 @@ class BootBridgeApp(Gtk.Window):
         cpu_cores = int(self.cpu_scale.get_value() if hasattr(self, "cpu_scale") else self.cpu_spin.get_value())
         display = self.display_combo.get_active_id() or "gtk"
 
-        self.log_message(f"Initiating VM boot for physical disk {self.selected_disk['path']}...")
+        fullscreen = self.fullscreen_chk.get_active()
+        self.log_message(f"Initiating VM boot for physical disk {self.selected_disk['path']} (Fullscreen={fullscreen})...")
         success = self.launcher.start_vm(
             disk_path=self.selected_disk["path"],
             ram_mb=ram_mb,
             cpu_cores=cpu_cores,
-            display_type=display
+            display_type=display,
+            fullscreen=fullscreen
         )
 
         if success:
