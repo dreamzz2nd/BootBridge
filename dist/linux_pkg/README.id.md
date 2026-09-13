@@ -29,6 +29,9 @@
   <a href="https://github.com/dreamzz2nd/BootBridge/releases/tag/v1.0.0">
     <img src="https://img.shields.io/badge/Rilis-v1.0.0%20(Semua%20Paket)-brightgreen?style=for-the-badge&logo=github" alt="GitHub Release v1.0.0" />
   </a>
+  <a href="https://ko-fi.com/dreamzz2nd">
+    <img src="https://img.shields.io/badge/Dukung-Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me A Coffee" />
+  </a>
 </p>
 
 <p align="center">

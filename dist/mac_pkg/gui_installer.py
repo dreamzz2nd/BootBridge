@@ -69,6 +69,20 @@ class BootBridgeInstallerWindow(Gtk.Window):
         os_box.pack_start(self.radio_mac, False, False, 0)
         main_box.pack_start(os_frame, False, False, 0)
 
+        # Installation Options Checkboxes
+        opts_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+        self.chk_desktop = Gtk.CheckButton(label="Buat Ikon Shortcut di Desktop")
+        self.chk_desktop.set_active(True)
+        self.chk_startmenu = Gtk.CheckButton(label="Daftarkan Aplikasi di Start Menu / System Menu")
+        self.chk_startmenu.set_active(True)
+        self.chk_launch = Gtk.CheckButton(label="Jalankan BootBridge secara otomatis setelah instalasi")
+        self.chk_launch.set_active(True)
+
+        opts_box.pack_start(self.chk_desktop, False, False, 0)
+        opts_box.pack_start(self.chk_startmenu, False, False, 0)
+        opts_box.pack_start(self.chk_launch, False, False, 0)
+        main_box.pack_start(opts_box, False, False, 0)
+
         # Status & Progress Section
         self.status_lbl = Gtk.Label(label="Klik 'Install Sekarang' untuk memulai instalasi otomatis.")
         self.status_lbl.set_xalign(0.0)
@@ -135,22 +149,33 @@ class BootBridgeInstallerWindow(Gtk.Window):
                 self.log("Menginstall komponen macOS via Homebrew...")
                 subprocess.run(["brew", "install", "gtk+3", "gobject-introspection", "qemu", "freerdp"], capture_output=True)
             elif self.radio_win.get_active():
-                self.log("Mengonfigurasi paket komponen Windows...")
+                self.log("Mengonfigurasi komponen Windows via Winget...")
+                subprocess.run(["winget", "install", "--id", "QEMU.QEMU", "-e", "--silent"], capture_output=True)
 
             self.set_progress(0.8)
-            self.log("Membuat shortcut desktop BootBridge...")
-            
-            apps_dir = os.path.expanduser("~/.local/share/applications")
-            os.makedirs(apps_dir, exist_ok=True)
-            desktop_src = os.path.join(SCRIPT_DIR, "desktop", "bootbridge.desktop")
-            if os.path.exists(desktop_src):
-                shutil.copy(desktop_src, apps_dir)
-                subprocess.run(["update-desktop-database", apps_dir], capture_output=True)
+            if self.chk_desktop.get_active() or self.chk_startmenu.get_active():
+                self.log("Membuat shortcut desktop & menu aplikasi BootBridge...")
+                if sys.platform == "win32":
+                    desktop_folder = os.path.join(os.path.expanduser("~"), "Desktop")
+                    if os.path.exists(desktop_folder) and self.chk_desktop.get_active():
+                        win_shortcut = os.path.join(desktop_folder, "BootBridge.bat")
+                        with open(win_shortcut, "w") as f:
+                            f.write(f'@echo off\ncd /d "{SCRIPT_DIR}"\npython bootbridge.py\n')
+                else:
+                    apps_dir = os.path.expanduser("~/.local/share/applications")
+                    os.makedirs(apps_dir, exist_ok=True)
+                    desktop_src = os.path.join(SCRIPT_DIR, "desktop", "bootbridge.desktop")
+                    if os.path.exists(desktop_src) and self.chk_startmenu.get_active():
+                        shutil.copy(desktop_src, apps_dir)
+                        subprocess.run(["update-desktop-database", apps_dir], capture_output=True)
 
             self.set_progress(1.0)
-            self.log("Instalasi Selesai! Menjalankan BootBridge...")
+            self.log("Instalasi Selesai!")
 
-            GLib.idle_add(self._finish_and_launch)
+            if self.chk_launch.get_active():
+                GLib.idle_add(self._finish_and_launch)
+            else:
+                GLib.idle_add(lambda: self.destroy() or Gtk.main_quit())
 
         except Exception as e:
             self.log(f"Error instalasi: {e}")
