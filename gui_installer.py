@@ -135,17 +135,25 @@ class BootBridgeInstallerWindow(Gtk.Window):
                 self.log("Menginstall komponen macOS via Homebrew...")
                 subprocess.run(["brew", "install", "gtk+3", "gobject-introspection", "qemu", "freerdp"], capture_output=True)
             elif self.radio_win.get_active():
-                self.log("Mengonfigurasi paket komponen Windows...")
+                self.log("Mengonfigurasi komponen Windows via Winget...")
+                subprocess.run(["winget", "install", "--id", "QEMU.QEMU", "-e", "--silent"], capture_output=True)
 
             self.set_progress(0.8)
             self.log("Membuat shortcut desktop BootBridge...")
             
-            apps_dir = os.path.expanduser("~/.local/share/applications")
-            os.makedirs(apps_dir, exist_ok=True)
-            desktop_src = os.path.join(SCRIPT_DIR, "desktop", "bootbridge.desktop")
-            if os.path.exists(desktop_src):
-                shutil.copy(desktop_src, apps_dir)
-                subprocess.run(["update-desktop-database", apps_dir], capture_output=True)
+            if sys.platform == "win32":
+                desktop_folder = os.path.join(os.path.expanduser("~"), "Desktop")
+                if os.path.exists(desktop_folder):
+                    win_shortcut = os.path.join(desktop_folder, "BootBridge.bat")
+                    with open(win_shortcut, "w") as f:
+                        f.write(f'@echo off\ncd /d "{SCRIPT_DIR}"\npython bootbridge.py\n')
+            else:
+                apps_dir = os.path.expanduser("~/.local/share/applications")
+                os.makedirs(apps_dir, exist_ok=True)
+                desktop_src = os.path.join(SCRIPT_DIR, "desktop", "bootbridge.desktop")
+                if os.path.exists(desktop_src):
+                    shutil.copy(desktop_src, apps_dir)
+                    subprocess.run(["update-desktop-database", apps_dir], capture_output=True)
 
             self.set_progress(1.0)
             self.log("Instalasi Selesai! Menjalankan BootBridge...")
