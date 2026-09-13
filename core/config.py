@@ -12,7 +12,7 @@ def load_config():
                 return json.load(f)
         except Exception as e:
             print(f"[BootBridge] Error loading config: {e}")
-    return {"language": "id", "theme": "dark"}
+    return {"language": "id", "theme": "dark", "show_launch_guide": True}
 
 def save_config(config):
     """Saves configuration data to JSON file."""

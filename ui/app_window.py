@@ -507,9 +507,68 @@ class BootBridgeApp(Gtk.Window):
                 state_mode="warning"
             )
 
+    def _show_launch_guide_dialog(self):
+        """Shows emulator-style quick controls & shortcuts dialog before launching VM."""
+        dialog = Gtk.Dialog(
+            title=self.tr("guide_dialog_title"),
+            transient_for=self,
+            flags=0
+        )
+        dialog.set_modal(True)
+        dialog.set_default_size(480, -1)
+
+        box = dialog.get_content_area()
+        box.set_spacing(12)
+        box.set_margin_top(16)
+        box.set_margin_bottom(16)
+        box.set_margin_start(16)
+        box.set_margin_end(16)
+
+        hdr_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        icon = Gtk.Image.new_from_icon_name("input-keyboard-symbolic", Gtk.IconSize.DND)
+        lbl_hdr = Gtk.Label()
+        lbl_hdr.set_markup(f"<b><big>{self.tr('guide_dialog_title')}</big></b>")
+        hdr_box.pack_start(icon, False, False, 0)
+        hdr_box.pack_start(lbl_hdr, False, False, 0)
+        box.pack_start(hdr_box, False, False, 0)
+
+        sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        box.pack_start(sep, False, False, 0)
+
+        body_lbl = Gtk.Label()
+        body_lbl.set_xalign(0)
+        body_lbl.set_line_wrap(True)
+        body_lbl.set_markup(self.tr("guide_dialog_markup"))
+        box.pack_start(body_lbl, False, False, 0)
+
+        dont_show_chk = Gtk.CheckButton(label=self.tr("dont_show_again"))
+        dont_show_chk.set_active(False)
+        box.pack_start(dont_show_chk, False, False, 4)
+
+        dialog.add_button(self.tr("btn_cancel"), Gtk.ResponseType.CANCEL)
+        btn_continue = dialog.add_button(self.tr("btn_continue"), Gtk.ResponseType.OK)
+        btn_continue.get_style_context().add_class("suggested-action")
+
+        box.show_all()
+        response = dialog.run()
+
+        dont_show = dont_show_chk.get_active()
+        dialog.destroy()
+
+        if dont_show:
+            self.config["show_launch_guide"] = False
+            save_config(self.config)
+
+        return response == Gtk.ResponseType.OK
+
     def on_start_vm_clicked(self, widget):
         if not self.selected_disk:
             return
+
+        if self.config.get("show_launch_guide", True):
+            if not self._show_launch_guide_dialog():
+                self.log_message("VM boot cancelled by user from shortcut guide dialog.")
+                return
 
         ram_mb = int(self.ram_scale.get_value())
         cpu_cores = int(self.cpu_scale.get_value())
