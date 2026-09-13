@@ -17,6 +17,15 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/dreamzz2nd/BootBridge/releases/latest/download/BootBridge-v1.0.0-Universal.zip">
+    <img src="https://img.shields.io/badge/Unduh-Paket%20Langsung%20(ZIP)-brightgreen?style=for-the-badge&logo=github" alt="Unduh Paket Langsung ZIP" />
+  </a>
+  <a href="https://github.com/dreamzz2nd/BootBridge/releases/latest">
+    <img src="https://img.shields.io/badge/Unduh-Paket%20Linux%20(TAR.GZ)-blue?style=for-the-badge&logo=linux" alt="Unduh Paket Linux TAR.GZ" />
+  </a>
+</p>
+
+<p align="center">
   <b>BootBridge</b> adalah aplikasi desktop khusus yang dirancang untuk menjalankan sistem operasi Windows dual-boot fisik kamu secara aman di dalam Virtual Machine (QEMU dengan akselerasi hardware native) langsung dari desktop—<b>tanpa perlu merestart (reboot) komputer kamu</b>.
 </p>
 

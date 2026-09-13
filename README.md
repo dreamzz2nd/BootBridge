@@ -17,6 +17,15 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/dreamzz2nd/BootBridge/releases/latest/download/BootBridge-v1.0.0-Universal.zip">
+    <img src="https://img.shields.io/badge/Download-Direct%20Package%20(ZIP)-brightgreen?style=for-the-badge&logo=github" alt="Download Direct Package ZIP" />
+  </a>
+  <a href="https://github.com/dreamzz2nd/BootBridge/releases/latest">
+    <img src="https://img.shields.io/badge/Download-Linux%20Package%20(TAR.GZ)-blue?style=for-the-badge&logo=linux" alt="Download Linux Package TAR.GZ" />
+  </a>
+</p>
+
+<p align="center">
   <b>BootBridge</b> is a specialized desktop application designed to safely run your existing physical dual-booted Windows installation inside a Virtual Machine (QEMU with native hardware acceleration) directly from your desktop—<b>without rebooting your computer</b>.
 </p>
 
