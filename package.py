@@ -25,6 +25,7 @@ DIST_DIR = os.path.join(BASE_DIR, "dist")
 
 COMMON_ITEMS = [
     "bootbridge.py",
+    "bootbridge.bat",
     "setup_wizard.py",
     "gui_installer.py",
     "install.sh",

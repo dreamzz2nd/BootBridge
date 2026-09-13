@@ -6,7 +6,6 @@
 #define MyAppVersion "1.0.0"
 #define MyAppPublisher "dreamzz2nd"
 #define MyAppURL "https://github.com/dreamzz2nd/BootBridge"
-#define MyAppExeName "bootbridge.bat"
 
 [Setup]
 ; Basic Application Identity
@@ -40,6 +39,7 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 
 [Files]
 ; Copy all application root files
+Source: "..\..\bootbridge.bat"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\bootbridge.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\setup_wizard.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\gui_installer.py"; DestDir: "{app}"; Flags: ignoreversion
@@ -47,6 +47,10 @@ Source: "..\..\bootbridge_installer.bat"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\README.id.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
+
+; Standalone binaries if available
+Source: "..\..\dist\BootBridge.exe"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "..\..\dist\BootBridge-Setup.exe"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
 
 ; Copy subdirectories
 Source: "..\..\core\*"; DestDir: "{app}\core"; Flags: ignoreversion recursesubdirs createallsubdirs

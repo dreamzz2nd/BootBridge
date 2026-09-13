@@ -15,7 +15,7 @@ cd "$SCRIPT_DIR"
 rm -rf "$DIST_DIR"
 mkdir -p "$DIST_DIR/win_pkg" "$DIST_DIR/mac_pkg" "$DIST_DIR/linux_pkg" "$DIST_DIR/universal_pkg"
 
-COMMON_FILES="bootbridge.py setup_wizard.py gui_installer.py install.sh start.sh bootbridge_installer.bat bootbridge_installer_mac.command Install_BootBridge.desktop core ui assets desktop README.md README.id.md LICENSE"
+COMMON_FILES="bootbridge.py bootbridge.bat setup_wizard.py gui_installer.py install.sh start.sh bootbridge_installer.bat bootbridge_installer_mac.command Install_BootBridge.desktop core ui assets desktop README.md README.id.md LICENSE"
 
 echo "[1/5] Copying platform package assets..."
 cp -r $COMMON_FILES "$DIST_DIR/win_pkg/"
