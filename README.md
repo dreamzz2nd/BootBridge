@@ -61,6 +61,9 @@ With BootBridge, your physical Windows partition is booted natively inside a hig
 - **Zero-Reboot Dual Booting**: Boot your physical Windows drive inside Linux at near-native speed.
 - **Mount Safety Guard**: Built-in protection protocol that verifies disk mount states, warns against shared host partition access, and safely unmounts Linux-mounted NTFS drives to prevent data corruption.
 - **Fast Startup & Offline Registry Modifier**: One-click Fast Startup enablement (`HiberbootEnabled = 1`) and reset via direct offline REGF Windows registry hive modification.
+- **Frameless Window Protection**: QEMU display window runs frameless (no titlebar, menu bar, or close button) to prevent accidental VM termination.
+- **Direct Windows Logo Key Capture**: Intercepts and routes the Windows/Super key directly to the Windows VM Start Menu when focused.
+- **Bidirectional Shared Clipboard**: Built-in `qemu-vdagent` integration for seamless text copy and paste (`Ctrl+C` / `Ctrl+V`) between Linux host and Windows VM.
 - **Mutually Exclusive Smart Button States**: Dynamic button state indicators (Orange for ready-to-use actions, Gray for applied/active states) with automatic persistence across app launches in `config.json`.
 - **Modular Clean Architecture**: Highly structured Python codebase separated into `core/`, `ui/`, `ui/pages/`, and `ui/components.py` for maximum maintainability.
 - **KVM & Hyper-V Acceleration**: Configures KVM hardware virtualization with a comprehensive suite of Hyper-V CPU enlightenments (`hv_relaxed`, `hv_spinlocks`, `hv_vapic`, `hv_time`, `hv_synic`, `hv_stimer`, `hv_reset`, `hv_vpindex`, `hv_runtime`, `hv_tlbflush`, `hv_ipi`) to prevent Windows kernel timer desynchronization and BSODs.
@@ -268,8 +271,9 @@ When the QEMU VM window is focused, use the following shortcuts for seamless int
 | Shortcut | Function | Description |
 | :--- | :--- | :--- |
 | **`Ctrl + Alt + F`** | **Toggle Fullscreen** | Switches between windowed and full-screen mode instantly |
-| **`Ctrl + Alt + G`** | **Release Mouse / Input** | Releases mouse cursor and keyboard focus back to Linux host |
-| **`View -> Zoom to Fit`** | **Auto-Scale Display** | Dynamically scales Windows display resolution to window bounds |
+| **`Ctrl + Alt + G`** | **Release / Grab Focus** | Releases mouse cursor and keyboard focus back to Linux host or captures it back |
+| **`Ctrl + C` / `Ctrl + V`** | **Shared Clipboard** | Bidirectional text copy and paste between Linux Host and Windows VM |
+| **`Super / Windows Key`** | **Windows Start Menu** | Captured directly by Windows VM Start Menu when window is focused |
 | **`Machine -> Send Key`** | **Send System Keys** | Sends `Ctrl+Alt+Del`, `PrintScreen`, or `Pause` commands to Windows |
 | **`Machine -> Reset`** | **Hard Reset** | Performs an emergency hardware reset if Windows freezes |
 
