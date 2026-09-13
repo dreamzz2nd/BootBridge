@@ -66,22 +66,22 @@ class QEMULauncher:
 
         is_secboot = bool(ovmf_code and ("secboot" in ovmf_code or "ms.fd" in ovmf_code))
 
-        # Machine & KVM Acceleration
-        if deps.get("kvm_available"):
+        # Machine & Hypervisor Hardware Acceleration (Linux: KVM, macOS: HVF, Windows: WHPX)
+        accel_type = deps.get("accel_type")
+        if accel_type == "kvm" or deps.get("kvm_available"):
             if is_secboot:
                 cmd.extend(["-enable-kvm", "-machine", "q35,smm=on,accel=kvm", "-global", "driver=cfi.pflash01,property=secure,value=on"])
             else:
                 cmd.extend(["-enable-kvm", "-machine", "q35,accel=kvm"])
-        else:
-            cmd.extend(["-machine", "q35"])
-
-        # CPU Configuration with Hyper-V enlightenments for Windows stability
-        if deps.get("kvm_available"):
             cmd.extend([
                 "-cpu", "host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time,hv_synic,hv_stimer,hv_reset,hv_vpindex,hv_runtime,hv_tlbflush,hv_ipi,kvm=on"
             ])
+        elif accel_type == "hvf":
+            cmd.extend(["-machine", "q35,accel=hvf", "-cpu", "host"])
+        elif accel_type == "whpx":
+            cmd.extend(["-machine", "q35,accel=whpx", "-cpu", "host"])
         else:
-            cmd.extend(["-cpu", "max"])
+            cmd.extend(["-machine", "q35", "-cpu", "max"])
 
         cmd.extend(["-smp", f"cores={cpu_cores},threads=1,sockets=1"])
 

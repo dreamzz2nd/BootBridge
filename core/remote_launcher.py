@@ -11,6 +11,8 @@ import time
 import socket
 import ipaddress
 
+import sys
+
 class RemoteLauncher:
     """Manages remote desktop connection processes (RDP, SPICE, VNC) and network discovery."""
 
@@ -23,9 +25,12 @@ class RemoteLauncher:
 
     @classmethod
     def check_remote_dependencies(cls):
-        """Checks for installed remote client binaries: xfreerdp, spicy, remote-viewer, vncviewer."""
+        """Checks for installed remote client binaries: xfreerdp, mstsc (Windows native), spicy, remote-viewer, vncviewer."""
+        is_win = sys.platform == "win32"
+        mstsc_path = shutil.which("mstsc") or (r"C:\Windows\System32\mstsc.exe" if is_win and os.path.exists(r"C:\Windows\System32\mstsc.exe") else None)
+
         clients = {
-            "freerdp": shutil.which("xfreerdp") or shutil.which("freerdp"),
+            "freerdp": mstsc_path if is_win else (shutil.which("xfreerdp") or shutil.which("freerdp")),
             "spicy": shutil.which("spicy") or shutil.which("remote-viewer"),
             "vnc": shutil.which("vncviewer") or shutil.which("xvnc4viewer")
         }
@@ -33,7 +38,8 @@ class RemoteLauncher:
         install_cmds = {
             "debian": "sudo apt install -y freerdp2-x11 spice-client-gtk tigervnc-viewer",
             "arch": "sudo pacman -S freerdp spice-gtk tigervnc",
-            "fedora": "sudo dnf install -y freerdp spice-gtk-tools tigervnc"
+            "fedora": "sudo dnf install -y freerdp spice-gtk-tools tigervnc",
+            "mac": "brew install freerdp virt-viewer"
         }
 
         return {
@@ -41,7 +47,7 @@ class RemoteLauncher:
             "has_rdp": bool(clients["freerdp"]),
             "has_spice": bool(clients["spicy"]),
             "has_vnc": bool(clients["vnc"]),
-            "install_cmd": install_cmds["debian"]
+            "install_cmd": install_cmds["debian"] if sys.platform.startswith("linux") else install_cmds.get("mac", "")
         }
 
     @classmethod
@@ -124,9 +130,17 @@ class RemoteLauncher:
 
     def build_rdp_command(self, host, port=3389, username="", password="", 
                           fullscreen=False, clipboard=True, sound=True, dynamic_res=True):
-        """Constructs FreeRDP command line arguments."""
+        """Constructs RDP command line arguments for FreeRDP or Windows mstsc."""
+        if sys.platform == "win32":
+            mstsc_bin = shutil.which("mstsc") or r"C:\Windows\System32\mstsc.exe"
+            cmd = [mstsc_bin, f"/v:{host}:{port}"]
+            if fullscreen:
+                cmd.append("/f")
+            else:
+                cmd.extend(["/w:1280", "/h:720"])
+            return cmd
+
         freerdp_bin = shutil.which("xfreerdp") or shutil.which("freerdp") or "xfreerdp"
-        
         cmd = [freerdp_bin, f"/v:{host}:{port}"]
 
         if username:

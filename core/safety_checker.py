@@ -5,6 +5,8 @@ import json
 import struct
 
 
+import sys
+
 class SafetyChecker:
     """Performs pre-flight safety validation before launching Windows VM."""
 
@@ -18,7 +20,10 @@ class SafetyChecker:
         "/usr/share/edk2-ovmf/x64/OVMF_CODE.fd",
         "/usr/share/edk2/ovmf/OVMF_CODE.fd",
         "/usr/share/qemu/OVMF.fd",
-        "/usr/share/qemu/ovmf-x86_64-code.bin"
+        "/usr/share/qemu/ovmf-x86_64-code.bin",
+        "/opt/homebrew/share/qemu/edk2-x86_64-code.fd",
+        "/usr/local/share/qemu/edk2-x86_64-code.fd",
+        r"C:\Program Files\qemu\share\edk2-x86_64-code.fd"
     ]
 
     OVMF_VARS_SEARCH_PATHS = [
@@ -29,24 +34,43 @@ class SafetyChecker:
         "/usr/share/edk2-ovmf/x64/OVMF_VARS.fd",
         "/usr/share/edk2/ovmf/OVMF_VARS.fd",
         "/usr/share/qemu/OVMF_VARS.fd",
-        "/usr/share/qemu/ovmf-x86_64-vars.bin"
+        "/usr/share/qemu/ovmf-x86_64-vars.bin",
+        "/opt/homebrew/share/qemu/edk2-i386-vars.fd",
+        "/usr/local/share/qemu/edk2-i386-vars.fd",
+        r"C:\Program Files\qemu\share\edk2-i386-vars.fd"
     ]
 
     @classmethod
     def check_system_dependencies(cls):
-        """Checks for required system packages: QEMU, OVMF firmware, KVM, pkexec, swtpm."""
+        """Checks for required system packages: QEMU, OVMF firmware, hardware acceleration (KVM/HVF/WHPX), pkexec, swtpm."""
+        is_linux = sys.platform.startswith("linux")
+        is_mac = sys.platform == "darwin"
+        is_win = sys.platform == "win32"
+
+        accel_type = None
+        if is_linux and os.path.exists("/dev/kvm"):
+            accel_type = "kvm"
+        elif is_mac:
+            accel_type = "hvf"
+        elif is_win:
+            accel_type = "whpx"
+
         status = {
+            "os_type": "linux" if is_linux else ("mac" if is_mac else "windows"),
+            "accel_type": accel_type,
             "qemu_installed": False,
             "qemu_path": None,
             "ovmf_installed": False,
             "ovmf_code": None,
             "ovmf_vars": None,
-            "kvm_available": os.path.exists("/dev/kvm"),
+            "kvm_available": bool(accel_type == "kvm"),
             "pkexec_installed": bool(shutil.which("pkexec")),
             "udisksctl_installed": bool(shutil.which("udisksctl")),
             "swtpm_installed": bool(shutil.which("swtpm")),
             "missing_packages": [],
-            "install_command": "sudo apt install -y qemu-system-x86-64 ovmf qemu-utils swtpm"
+            "install_command": "sudo apt install -y qemu-system-x86-64 ovmf qemu-utils swtpm" if is_linux else (
+                "brew install qemu" if is_mac else "winget install QEMU.QEMU"
+            )
         }
 
         # Check QEMU
