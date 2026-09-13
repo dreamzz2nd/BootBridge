@@ -197,6 +197,21 @@ button.btn-warning:hover {
     background-color: #ef6c00;
 }
 
+button.btn-success {
+    background-color: #43a047;
+    color: #ffffff;
+    border: 1px solid #43a047;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px 18px;
+}
+
+button.btn-success:hover {
+    background-color: #2e7d32;
+}
+
+
 /* Bottom Action Launcher Bar */
 .bottom-bar {
     background-color: #ffffff;

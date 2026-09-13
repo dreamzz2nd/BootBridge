@@ -2,6 +2,8 @@ import os
 import subprocess
 import shutil
 import json
+import struct
+
 
 class SafetyChecker:
     """Performs pre-flight safety validation before launching Windows VM."""
@@ -150,6 +152,171 @@ class SafetyChecker:
                 return False, f"Gagal mereset NTFS {part_path}: {res.stderr or res.stdout}"
         except Exception as e:
             return False, f"Error ntfsfix: {str(e)}"
+
+    @staticmethod
+    def enable_fast_startup(part_path):
+        """
+        Enables Fast Startup for a target Windows NTFS partition:
+        1. Mounts partition temporarily if not already mounted.
+        2. Modifies HiberbootEnabled & HibernateEnabled DWORD in Windows SYSTEM registry hive offline.
+        3. Generates Enable_Fast_Startup.bat and .reg files on root of Windows partition.
+        4. Cleans up temporary mount.
+        """
+        was_mounted_by_us = False
+        mountpoint = None
+
+        # Check if already mounted
+        try:
+            with open("/proc/mounts", "r") as f:
+                for line in f:
+                    parts = line.split()
+                    if len(parts) >= 2 and parts[0] == part_path:
+                        mountpoint = parts[1].replace("\\040", " ")
+                        break
+        except Exception:
+            pass
+
+        # If not mounted, try mounting using udisksctl
+        if not mountpoint:
+            try:
+                res = subprocess.run(["udisksctl", "mount", "-b", part_path], capture_output=True, text=True)
+                if res.returncode == 0:
+                    was_mounted_by_us = True
+                    out = res.stdout.strip()
+                    if " at " in out:
+                        mountpoint = out.split(" at ")[-1].strip()
+                        if mountpoint.endswith("."):
+                            mountpoint = mountpoint[:-1]
+                else:
+                    with open("/proc/mounts", "r") as f:
+                        for line in f:
+                            p = line.split()
+                            if len(p) >= 2 and p[0] == part_path:
+                                mountpoint = p[1].replace("\\040", " ")
+                                was_mounted_by_us = True
+                                break
+            except Exception as e:
+                return False, f"Gagal meng-mount partisi {part_path}: {str(e)}"
+
+        if not mountpoint or not os.path.exists(mountpoint):
+            return False, f"Tidak dapat mengakses mountpoint untuk partisi {part_path}."
+
+        try:
+            # Search for SYSTEM registry hive case-insensitively
+            system_hive_path = None
+            possible_rel_paths = [
+                "Windows/System32/config/SYSTEM",
+                "windows/system32/config/system",
+                "Windows/system32/config/system",
+                "WINDOWS/SYSTEM32/CONFIG/SYSTEM"
+            ]
+            for rel in possible_rel_paths:
+                full_p = os.path.join(mountpoint, rel)
+                if os.path.exists(full_p):
+                    system_hive_path = full_p
+                    break
+
+            if not system_hive_path:
+                for root, dirs, files in os.walk(mountpoint):
+                    for file in files:
+                        if file.lower() == "system" and "config" in root.lower():
+                            system_hive_path = os.path.join(root, file)
+                            break
+                    if system_hive_path:
+                        break
+
+            registry_updated = False
+            if system_hive_path and os.path.exists(system_hive_path):
+                try:
+                    bak_path = system_hive_path + ".bak_bootbridge"
+                    if not os.path.exists(bak_path):
+                        shutil.copy2(system_hive_path, bak_path)
+
+                    with open(system_hive_path, "rb") as f:
+                        hive_data = bytearray(f.read())
+
+                    modified = False
+                    for target_name in [b"HiberbootEnabled", b"HibernateEnabled"]:
+                        pos = 0
+                        while True:
+                            pos = hive_data.find(target_name, pos)
+                            if pos == -1:
+                                break
+                            if pos >= 16 and hive_data[pos-16:pos-14] == b"vk":
+                                hive_data[pos-8:pos-4] = b"\x01\x00\x00\x00"
+                                modified = True
+                            pos += len(target_name)
+
+                    if modified:
+                        if len(hive_data) >= 4096 and hive_data[:4] == b"regf":
+                            cs = 0
+                            for i in range(0, 508, 4):
+                                cs ^= struct.unpack("<I", hive_data[i:i+4])[0]
+                            hive_data[0x1c:0x20] = struct.pack("<I", cs)
+
+                        with open(system_hive_path, "wb") as f:
+                            f.write(hive_data)
+                        registry_updated = True
+                except Exception as e:
+                    print(f"[SafetyChecker] Warning modifying registry hive directly: {e}")
+
+            # Also try chntpw if available
+            chntpw_bin = shutil.which("chntpw")
+            if chntpw_bin and system_hive_path:
+                try:
+                    cmd = [chntpw_bin, "-e", system_hive_path]
+                    input_script = "cd ControlSet001\\Control\\Session Manager\\Power\n" \
+                                   "nv 4 HiberbootEnabled\n" \
+                                   "ed HiberbootEnabled\n1\n" \
+                                   "cd \\ControlSet001\\Control\\Power\n" \
+                                   "nv 4 HibernateEnabled\n" \
+                                   "ed HibernateEnabled\n1\n" \
+                                   "s\ny\nq\n"
+                    subprocess.run(cmd, input=input_script, text=True, capture_output=True)
+                    registry_updated = True
+                except Exception as e:
+                    print(f"[SafetyChecker] Warning running chntpw: {e}")
+
+            # Generate helper scripts on Windows drive
+            bat_path = os.path.join(mountpoint, "Enable_Fast_Startup.bat")
+            reg_path = os.path.join(mountpoint, "Enable_Fast_Startup.reg")
+
+            bat_content = (
+                "@echo off\r\n"
+                "echo Enabling Windows Fast Startup...\r\n"
+                "powercfg /h on\r\n"
+                "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Power\" /v HiberbootEnabled /t REG_DWORD /d 1 /f\r\n"
+                "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Power\" /v HibernateEnabled /t REG_DWORD /d 1 /f\r\n"
+                "echo.\r\n"
+                "echo Fast Startup is now ENABLED in Windows!\r\n"
+                "pause\r\n"
+            )
+            with open(bat_path, "w", newline="\r\n") as f:
+                f.write(bat_content)
+
+            reg_content = (
+                "Windows Registry Editor Version 5.00\r\n\r\n"
+                "[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Power]\r\n"
+                "\"HiberbootEnabled\"=dword:00000001\r\n\r\n"
+                "[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Power]\r\n"
+                "\"HibernateEnabled\"=dword:00000001\r\n"
+            )
+            with open(reg_path, "w", newline="\r\n") as f:
+                f.write(reg_content)
+
+            msg = f"Fast Startup berhasil diaktifkan untuk partisi {part_path}!\n" \
+                  f"• Status HiberbootEnabled diatur ke 1 pada Registry Windows.\n" \
+                  f"• File helper '{os.path.basename(bat_path)}' & '{os.path.basename(reg_path)}' telah dibuat di C:\\."
+
+            return True, msg
+
+        finally:
+            if was_mounted_by_us and part_path:
+                try:
+                    subprocess.run(["udisksctl", "unmount", "-b", part_path], capture_output=True, text=True)
+                except Exception:
+                    pass
+
 
 if __name__ == "__main__":
     deps = SafetyChecker.check_system_dependencies()

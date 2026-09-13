@@ -67,6 +67,7 @@ TRANSLATIONS = {
         "safety_card_title": "Proteksi & Keamanan Data File System",
         "unmount_btn": "Unmount Partisi Linux dengan Aman",
         "fix_ntfs_btn": "Reset Status NTFS / Fast Startup",
+        "enable_fast_btn": "Aktifkan Fast Startup",
         "mount_active_hdr": "PROTEKSI MOUNT AKTIF:",
         "mount_active_msg": "Partisi Windows sedang di-mount oleh Linux. Harap unmount terlebih dahulu untuk mencegah kerusakan file NTFS.",
         "mount_safe_hdr": "PROTEKSI MOUNT: UNMOUNTED",
@@ -137,6 +138,7 @@ TRANSLATIONS = {
         "safety_card_title": "Safety & Data Protection Guard",
         "unmount_btn": "Safe Unmount Linux Partitions",
         "fix_ntfs_btn": "Reset NTFS Status / Fast Startup",
+        "enable_fast_btn": "Enable Fast Startup",
         "mount_active_hdr": "MOUNT PROTECTION ACTIVE:",
         "mount_active_msg": "Windows partitions are currently mounted by Linux. Please unmount them first to prevent NTFS file corruption.",
         "mount_safe_hdr": "MOUNT GUARD: UNMOUNTED",
@@ -453,6 +455,11 @@ class BootBridgeApp(Gtk.Window):
         self.fix_ntfs_btn, self.fix_ntfs_btn_lbl = make_icon_button("system-run-symbolic", self.tr("fix_ntfs_btn"), style_class="btn-warning")
         self.fix_ntfs_btn.connect("clicked", self.on_fix_ntfs_clicked)
         self.unmount_btn_box.pack_start(self.fix_ntfs_btn, False, False, 0)
+
+        self.enable_fast_btn, self.enable_fast_btn_lbl = make_icon_button("emblem-ok-symbolic", self.tr("enable_fast_btn"), style_class="btn-success")
+        self.enable_fast_btn.connect("clicked", self.on_enable_fast_startup_clicked)
+        self.unmount_btn_box.pack_start(self.enable_fast_btn, False, False, 0)
+
         self.safety_card.pack_start(self.unmount_btn_box, False, False, 0)
 
         page_safety_box.pack_start(self.safety_card, False, False, 0)
@@ -791,6 +798,7 @@ class BootBridgeApp(Gtk.Window):
         if hasattr(self, "safety_title_lbl"): self.safety_title_lbl.set_text(self.tr("safety_card_title"))
         if hasattr(self, "unmount_btn_lbl"): self.unmount_btn_lbl.set_text(self.tr("unmount_btn"))
         if hasattr(self, "fix_ntfs_btn_lbl"): self.fix_ntfs_btn_lbl.set_text(self.tr("fix_ntfs_btn"))
+        if hasattr(self, "enable_fast_btn_lbl"): self.enable_fast_btn_lbl.set_text(self.tr("enable_fast_btn"))
         if hasattr(self, "config_title_lbl"): self.config_title_lbl.set_text(self.tr("config_card_title"))
         if hasattr(self, "ram_lbl"): self.ram_lbl.set_text(self.tr("ram_alloc"))
         if hasattr(self, "cpu_lbl"): self.cpu_lbl.set_text(self.tr("cpu_cores"))
@@ -985,6 +993,20 @@ class BootBridgeApp(Gtk.Window):
         for p in ntfs_parts:
             self.log_message(f"Fixing NTFS dirty flag for partition {p['path']}...")
             success, msg = SafetyChecker.fix_ntfs_dirty_flag(p["path"])
+            self.log_message(msg)
+
+    def on_enable_fast_startup_clicked(self, widget):
+        if not self.selected_disk:
+            return
+
+        ntfs_parts = [p for p in self.selected_disk.get("partitions", []) if p.get("fstype") == "ntfs"]
+        if not ntfs_parts:
+            self.log_message("Tidak ditemukan partisi NTFS pada disk yang dipilih.")
+            return
+
+        for p in ntfs_parts:
+            self.log_message(f"Mengaktifkan Fast Startup untuk partisi {p['path']}...")
+            success, msg = SafetyChecker.enable_fast_startup(p["path"])
             self.log_message(msg)
 
     def on_start_vm_clicked(self, widget):
