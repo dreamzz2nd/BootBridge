@@ -23,6 +23,18 @@ class RemoteLauncher:
         self.status_callback = status_callback or (lambda status: None)
         self.monitor_thread = None
 
+    @staticmethod
+    def get_local_ip():
+        """Returns the primary local IPv4 address for network connection sharing."""
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(('8.8.8.8', 80))
+            local_ip = s.getsockname()[0]
+            s.close()
+            return local_ip
+        except Exception:
+            return "127.0.0.1"
+
     @classmethod
     def check_remote_dependencies(cls):
         """Checks for installed remote client binaries: xfreerdp, mstsc (Windows native), spicy, remote-viewer, vncviewer."""

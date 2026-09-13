@@ -262,6 +262,9 @@ TRANSLATIONS = {
 
         "remote_mode_easy": "Easy Mode (Beginners)",
         "remote_mode_adv": "Advanced Mode (Expert)",
+        "remote_my_id_title": "This Computer's ID / IP Address (Your Device):",
+        "remote_copy_id_btn": "Copy ID",
+        "remote_partner_id_title": "Partner / Target Windows Computer ID (Target IP):",
         "remote_target_preset": "Select Target Device Type:",
         "remote_preset_win": "Remote Windows PC / Laptop (RDP)",
         "remote_preset_vm": "Local Virtual Machine (SPICE)",
