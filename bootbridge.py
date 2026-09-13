@@ -14,7 +14,17 @@ if BASE_DIR not in sys.path:
 
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
+
+GLib.set_prgname("bootbridge")
+GLib.set_application_name("BootBridge")
+
+icon_path = os.path.join(BASE_DIR, "assets", "bootbridge.png")
+if os.path.exists(icon_path):
+    try:
+        Gtk.Window.set_default_icon_from_file(icon_path)
+    except Exception as e:
+        print(f"[BootBridge] Warning setting default icon: {e}")
 
 from ui.app_window import BootBridgeApp
 
@@ -27,3 +37,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

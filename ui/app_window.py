@@ -32,13 +32,18 @@ class BootBridgeApp(Gtk.Window):
         self.set_default_size(880, 680)
         self.set_position(Gtk.WindowPosition.CENTER)
 
-        # Set Window Icon
+        # Set Window Icon & WM Class / Prgname
+        GLib.set_prgname("bootbridge")
+        GLib.set_application_name("BootBridge")
+        
         icon_path = os.path.join(BASE_DIR, "assets", "bootbridge.png")
         if os.path.exists(icon_path):
             try:
+                Gtk.Window.set_default_icon_from_file(icon_path)
                 self.set_icon_from_file(icon_path)
             except Exception as e:
                 print(f"[BootBridge] Warning setting window icon: {e}")
+
 
         # Load Saved Config & Preferences
         self.config = load_config()
