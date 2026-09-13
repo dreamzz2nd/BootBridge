@@ -43,6 +43,7 @@ TRANSLATIONS = {
         "shortcut_title": "Fitur Canggih & Shortcut Layar VM (Fullscreen, Mouse, Keys, Copy-Paste)",
         "shortcut_markup": (
             "<b>Daftar Fitur &amp; Shortcut QEMU VM yang Bisa Kamu Gunakan:</b>\n\n"
+            "• <b>Pop-up Petunjuk Shortcut:</b> Tekan <b><tt>Ctrl + Alt + H</tt></b> kapan saja untuk memunculkan panduan kontrol VM.\n"
             "• <b>Proteksi Jendela (Tanpa Tombol Close):</b> Jendela QEMU dirancang tanpa titlebar &amp; tombol close agar tidak sengaja mati saat digunakan.\n"
             "• <b>Tombol Logo Windows:</b> Penekanan tombol Logo Windows di keyboard langsung diarahkan ke Start Menu Windows VM.\n"
             "• <b>Toggle Fullscreen:</b> Tekan <b><tt>Ctrl + Alt + F</tt></b> di dalam jendela VM untuk masuk/keluar mode Layar Penuh.\n"
@@ -89,13 +90,14 @@ TRANSLATIONS = {
         "menu_theme": "Tema:",
         "menu_about": "Tentang BootBridge",
         "about_comments": "Peluncur VM Windows fisik dual-boot yang aman dan ringan untuk Linux melalui passthrough QEMU/KVM.",
-        "guide_dialog_title": "🚀 Petunjuk Cepat Kontrol & Shortcut VM",
+        "guide_dialog_title": "Petunjuk Cepat Kontrol & Shortcut VM",
         "guide_dialog_markup": (
             "<b>Tips Kontrol Virtual Machine (Emulator Style):</b>\n\n"
-            "🖥️ <b>Toggle Fullscreen:</b> Tekan <b><tt>Ctrl + Alt + F</tt></b> untuk layar penuh.\n"
-            "🖱️ <b>Kursor &amp; Keyboard:</b> Tekan <b><tt>Ctrl + Alt + G</tt></b> untuk melepas/menangkap kursor.\n"
-            "📋 <b>Shared Copy-Paste:</b> Gunakan <b><tt>Ctrl + C</tt></b> &amp; <b><tt>Ctrl + V</tt></b> (setelah install SPICE Guest Tools di VM).\n"
-            "🛡️ <b>Proteksi Window:</b> Jendela VM tanpa tombol close. Matikan VM via Windows Shutdown atau tombol <b>Hentikan VM</b>."
+            "• <b>Toggle Fullscreen:</b> Tekan <b><tt>Ctrl + Alt + F</tt></b> untuk mode Layar Penuh.\n"
+            "• <b>Kursor &amp; Keyboard:</b> Tekan <b><tt>Ctrl + Alt + G</tt></b> untuk melepas/menangkap kursor.\n"
+            "• <b>Shared Copy-Paste:</b> Gunakan <b><tt>Ctrl + C</tt></b> &amp; <b><tt>Ctrl + V</tt></b> (setelah install SPICE Guest Tools di VM).\n"
+            "• <b>Tampilkan Petunjuk Kapan Saja:</b> Tekan <b><tt>Ctrl + Alt + H</tt></b> untuk memunculkan petunjuk ini kembali.\n"
+            "• <b>Proteksi Window:</b> Jendela VM tanpa tombol close. Matikan VM via Windows Shutdown atau tombol <b>Hentikan VM</b>."
         ),
         "dont_show_again": "Jangan tampilkan petunjuk ini lagi saat memulai VM",
         "btn_continue": "Lanjutkan Boot VM",
@@ -141,6 +143,7 @@ TRANSLATIONS = {
         "shortcut_title": "VM Features & Screen Shortcuts (Fullscreen, Mouse, Keys, Copy-Paste)",
         "shortcut_markup": (
             "<b>Available QEMU VM Features &amp; Shortcuts:</b>\n\n"
+            "• <b>Shortcut Guide Overlay:</b> Press <b><tt>Ctrl + Alt + H</tt></b> anytime to display the control guide dialog.\n"
             "• <b>Window Protection (No Close Button):</b> QEMU display window is framed without titlebar &amp; close button to prevent accidental VM termination.\n"
             "• <b>Windows Logo Key:</b> Pressing the Windows key is captured directly by Windows VM Start Menu.\n"
             "• <b>Toggle Fullscreen:</b> Press <b><tt>Ctrl + Alt + F</tt></b> inside VM window to toggle Fullscreen mode.\n"
@@ -176,7 +179,7 @@ TRANSLATIONS = {
         "theme_dark": "Dark Mode (Postman Studio Dark)",
         "theme_light": "Light Mode (Postman Studio Light)",
         "lang_setting": "Application Language:",
-        "sys_info_title": "Host System & Hypervisor Specifications",
+        "sys_info_title": "Host Specifications & Hypervisor Info",
         "progress_ready": "Ready to launch Windows VM",
         "progress_booting": "Booting Windows VM... Initializing KVM Hypervisor",
         "progress_running": "Windows VM Active & Running",
@@ -187,13 +190,14 @@ TRANSLATIONS = {
         "menu_theme": "Theme:",
         "menu_about": "About BootBridge",
         "about_comments": "Lightweight & safe dual-boot physical Windows launcher for Linux via QEMU/KVM passthrough.",
-        "guide_dialog_title": "🚀 Quick VM Controls & Shortcuts Guide",
+        "guide_dialog_title": "Quick VM Controls & Shortcuts Guide",
         "guide_dialog_markup": (
             "<b>Virtual Machine Control Tips (Emulator Style):</b>\n\n"
-            "🖥️ <b>Toggle Fullscreen:</b> Press <b><tt>Ctrl + Alt + F</tt></b> for full-screen mode.\n"
-            "🖱️ <b>Mouse &amp; Keyboard:</b> Press <b><tt>Ctrl + Alt + G</tt></b> to release/grab mouse focus.\n"
-            "📋 <b>Shared Copy-Paste:</b> Use <b><tt>Ctrl + C</tt></b> &amp; <b><tt>Ctrl + V</tt></b> (after installing SPICE Guest Tools in VM).\n"
-            "🛡️ <b>Window Guard:</b> Frameless VM display without close button. Shut down via Windows or <b>Stop VM</b> button."
+            "• <b>Toggle Fullscreen:</b> Press <b><tt>Ctrl + Alt + F</tt></b> for full-screen mode.\n"
+            "• <b>Mouse &amp; Keyboard:</b> Press <b><tt>Ctrl + Alt + G</tt></b> to release/grab mouse focus.\n"
+            "• <b>Shared Copy-Paste:</b> Use <b><tt>Ctrl + C</tt></b> &amp; <b><tt>Ctrl + V</tt></b> (after installing SPICE Guest Tools in VM).\n"
+            "• <b>Show Guide Anytime:</b> Press <b><tt>Ctrl + Alt + H</tt></b> to open this guide dialog overlay anytime.\n"
+            "• <b>Window Guard:</b> Frameless VM display without close button. Shut down via Windows or <b>Stop VM</b> button."
         ),
         "dont_show_again": "Don't show this shortcut guide again when launching VM",
         "btn_continue": "Continue Boot VM",

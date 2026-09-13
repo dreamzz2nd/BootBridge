@@ -60,6 +60,9 @@ class BootBridgeApp(Gtk.Window):
         # Load Custom CSS Styling
         self.load_css()
 
+        # Connect Global Application Shortcut Handler (Ctrl + Alt + H)
+        self.connect("key-press-event", self.on_key_press_event)
+
         # Build GUI Layout & Navigation
         self.build_ui()
 
@@ -507,15 +510,24 @@ class BootBridgeApp(Gtk.Window):
                 state_mode="warning"
             )
 
-    def _show_launch_guide_dialog(self):
-        """Shows emulator-style quick controls & shortcuts dialog before launching VM."""
+    def on_key_press_event(self, widget, event):
+        """Global keypress handler for application shortcuts (Ctrl + Alt + H)."""
+        state = event.state & Gdk.ModifierType.MODIFIER_MASK
+        ctrl_alt = (Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.MOD1_MASK)
+        if (state & ctrl_alt) == ctrl_alt and event.keyval in (Gdk.KEY_h, Gdk.KEY_H):
+            self._show_launch_guide_dialog(is_manual=True)
+            return True
+        return False
+
+    def _show_launch_guide_dialog(self, is_manual=False):
+        """Shows emulator-style quick controls & shortcuts dialog (clean symbolic styling without emoticons)."""
         dialog = Gtk.Dialog(
             title=self.tr("guide_dialog_title"),
             transient_for=self,
             flags=0
         )
         dialog.set_modal(True)
-        dialog.set_default_size(480, -1)
+        dialog.set_default_size(500, -1)
 
         box = dialog.get_content_area()
         box.set_spacing(12)
@@ -524,8 +536,8 @@ class BootBridgeApp(Gtk.Window):
         box.set_margin_start(16)
         box.set_margin_end(16)
 
-        hdr_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        icon = Gtk.Image.new_from_icon_name("input-keyboard-symbolic", Gtk.IconSize.DND)
+        hdr_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        icon = Gtk.Image.new_from_icon_name("help-about-symbolic", Gtk.IconSize.DND)
         lbl_hdr = Gtk.Label()
         lbl_hdr.set_markup(f"<b><big>{self.tr('guide_dialog_title')}</big></b>")
         hdr_box.pack_start(icon, False, False, 0)
@@ -541,24 +553,29 @@ class BootBridgeApp(Gtk.Window):
         body_lbl.set_markup(self.tr("guide_dialog_markup"))
         box.pack_start(body_lbl, False, False, 0)
 
-        dont_show_chk = Gtk.CheckButton(label=self.tr("dont_show_again"))
-        dont_show_chk.set_active(False)
-        box.pack_start(dont_show_chk, False, False, 4)
+        dont_show_chk = None
+        if not is_manual:
+            dont_show_chk = Gtk.CheckButton(label=self.tr("dont_show_again"))
+            dont_show_chk.set_active(False)
+            box.pack_start(dont_show_chk, False, False, 4)
 
-        dialog.add_button(self.tr("btn_cancel"), Gtk.ResponseType.CANCEL)
-        btn_continue = dialog.add_button(self.tr("btn_continue"), Gtk.ResponseType.OK)
-        btn_continue.get_style_context().add_class("suggested-action")
+        if is_manual:
+            dialog.add_button("Tutup", Gtk.ResponseType.OK)
+        else:
+            dialog.add_button(self.tr("btn_cancel"), Gtk.ResponseType.CANCEL)
+            btn_continue = dialog.add_button(self.tr("btn_continue"), Gtk.ResponseType.OK)
+            btn_continue.get_style_context().add_class("suggested-action")
 
         box.show_all()
         response = dialog.run()
 
-        dont_show = dont_show_chk.get_active()
+        if dont_show_chk:
+            dont_show = dont_show_chk.get_active()
+            if dont_show:
+                self.config["show_launch_guide"] = False
+                save_config(self.config)
+
         dialog.destroy()
-
-        if dont_show:
-            self.config["show_launch_guide"] = False
-            save_config(self.config)
-
         return response == Gtk.ResponseType.OK
 
     def on_start_vm_clicked(self, widget):
