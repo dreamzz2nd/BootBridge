@@ -1,0 +1,17 @@
+#!/bin/sh
+set -e
+
+# Update desktop database
+if which update-desktop-database >/dev/null 2>&1; then
+    update-desktop-database -q /usr/share/applications || true
+fi
+
+# Update icon cache
+if which gtk-update-icon-cache >/dev/null 2>&1; then
+    gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true
+fi
+
+# Ensure correct permissions
+chmod +x /usr/bin/bootbridge /opt/bootbridge/bootbridge.py /opt/bootbridge/setup_wizard.py || true
+
+exit 0

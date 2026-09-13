@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=BootBridge
+GenericName=Physical Windows VM Launcher
+Comment=Safe & Lightweight Dual-Boot Windows Virtualization for Linux
+Exec=/usr/bin/bootbridge
+Icon=bootbridge
+Terminal=false
+Type=Application
+Categories=System;Utility;Emulator;
+Keywords=Virtualization;QEMU;DualBoot;Windows;KVM;

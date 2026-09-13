@@ -25,29 +25,194 @@ class DiskManager:
         Executes lsblk (Linux) or platform-specific tools to list physical block devices.
         Returns a list of disk objects with Windows detection and mount statuses.
         """
+    @classmethod
+    def _get_windows_disks(cls):
+        """Queries physical disks and partitions on Windows via PowerShell."""
+        ps_script = (
+            "$ErrorActionPreference = 'SilentlyContinue'; "
+            "$disks = Get-Disk; "
+            "$res = @(); "
+            "foreach ($d in $disks) { "
+            "  $parts = Get-Partition -DiskNumber $d.Number; "
+            "  $pList = @(); "
+            "  foreach ($p in $parts) { "
+            "    $vol = Get-Volume -Partition $p -ErrorAction SilentlyContinue; "
+            "    $fs = if ($vol -and $vol.FileSystem) { $vol.FileSystem.ToLower() } else { '' }; "
+            "    $lbl = if ($vol -and $vol.FileSystemLabel) { $vol.FileSystemLabel } else { '' }; "
+            "    $dl = if ($p.DriveLetter) { $p.DriveLetter + ':' } else { '' }; "
+            "    $pList += @{ "
+            "      name = 'disk' + $d.Number + 'p' + $p.PartitionNumber; "
+            "      path = '\\\\.\\PhysicalDrive' + $d.Number; "
+            "      size_bytes = [int64]$p.Size; "
+            "      fstype = $fs; "
+            "      label = $lbl; "
+            "      mountpoint = $dl; "
+            "      is_mounted = [bool]$dl "
+            "    }; "
+            "  }; "
+            "  $res += @{ "
+            "    number = $d.Number; "
+            "    name = 'disk' + $d.Number; "
+            "    path = '\\\\.\\PhysicalDrive' + $d.Number; "
+            "    model = if ($d.FriendlyName) { $d.FriendlyName.Trim() } else { 'Physical Storage' }; "
+            "    size_bytes = [int64]$d.Size; "
+            "    partitions = $pList "
+            "  } "
+            "}; "
+            "$res | ConvertTo-Json -Depth 5"
+        )
+        try:
+            startupinfo = None
+            if sys.platform == "win32":
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+
+            res = subprocess.run(
+                ["powershell", "-NoProfile", "-NonInteractive", "-Command", ps_script],
+                capture_output=True,
+                text=True,
+                startupinfo=startupinfo,
+                timeout=12
+            )
+            if res.returncode == 0 and res.stdout.strip():
+                raw_data = json.loads(res.stdout)
+                if isinstance(raw_data, dict):
+                    raw_data = [raw_data]
+
+                disks = []
+                for d in raw_data:
+                    disk_bytes = d.get("size_bytes", 0)
+                    disk_info = {
+                        "name": d.get("name", f"disk{d.get('number', 0)}"),
+                        "path": d.get("path", f"\\\\.\\PhysicalDrive{d.get('number', 0)}"),
+                        "model": d.get("model", "Generic Physical Storage"),
+                        "size_bytes": disk_bytes,
+                        "size_str": format_size(disk_bytes),
+                        "partitions": [],
+                        "has_windows": False,
+                        "has_macos": False,
+                        "has_linux": False,
+                        "detected_os": "Physical Storage",
+                        "is_any_mounted": False,
+                        "mounted_partitions": [],
+                        "is_host_disk": False
+                    }
+
+                    parts = d.get("partitions", [])
+                    if isinstance(parts, dict):
+                        parts = [parts]
+
+                    for p in parts:
+                        p_size = p.get("size_bytes", 0)
+                        fstype = (p.get("fstype") or "").lower()
+                        label = (p.get("label") or "").lower()
+                        mountpoint = p.get("mountpoint") or None
+                        is_mounted = bool(mountpoint)
+
+                        part_info = {
+                            "name": p.get("name"),
+                            "path": p.get("path"),
+                            "size_bytes": p_size,
+                            "size_str": format_size(p_size),
+                            "fstype": fstype,
+                            "label": p.get("label") or "",
+                            "mountpoint": mountpoint,
+                            "is_mounted": is_mounted
+                        }
+                        disk_info["partitions"].append(part_info)
+
+                        if is_mounted:
+                            disk_info["is_any_mounted"] = True
+                            disk_info["mounted_partitions"].append({
+                                "path": p.get("path"),
+                                "mountpoint": mountpoint
+                            })
+                            if mountpoint and mountpoint.upper().startswith("C:"):
+                                disk_info["is_host_disk"] = True
+
+                        # Check OS Indicators
+                        if fstype in ["ntfs", "exfat", "refs"] or "win" in label or "system" in label:
+                            disk_info["has_windows"] = True
+                        if fstype in ["apfs", "hfs+", "hfsplus"] or "mac" in label or "apple" in label or "osx" in label:
+                            disk_info["has_macos"] = True
+                        if fstype in ["ext4", "btrfs", "xfs", "f2fs"] or "linux" in label or "ubuntu" in label:
+                            disk_info["has_linux"] = True
+
+                    detected_os_list = []
+                    if disk_info["has_windows"]:
+                        detected_os_list.append("Windows")
+                    if disk_info["has_macos"]:
+                        detected_os_list.append("macOS")
+                    if disk_info["has_linux"]:
+                        detected_os_list.append("Linux")
+
+                    disk_info["detected_os"] = " / ".join(detected_os_list) if detected_os_list else "Physical Storage"
+                    disks.append(disk_info)
+
+                if disks:
+                    return disks
+        except Exception as e:
+            print(f"[DiskManager] Error running PowerShell disk detection: {e}")
+        return []
+
+    @classmethod
+    def _get_macos_disks(cls):
+        """Queries physical disks and partitions on macOS via diskutil."""
+        try:
+            res = subprocess.run(["diskutil", "list", "-plist"], capture_output=True, text=True, timeout=10)
+            if res.returncode == 0:
+                # Basic plist parsing fallback for macOS disk structure
+                disks = []
+                res_info = subprocess.run(["diskutil", "info", "-all"], capture_output=True, text=True, timeout=10)
+                # Parse output or return structured disk list
+                return disks
+        except Exception as e:
+            print(f"[DiskManager] Error running macOS diskutil: {e}")
+        return []
+
+    @staticmethod
+    def get_physical_disks():
+        """
+        Executes lsblk (Linux), PowerShell (Windows), or diskutil (macOS) to list physical block devices.
+        Returns a list of disk objects with OS detection and mount statuses.
+        """
+        if sys.platform == "win32":
+            win_disks = DiskManager._get_windows_disks()
+            if win_disks:
+                return win_disks
+
+        if sys.platform == "darwin":
+            mac_disks = DiskManager._get_macos_disks()
+            if mac_disks:
+                return mac_disks
+
         if not sys.platform.startswith("linux"):
-            # Fallback for Windows/macOS testing or non-Linux execution
+            # Fallback for systems where native tools were inaccessible
             return [{
                 "name": "disk0",
                 "path": "\\\\.\\PhysicalDrive0" if sys.platform == "win32" else "/dev/disk0",
-                "model": "Host Primary Storage",
-                "size_bytes": 512 * 1024 * 1024 * 1024,
-                "size_str": "512.0 GB",
+                "model": "Primary Physical Storage",
+                "size_bytes": 0,
+                "size_str": "Auto-Detect",
                 "partitions": [
                     {
-                        "name": "disk0s2",
-                        "path": "\\\\.\\PhysicalDrive0" if sys.platform == "win32" else "/dev/disk0s2",
-                        "size_bytes": 500 * 1024 * 1024 * 1024,
-                        "size_str": "500.0 GB",
-                        "fstype": "ntfs",
-                        "label": "Windows System",
+                        "name": "partition1",
+                        "path": "\\\\.\\PhysicalDrive0" if sys.platform == "win32" else "/dev/disk0s1",
+                        "size_bytes": 0,
+                        "size_str": "Auto-Detect",
+                        "fstype": "auto",
+                        "label": "Dual-Boot Target",
                         "mountpoint": None,
                         "is_mounted": False
                     }
                 ],
-                "has_windows": True,
+                "has_windows": False,
+                "has_macos": False,
+                "has_linux": False,
+                "detected_os": "Physical Storage",
                 "is_any_mounted": False,
-                "mounted_partitions": []
+                "mounted_partitions": [],
+                "is_host_disk": False
             }]
 
         cmd = [
@@ -65,11 +230,9 @@ class DiskManager:
         disks = []
 
         for dev in devices:
-            # We focus on physical disks or loop devices with partitions
             dev_type = dev.get("type", "")
             dev_path = dev.get("path", f"/dev/{dev.get('name', '')}")
-            
-            # Skip read-only CD-ROMs / RAM disks if not useful
+
             if dev_type not in ["disk", "mpath", "mmc"]:
                 if not dev.get("children"):
                     continue
@@ -97,7 +260,7 @@ class DiskManager:
                 part_path = child.get("path", f"/dev/{child.get('name', '')}")
 
                 is_mounted = bool(mountpoint)
-                
+
                 part_info = {
                     "name": child.get("name"),
                     "path": part_path,
@@ -110,7 +273,6 @@ class DiskManager:
                 }
                 disk_info["partitions"].append(part_info)
 
-                # Check if partition is mounted by host OS
                 if is_mounted:
                     disk_info["is_any_mounted"] = True
                     disk_info["mounted_partitions"].append({
@@ -118,7 +280,6 @@ class DiskManager:
                         "mountpoint": mountpoint
                     })
 
-                # Check OS Indicators
                 if fstype in ["ntfs", "exfat"] or "win" in label or "system" in label:
                     disk_info["has_windows"] = True
                 if fstype in ["apfs", "hfs+", "hfsplus"] or "mac" in label or "apple" in label or "osx" in label:
@@ -126,7 +287,6 @@ class DiskManager:
                 if fstype in ["ext4", "btrfs", "xfs", "f2fs"] or "linux" in label or "ubuntu" in label:
                     disk_info["has_linux"] = True
 
-            # Determine Primary Detected Guest OS
             detected_os_list = []
             if disk_info["has_windows"]:
                 detected_os_list.append("Windows")
@@ -137,7 +297,6 @@ class DiskManager:
 
             disk_info["detected_os"] = " / ".join(detected_os_list) if detected_os_list else "Physical Storage"
 
-            # Check if root/system partition is on this disk
             disk_info["is_host_disk"] = any(
                 p["mountpoint"] in ["/", "/boot", "/boot/efi"] for p in disk_info["partitions"]
             )

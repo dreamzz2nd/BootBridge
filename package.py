@@ -82,6 +82,12 @@ def package_all():
                 else:
                     shutil.copy2(src, dst)
 
+    # Copy any compiled .exe binaries into Windows staging package if present
+    for exe_name in ["BootBridge.exe", "BootBridge-Setup.exe", f"{APP_NAME}-v{VERSION}-Windows-Setup.exe", "BootBridge-Setup.exe"]:
+        exe_src = os.path.join(DIST_DIR, exe_name)
+        if os.path.exists(exe_src):
+            shutil.copy2(exe_src, os.path.join(win_stage, exe_name))
+
     # Make standard archives
     make_zip(win_stage, os.path.join(DIST_DIR, f"{APP_NAME}-v{VERSION}-Windows-Package.zip"))
     make_zip(mac_stage, os.path.join(DIST_DIR, f"{APP_NAME}-v{VERSION}-macOS-Package.zip"))

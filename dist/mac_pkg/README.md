@@ -4,27 +4,27 @@
 
 # BootBridge
 
-### *Lightweight, Safe & Zero-Reboot Physical Dual-Boot Launcher*
+### *Lightweight, Safe & Zero-Reboot Physical Dual-Boot Virtualization*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python Version](https://img.shields.io/badge/Python-3.8%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
-[![GUI Framework](https://img.shields.io/badge/GUI-GTK3-4B8BBE.svg?logo=gnome&logoColor=white)](https://www.gtk.org/)
+[![GUI Framework](https://img.shields.io/badge/GUI-GTK3%20%7C%20Tkinter-4B8BBE.svg?logo=gnome&logoColor=white)](https://www.gtk.org/)
 [![Hypervisor Engines](https://img.shields.io/badge/Hypervisor-KVM%20%7C%20HVF%20%7C%20WHPX-FF6600.svg?logo=qemu&logoColor=white)](https://www.qemu.org/)
-[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-blue.svg)](https://github.com/dreamzz2nd/BootBridge)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue.svg)](https://github.com/dreamzz2nd/BootBridge)
 
 <p align="center">
   <b>Languages / Bahasa:</b> <b><a href="README.md">English</a></b> | <a href="README.id.md">Bahasa Indonesia</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/BootBridge-v1.0.0-Windows-Package.zip">
-    <img src="https://img.shields.io/badge/Download-Windows%20Package%20(ZIP)-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Windows Package" />
+  <a href="https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/BootBridge-v1.0.0-Windows-Setup.exe">
+    <img src="https://img.shields.io/badge/Download-Windows%20(.EXE)-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Windows EXE" />
   </a>
-  <a href="https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/BootBridge-v1.0.0-macOS-Package.zip">
-    <img src="https://img.shields.io/badge/Download-macOS%20Package%20(ZIP)-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Download macOS Package" />
+  <a href="https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/BootBridge-v1.0.0-macOS.dmg">
+    <img src="https://img.shields.io/badge/Download-macOS%20(.DMG)-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Download macOS DMG" />
   </a>
-  <a href="https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/BootBridge-v1.0.0-Linux-x64-Package.tar.gz">
-    <img src="https://img.shields.io/badge/Download-Linux%20Package%20(TAR.GZ)-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Download Linux Package" />
+  <a href="https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/bootbridge_1.0.0_all.deb">
+    <img src="https://img.shields.io/badge/Download-Linux%20(.DEB)-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Download Linux DEB" />
   </a>
   <a href="https://github.com/dreamzz2nd/BootBridge/releases/tag/v1.0.0">
     <img src="https://img.shields.io/badge/Releases-v1.0.0%20(All%20Files)-brightgreen?style=for-the-badge&logo=github" alt="GitHub Release v1.0.0" />
@@ -35,14 +35,19 @@
 </p>
 
 <p align="center">
+  <b>🌐 <a href="web/index.html">Smart OS Auto-Detect Download Page</a></b> — Automatically detects your operating system and offers the right installer (.exe / .dmg / .deb).
+</p>
+
+<p align="center">
   <b>BootBridge</b> is a specialized desktop application designed to safely run your existing physical dual-booted Windows installation inside a Virtual Machine (QEMU with native hardware acceleration) directly from your desktop—<b>without rebooting your computer</b>.
 </p>
 
 [Key Features](#key-features) •
 [Cross-Platform Support](#cross-platform-support) •
-[Installation Guide](#installation-guide) •
+[Installation Guide](#multi-platform-installation-guide) •
+[Setup Wizard](#modern-5-step-setup-wizard) •
 [Remote Desktop](#easy-remote-desktop-suite) •
-[Comparison](#comparison-matrix) •
+[Comparison Matrix](#comparison-matrix) •
 [Troubleshooting](#troubleshooting--faq)
 
 </div>
@@ -54,40 +59,44 @@
 - [Overview](#overview)
 - [Key Features](#key-features)
 - [Cross-Platform Support](#cross-platform-support)
-- [Installation Guide](#installation-guide)
-  - [Option A: 1-Click Graphical Setup Wizard (No-Terminal / Beginners)](#option-a-1-click-graphical-setup-wizard-no-terminal--beginners)
-  - [Option B: 1-Line Automated Terminal Installer](#option-b-1-line-automated-terminal-installer)
-  - [Option C: Manual Installation](#option-c-manual-installation)
+- [Multi-Platform Installation Guide](#multi-platform-installation-guide)
+  - [1. Microsoft Windows (.exe)](#1-microsoft-windows-exe)
+  - [2. Apple macOS (.dmg)](#2-apple-macos-dmg)
+  - [3. Linux (.deb & Tarball)](#3-linux-deb--tarball)
+  - [4. Automated 1-Line Terminal Command](#4-automated-1-line-terminal-command)
+- [Modern 5-Step Setup Wizard](#modern-5-step-setup-wizard)
 - [Easy Remote Desktop Suite](#easy-remote-desktop-suite)
 - [Comparison Matrix](#comparison-matrix)
 - [System Architecture](#system-architecture)
 - [System Requirements](#system-requirements)
 - [Usage Guide](#usage-guide)
 - [Troubleshooting & FAQ](#troubleshooting--faq)
-- [Keyboard Shortcuts Reference](#keyboard-shortcuts-reference)
+- [Keyboard Shortcuts](#keyboard-shortcuts)
 - [Contributing & License](#contributing--license)
 
 ---
 
 ## Overview
 
-Traditionally, dual-boot users must completely shut down their OS and restart their computer to access their Windows installation. **BootBridge** eliminates this workflow friction by leveraging **native hardware hypervisors** and **QEMU raw block device passthrough**.
+Traditionally, dual-boot users have to shut down their entire workstation and restart the computer every time they need to access their physical Windows installation. **BootBridge** eliminates this constant reboot cycle by leveraging **native hardware hypervisor acceleration** and **QEMU physical block device passthrough**.
 
-With BootBridge, your physical Windows partition is booted natively inside a high-performance VM window on your desktop. You retain full access to your physical Windows files, installed games, and applications while running your host OS simultaneously.
+With BootBridge, your physical Windows partition is booted inside a hardware-accelerated VM directly inside your primary desktop environment at near 1:1 bare-metal speed.
 
 ---
 
 ## Key Features
 
-- **Zero-Reboot Dual Booting**: Boot your physical Windows drive inside your host OS at near-native speed.
-- **Cross-Platform Compatibility**: Full support for **Linux**, **macOS** (Intel & Apple Silicon), and **Windows**.
-- **1-Click Setup Wizard**: Double-click `Install_BootBridge.desktop` or run `gui_installer.py` for a beginner-friendly setup.
-- **Easy Remote Desktop Suite**: 7-step simple remote desktop workflow with auto-generated Device ID, 1-click IP copy, Wi-Fi device auto-scanning, and 1-click connect.
-- **Mount Safety Guard**: Built-in protection protocol that verifies disk mount states, warns against shared host partition access, and safely unmounts host-mounted NTFS drives to prevent data corruption.
-- **Fast Startup & Offline Registry Modifier**: One-click Fast Startup enablement (`HiberbootEnabled = 1`) and reset via direct offline REGF Windows registry hive modification.
-- **Frameless Window Protection**: QEMU display window runs frameless to prevent accidental VM termination.
-- **Bidirectional Shared Clipboard**: Built-in `qemu-vdagent` integration for seamless text copy and paste (`Ctrl+C` / `Ctrl+V`).
-- **100% Free & Lightweight**: Built with Python 3 & GTK 3 (~30–50 MB RAM, 0% CPU idle footprint). Zero heavy web-wrappers.
+- ⚡ **Zero-Reboot Dual Booting**: Launch your physical Windows drive directly inside your primary OS at near-native 1:1 speed.
+- 🌐 **Cross-Platform Native Packages**:
+  - **Windows**: `.exe` (Inno Setup Installer) & Standalone binary.
+  - **macOS**: Apple Disk Image `.dmg` with `/Applications` drag & drop (Intel & Apple Silicon M1–M4).
+  - **Linux**: Debian package `.deb` with system bin `/usr/bin/bootbridge` & desktop integration.
+- 🧙 **Modern 5-Step Setup Wizard**: Interactive GUI setup wizard for system diagnostics, hypervisor validation, directory selection, and dependency provisioning.
+- 🛡️ **Mount Safety Guard**: Built-in verification protocol that inspects disk mount statuses, warns against split partitions, and safely unmounts host-bound NTFS drives.
+- 🔧 **Offline Registry Modifier**: 1-Click offline registry tool to reset Windows Fast Startup hibernated locks (`HiberbootEnabled = 1`) safely.
+- 📋 **Bidirectional Shared Clipboard**: Built-in `qemu-vdagent` integration for seamless text copy-paste (`Ctrl+C` / `Ctrl+V`) between host and VM.
+- 🖥️ **Easy Remote Desktop Suite**: 7-step remote desktop connection with automatic unique Device ID, 1-click IP copy, and instant Wi-Fi subnet scanning.
+- 🪶 **100% Free & Lightweight**: Built with Python 3, GTK 3, and Tkinter (~30–50 MB RAM footprint, 0% idle CPU).
 
 ---
 
@@ -95,30 +104,55 @@ With BootBridge, your physical Windows partition is booted natively inside a hig
 
 BootBridge is engineered to run seamlessly across all major desktop operating systems with native hardware acceleration:
 
-| Operating System | Hardware Hypervisor Engine | Storage Interface | Remote Desktop Client |
-| :--- | :--- | :--- | :--- |
-| **Linux** (Ubuntu, Debian, Fedora, Arch, Mint) | **KVM** (`-accel kvm`) | `/dev/nvme*` or `/dev/sd*` | `xfreerdp` / `spicy` |
-| **macOS** (Intel & Apple Silicon M1/M2/M3/M4) | **HVF** (`-accel hvf`) | `/dev/disk*` | `freerdp` / `remote-viewer` |
-| **Windows** (Windows 10 & Windows 11) | **WHPX** (`-accel whpx`) | `\\.\PhysicalDrive*` | Native `mstsc.exe` |
+| Operating System | Installer Format | Hypervisor Engine | Storage Interface | Remote Desktop Client |
+| :--- | :--- | :--- | :--- | :--- |
+| **Windows** (10 / 11) | **`.exe`** (Setup Wizard) | **WHPX** (`-accel whpx`) | `\\.\PhysicalDrive*` | Native `mstsc.exe` |
+| **macOS** (Intel / M1–M4) | **`.dmg`** (Disk Image) | **HVF** (`-accel hvf`) | `/dev/disk*` | `freerdp` / `remote-viewer` |
+| **Linux** (Debian, Ubuntu, Mint, Arch, Fedora) | **`.deb`** / **`.tar.gz`** | **KVM** (`-accel kvm`) | `/dev/nvme*` or `/dev/sd*` | `xfreerdp` / `spicy` |
 
 ---
 
-## Installation Guide
+## Multi-Platform Installation Guide
 
-### Option A: 1-Click Graphical Setup Wizard (No-Terminal / Beginners)
+### 1. Microsoft Windows (`.exe`)
 
-1. Download & Extract the BootBridge ZIP file or repository folder.
-2. Double-click the **`Install_BootBridge.desktop`** file inside the folder.
-3. The **BootBridge Setup Wizard** window will pop up:
-   - Select your Operating System (Linux, Windows, or macOS).
-   - Click **`Install Sekarang`** (Install Now).
-4. The wizard will automatically install dependencies, register the desktop shortcut, and launch BootBridge!
+1. Download **[BootBridge-v1.0.0-Windows-Setup.exe](https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/BootBridge-v1.0.0-Windows-Setup.exe)**.
+2. Double-click the `.exe` file to start the Setup Wizard.
+3. Follow the wizard steps to choose installation path and create Desktop / Start Menu shortcuts.
+4. Or launch `bootbridge_installer.bat` from the portable ZIP package.
 
 ---
 
-### Option B: 1-Line Automated Terminal Installer
+### 2. Apple macOS (`.dmg`)
 
-Open your terminal, copy, and paste this single command:
+1. Download **[BootBridge-v1.0.0-macOS.dmg](https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/BootBridge-v1.0.0-macOS.dmg)**.
+2. Double-click the `.dmg` file to open the disk image.
+3. Drag the **BootBridge.app** icon into your **Applications** folder.
+4. Launch BootBridge directly from Launchpad or Applications.
+
+---
+
+### 3. Linux (`.deb` & Tarball)
+
+#### Option A: Using the Debian Package (.deb)
+```bash
+# Download .deb package
+wget https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/bootbridge_1.0.0_all.deb
+
+# Install package and dependencies
+sudo apt install ./bootbridge_1.0.0_all.deb
+```
+
+#### Option B: Using the GUI Setup Wizard
+```bash
+python3 setup_wizard.py
+```
+
+---
+
+### 4. Automated 1-Line Terminal Command
+
+Open your terminal and run:
 
 ```bash
 git clone https://github.com/dreamzz2nd/BootBridge.git && cd BootBridge && ./install.sh
@@ -126,75 +160,54 @@ git clone https://github.com/dreamzz2nd/BootBridge.git && cd BootBridge && ./ins
 
 ---
 
-### Option C: Manual Installation
+## Modern 5-Step Setup Wizard
 
-#### 1. Install System Dependencies
+BootBridge includes an interactive **Setup Wizard** (`setup_wizard.py`) with zero heavy pre-requisite dependencies:
 
-* **Ubuntu / Linux Mint / Debian**:
-  ```bash
-  sudo apt update && sudo apt install -y qemu-system-x86-64 ovmf qemu-utils swtpm freerdp2-x11 spice-client-gtk python3-gi
-  ```
-* **macOS (via Homebrew)**:
-  ```bash
-  brew install gtk+3 gobject-introspection qemu freerdp
-  ```
-* **Arch Linux / Manjaro**:
-  ```bash
-  sudo pacman -S --needed qemu-desktop ovmf qemu-img swtpm freerdp python-gobject
-  ```
-* **Fedora**:
-  ```bash
-  sudo dnf install -y qemu-system-x86 edk2-ovmf qemu-img swtpm freerdp python3-gobject
-  ```
+1. **Step 1 (Welcome & Language)**: Switch between English 🇬🇧 and Bahasa Indonesia 🇮🇩 with feature highlights.
+2. **Step 2 (System Diagnostics)**: Auto-detects hardware virtualization (KVM, WHPX, HVF), QEMU, and Python.
+3. **Step 3 (Destination & Options)**: Select install directory, Desktop Shortcut, Start Menu entry, and PATH options.
+4. **Step 4 (Installation Execution)**: Real-time progress bar with expandable live logs.
+5. **Step 5 (Finish & Launch)**: Summary of installation and instant application launch.
 
-#### 2. Run BootBridge
 ```bash
-git clone https://github.com/dreamzz2nd/BootBridge.git
-cd BootBridge
-./start.sh
+# Launch wizard anytime:
+python setup_wizard.py
 ```
 
 ---
 
 ## Easy Remote Desktop Suite
 
-BootBridge includes an intuitive, 7-step Remote Desktop connection suite designed for effortless remote PC access:
+BootBridge includes an intuitive 7-step Remote Desktop connection module:
 
 ```
 +-----------------------------------------------------------------------------+
 |  BootBridge Remote Desktop                                                 |
 +-----------------------------------------------------------------------------+
-|  [ID Komputer Anda / My ID]  192.168.1.15         [ Salin ID / Copy ]       |
+|  [My Device ID]             192.168.1.15         [ Copy ID ]               |
 +-----------------------------------------------------------------------------+
-|  ID Komputer Partner:       [ 192.168.1.100                    ]          |
-|  Komputer Terdeteksi Wi-Fi: [ LAPTOP-WINDOWS (192.168.1.100) v ] [ Pindai ] |
+|  Partner Device ID:         [ 192.168.1.100                    ]          |
+|  Discovered Wi-Fi Devices:  [ LAPTOP-WINDOWS (192.168.1.100) v ] [ Scan ]   |
 +-----------------------------------------------------------------------------+
-|  [ SAMBUNGKAN SEKARANG (1-KLIK) ]                                           |
+|  [ CONNECT NOW (1-CLICK) ]                                                 |
 +-----------------------------------------------------------------------------+
 ```
-
-### The 7-Step Remote Desktop Workflow:
-
-1. **Step 1 & 2 (Automatic Component Setup)**: BootBridge checks required remote desktop client binaries on launch. Missing components can be installed with 1 click.
-2. **Step 3 (Your Device ID)**: Your unique Device ID / IP Address is displayed at the top banner with a 1-click **Copy ID** button to share with partners.
-3. **Step 4 (Connect to Remote Computer - Attended Access)**: Enter the partner's Device ID / IP address (or click **Pindai Wi-Fi** to auto-discover local Windows PCs) and click **SAMBUNGKAN SEKARANG**.
-4. **Step 5 (Unattended Access Setup)**: Save Windows credentials to connect anytime without requiring manual approval at the target computer.
-5. **Step 6 (Full Remote Control)**: Seamlessly control mouse, keyboard, bidirectional clipboard text copy-paste, audio passthrough, and dynamic display resolution.
-6. **Step 7 (Encrypted & Secure)**: All remote desktop connections are encrypted and safe.
 
 ---
 
 ## Comparison Matrix
 
-| Feature | Native Reboot Dual-Boot | Standard Virtual Machines | BootBridge |
+| Feature | Physical Reboot Dual-Boot | Standard Virtual Machine | BootBridge |
 | :--- | :---: | :---: | :---: |
-| **Reboot Required** | Yes | No | **No** |
-| **Uses Physical Installed Windows**| Yes | No (Requires duplicate OS install) | **Yes** |
+| **Requires Reboot** | Yes | No | **No** |
+| **Uses Existing Physical Windows** | Yes | No (Requires re-install) | **Yes** |
 | **Performance** | 100% Native | 60% - 80% Virtualized | **90% - 98% Near-Native** |
+| **Native Installer Packages** | N/A | Limited | **.exe (Win), .dmg (Mac), .deb (Linux)** |
 | **Cross-Platform Support** | N/A | Yes | **Yes (Linux, macOS, Windows)** |
-| **Data Safety Protection** | None | N/A | **Automated Mount Protection Guard** |
-| **Remote Desktop Suite** | None | Limited | **7-Step Easy Suite** |
-| **RAM Footprint** | N/A | 500 MB+ (Web wrappers) | **~30 – 50 MB (Native GTK3)** |
+| **Disk Safety Guard** | None | N/A | **Automated Mount Protection Guard** |
+| **Remote Desktop Suite** | None | Limited | **Built-in 7-Step Remote Module** |
+| **Memory Footprint (RAM)** | N/A | 500 MB+ (Web wrapper) | **~30 – 50 MB (Native GTK/Tkinter)** |
 
 ---
 
@@ -203,7 +216,7 @@ BootBridge includes an intuitive, 7-step Remote Desktop connection suite designe
 ```mermaid
 flowchart TD
     subgraph Host ["Host Operating System (Linux / macOS / Windows)"]
-        UI["BootBridge GTK3 Application"]
+        UI["BootBridge GUI Application"]
         SC["Safety Checker Protocol"]
         DM["Disk Manager"]
         TPM["swtpm (TPM 2.0 Daemon)"]
@@ -216,21 +229,21 @@ flowchart TD
         WIN["Windows OS Volume (NTFS)"]
     end
 
-    subgraph Guest ["Guest Windows Virtual Machine"]
-        OVMF["OVMF UEFI Firmware"]
-        WINOS["Physical Windows 10/11 Kernel"]
+    subgraph Guest ["Windows Guest Virtual Machine"]
+        OVMF["UEFI Firmware (OVMF)"]
+        WINOS["Physical Windows Kernel"]
     end
 
-    UI -->|1. Detect Disks & OS| DM
-    DM -->|2. Check Mount Status| DISK
+    UI -->|1. Detect Storage & OS| DM
+    DM -->|2. Inspect Mount Status| DISK
     UI -->|3. Evaluate Safety Rules| SC
-    SC -->|4. Safe Unmount NTFS| DM
-    UI -->|5. Launch TPM Daemon| TPM
-    UI -->|6. Execute Passthrough| QEMU
+    SC -->|4. Safely Unmount Host Volumes| DM
+    UI -->|5. Provision TPM Daemon| TPM
+    UI -->|6. Execute Passthrough VM| QEMU
     QEMU -->|7. Access Physical Drive| DISK
     DISK --> ESP & WIN
-    QEMU -->|8. Pass Control via OVMF| OVMF
-    OVMF -->|9. Boot Kernel| WINOS
+    QEMU -->|8. Transfer Control via OVMF| OVMF
+    OVMF -->|9. Boot OS Kernel| WINOS
 
     style SC fill:#1f6feb,stroke:#fff,stroke-width:2px,color:#fff
     style QEMU fill:#ff6600,stroke:#fff,stroke-width:2px,color:#fff
@@ -243,62 +256,62 @@ flowchart TD
 
 | Component | Minimum Specification | Recommended Specification |
 | :--- | :--- | :--- |
-| **Host Operating System** | Linux, macOS (10.15+), or Windows 10/11 | Linux Mint, Ubuntu 22.04+, macOS 12+, Windows 11 |
-| **CPU Virtualization** | Intel VT-x or AMD-V enabled in BIOS/UEFI | 4+ Cores CPU with Hardware Virtualization |
-| **System Memory (RAM)** | 8 GB Total System RAM | 16 GB+ Total System RAM |
-| **Storage Interface** | SATA SSD or HDD Dual-Boot Setup | NVMe M.2 SSD Dual-Boot Setup |
+| **Host OS** | Linux, macOS (10.15+), or Windows 10/11 | Linux Mint, Ubuntu 22.04+, macOS 12+, Windows 11 |
+| **CPU Virtualization** | Intel VT-x or AMD-V enabled in BIOS | 4+ Cores with Hardware Virtualization |
+| **RAM** | 8 GB System Memory | 16 GB+ System Memory |
+| **Storage Interface** | Dual-Boot SATA SSD / HDD | Dual-Boot NVMe M.2 SSD |
 
 ---
 
 ## Usage Guide
 
 1. **Launch BootBridge**:
-   Run `./start.sh` or double-click **`Install_BootBridge.desktop`**.
+   Open via desktop launcher or run `bootbridge` in terminal.
 
 2. **Select Target Physical Disk**:
-   Choose the physical drive containing your Windows installation from the **Target Disk** dropdown menu.
+   Choose the physical drive containing your Windows installation from the **Target Disk** dropdown.
 
 3. **Verify Safety Guard Status**:
-   - If NTFS partitions are currently mounted, click **`Safe Unmount Linux Partitions`**.
-   - If Windows was hibernated by Fast Startup, click **`Reset Status NTFS / Fast Startup`**.
+   - If NTFS is mounted on host, click **`Safely Unmount Partition`**.
+   - If locked by Fast Startup, click **`Reset NTFS / Fast Startup Lock`**.
 
-4. **Launch VM**:
-   Click **`START WINDOWS VM`**. The VM window will boot directly into your physical Windows desktop.
+4. **Start VM**:
+   Click **`START WINDOWS VM`**. The VM window will boot into your physical Windows installation.
 
 ---
 
 ## Troubleshooting & FAQ
 
-### 1. Disabling / Enabling Windows Fast Startup
+### 1. Handling Windows Fast Startup
 
 > [!IMPORTANT]
-> When Windows is shut down physically with **Fast Startup** enabled, Windows hibernates the kernel and locks the NTFS filesystem. Booting QEMU with a hibernated state forces Windows into an Automatic Repair loop.
+> When Windows is shut down with **Fast Startup** enabled, it hibernates the kernel and locks the NTFS filesystem. Booting QEMU over a hibernated physical drive triggers Windows Automatic Repair loops.
 
-**Resolution:**
-- Use the built-in **`Reset Status NTFS / Fast Startup`** button in BootBridge to clear hibernation locks.
-- Alternatively, boot into physical Windows and run `powercfg /h off` in CMD as Administrator.
+**Solution:**
+- Use the built-in **`Reset NTFS / Fast Startup Lock`** button in BootBridge.
+- Or boot into physical Windows and run `powercfg /h off` in Administrator CMD.
 
 ---
 
-## Keyboard Shortcuts Reference
+## Keyboard Shortcuts
 
-| Shortcut | Function | Description |
+| Shortcut | Action | Description |
 | :--- | :--- | :--- |
-| **`Ctrl + Alt + F`** | **Toggle Fullscreen** | Switches between windowed and full-screen mode |
-| **`Ctrl + Alt + G`** | **Release / Grab Focus** | Releases mouse cursor and keyboard focus |
-| **`F11`** | **Window Fullscreen** | Toggles BootBridge window fullscreen state |
-| **`Ctrl + C` / `Ctrl + V`** | **Shared Clipboard** | Bidirectional text copy and paste |
-| **`Super / Windows Key`** | **Windows Start Menu** | Captured directly by Windows VM Start Menu when focused |
+| **`Ctrl + Alt + F`** | **Toggle VM Fullscreen** | Switch between windowed and fullscreen VM mode |
+| **`Ctrl + Alt + G`** | **Release / Grab Focus** | Release or grab mouse cursor and keyboard focus |
+| **`F11`** | **Main Window Fullscreen** | Toggle fullscreen mode for the main BootBridge window |
+| **`Ctrl + C` / `Ctrl + V`** | **Shared Clipboard** | Bidirectional text copy and paste between Host and VM |
+| **`Super / Windows Key`** | **Windows Start Menu** | Captured directly by guest Windows VM when active |
 
 ---
 
 ## Contributing & License
 
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+Contributions are very welcome! Please review [CONTRIBUTING.md](CONTRIBUTING.md) for pull request guidelines.
 
 ### License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License** - see [LICENSE](LICENSE) for details.
 
 ---
 
