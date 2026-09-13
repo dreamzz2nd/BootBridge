@@ -17,14 +17,11 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/dreamzz2nd/BootBridge/releases/latest/download/BootBridge-v1.0.0-Windows-Package.zip">
-    <img src="https://img.shields.io/badge/Download-Windows%20Package%20(ZIP)-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Windows Package" />
+  <a href="https://github.com/dreamzz2nd/BootBridge/archive/refs/heads/main.zip">
+    <img src="https://img.shields.io/badge/Download-Latest%20Package%20(ZIP)-brightgreen?style=for-the-badge&logo=github" alt="Download Latest Package ZIP" />
   </a>
-  <a href="https://github.com/dreamzz2nd/BootBridge/releases/latest/download/BootBridge-v1.0.0-macOS-Package.zip">
-    <img src="https://img.shields.io/badge/Download-macOS%20Package%20(ZIP)-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Download macOS Package" />
-  </a>
-  <a href="https://github.com/dreamzz2nd/BootBridge/releases/latest/download/BootBridge-v1.0.0-Linux-x64-Package.tar.gz">
-    <img src="https://img.shields.io/badge/Download-Linux%20Package%20(TAR.GZ)-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Download Linux Package" />
+  <a href="https://github.com/dreamzz2nd/BootBridge/releases">
+    <img src="https://img.shields.io/badge/Releases-All%20Packages-blue?style=for-the-badge&logo=github" alt="Releases All Packages" />
   </a>
 </p>
 
