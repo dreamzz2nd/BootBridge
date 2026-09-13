@@ -3,7 +3,7 @@ BootBridge i18n Translations Dictionary & Google Translate API Handler
 No Unicode emojis/emoticons in text strings. Supports all Google Translate languages dynamically.
 """
 
-from core.translator import translate_text, SUPPORTED_LANGUAGES
+from core.translator import translate_text, batch_translate_keys, SUPPORTED_LANGUAGES
 
 TRANSLATIONS = {
     "id": {
@@ -314,10 +314,15 @@ TRANSLATIONS = {
     }
 }
 
+def batch_translate_language(target_lang, callback=None):
+    """Batch translates all base Indonesian strings to target language in 1 single HTTP request."""
+    id_dict = TRANSLATIONS.get("id", {})
+    batch_translate_keys(id_dict, target_lang=target_lang, source_lang="id", callback=callback)
+
 def tr(key, lang="id", **kwargs):
     """
     Translates a translation key into the requested language with optional string formatting.
-    If lang is not 'id' or 'en', dynamically uses Google Translate API with local caching.
+    Uses instant in-memory cache lookup for Google Translate API translated strings.
     """
     id_dict = TRANSLATIONS.get("id", {})
     en_dict = TRANSLATIONS.get("en", {})
