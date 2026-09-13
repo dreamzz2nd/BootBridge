@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 BootBridge Modern Multi-Step Setup Wizard
-Cross-Platform Graphical Installer for Windows, macOS, and Linux.
+Cross-Platform Graphical Installer with identical theme to BootBridge main application.
 Requires no heavy external dependencies to run out-of-the-box.
 """
 
@@ -19,21 +19,22 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 APP_NAME = "BootBridge"
 APP_VERSION = "1.0.0"
 
-# Color Palette & Styling (Modern Sleek Slate / Blue Theme)
+# Unified Color Palette matching BootBridge Main App Window
 THEME = {
-    "bg_dark": "#0f172a",       # Slate 900
-    "bg_card": "#1e293b",       # Slate 800
-    "bg_input": "#334155",      # Slate 700
-    "accent": "#3b82f6",        # Blue 500
-    "accent_hover": "#2563eb",  # Blue 600
-    "accent_green": "#10b981",  # Emerald 500
-    "text_main": "#f8fafc",     # Slate 50
-    "text_muted": "#94a3b8",    # Slate 400
-    "border": "#334155",        # Slate 700
-    "sidebar_bg": "#090d16",    # Darkest Slate
-    "step_active": "#3b82f6",
-    "step_done": "#10b981",
-    "step_idle": "#475569"
+    "bg_dark": "#090d16",       # Deepest Navy/Slate (Main Background)
+    "bg_card": "#131b2e",       # Card Background
+    "bg_input": "#1e293b",      # Input/Button Background
+    "accent_blue": "#2563eb",   # Primary Blue
+    "accent_blue_hover": "#1d4ed8",
+    "accent_cyan": "#06b6d4",   # Accent Cyan
+    "accent_green": "#10b981",  # Emerald Green
+    "accent_red": "#ef4444",    # Danger Red
+    "text_main": "#f8fafc",     # Light Text
+    "text_muted": "#94a3b8",    # Muted Text
+    "border": "#1e293b",        # Subtle Border
+    "sidebar_bg": "#090d16",    # Sidebar Navy
+    "step_active_bg": "#2563eb",
+    "step_idle_bg": "#131b2e"
 }
 
 # Localization strings
@@ -41,14 +42,14 @@ I18N = {
     "id": {
         "title": f"Wizard Instalasi {APP_NAME} v{APP_VERSION}",
         "step_welcome": "1. Sambutan",
-        "step_check": "2. Cek Sistem",
+        "step_check": "2. Cek Kesiapan Sistem",
         "step_options": "3. Opsi Instalasi",
         "step_install": "4. Proses Instalasi",
         "step_finish": "5. Selesai",
         "welcome_title": f"Selamat Datang di Installer {APP_NAME}",
         "welcome_sub": "Aplikasi virtualisasi dual-boot fisik Windows tanpa perlu restart.",
         "welcome_desc": f"{APP_NAME} memungkinkan Anda menjalankan instalasi Windows fisik secara langsung dari sistem operasi utama dengan akselerasi hypervisor native (KVM, WHPX, HVF) dan performa 1:1.\n\nKlik 'Lanjut' untuk memeriksa kesiapan sistem dan mengonfigurasi instalasi.",
-        "lang_select": "Pilih Bahasa / Language:",
+        "lang_select": "Bahasa / Language:",
         "sys_title": "Pemeriksaan Kesiapan Sistem",
         "sys_sub": "Mendeteksi akselerasi hypervisor dan komponen pendukung...",
         "sys_os": "Sistem Operasi",
@@ -87,14 +88,14 @@ I18N = {
     "en": {
         "title": f"{APP_NAME} v{APP_VERSION} Setup Wizard",
         "step_welcome": "1. Welcome",
-        "step_check": "2. System Check",
+        "step_check": "2. System Diagnostics",
         "step_options": "3. Options",
         "step_install": "4. Installation",
         "step_finish": "5. Finish",
         "welcome_title": f"Welcome to {APP_NAME} Setup",
         "welcome_sub": "Zero-reboot physical Windows dual-boot virtualization launcher.",
         "welcome_desc": f"{APP_NAME} allows you to run your physical Windows installation directly from your main operating system with native hardware hypervisor acceleration (KVM, WHPX, HVF) at 1:1 near bare-metal speed.\n\nClick 'Next' to diagnose system requirements and configure setup.",
-        "lang_select": "Language / Pilih Bahasa:",
+        "lang_select": "Language / Bahasa:",
         "sys_title": "System Diagnostics & Requirements",
         "sys_sub": "Checking hardware virtualization and required components...",
         "sys_os": "Operating System",
@@ -140,15 +141,31 @@ class ModernSetupWizard(tk.Tk):
         self.steps = ["welcome", "check", "options", "install", "finish"]
         
         self.title(I18N[self.lang]["title"])
-        self.geometry("780x520")
-        self.minsize(740, 480)
+        self.geometry("820x540")
+        self.minsize(780, 500)
         self.configure(bg=THEME["bg_dark"])
         self.center_window()
+
+        # Set Window Titlebar Icon
+        ico_path = os.path.join(BASE_DIR, "assets", "icon.ico")
+        png_path = os.path.join(BASE_DIR, "assets", "bootbridge.png")
+        if os.path.exists(ico_path) and sys.platform == "win32":
+            try:
+                self.iconbitmap(ico_path)
+            except Exception:
+                pass
+        elif os.path.exists(png_path):
+            try:
+                icon_img = tk.PhotoImage(file=png_path)
+                self.iconphoto(True, icon_img)
+            except Exception:
+                pass
         
-        # Determine Default Install Directory
+        # Determine Safe Default Install Directory (User Space - No WinError 5 Permission Issues)
         self.system_os = platform.system().lower()
         if "windows" in self.system_os:
-            self.default_install_dir = os.path.join(os.environ.get("ProgramFiles", "C:\\Program Files"), APP_NAME)
+            local_appdata = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~\\AppData\\Local")
+            self.default_install_dir = os.path.join(local_appdata, "Programs", APP_NAME)
         elif "darwin" in self.system_os:
             self.default_install_dir = f"/Applications/{APP_NAME}.app"
         else:
@@ -167,8 +184,8 @@ class ModernSetupWizard(tk.Tk):
 
     def center_window(self):
         self.update_idletasks()
-        width = 780
-        height = 520
+        width = 820
+        height = 540
         x = (self.winfo_screenwidth() // 2) - (width // 2)
         y = (self.winfo_screenheight() // 2) - (height // 2)
         self.geometry(f"{width}x{height}+{x}+{y}")
@@ -177,20 +194,17 @@ class ModernSetupWizard(tk.Tk):
         self.style = ttk.Style(self)
         self.style.theme_use("clam")
 
-        # Custom TTK Styling
         self.style.configure(".", background=THEME["bg_card"], foreground=THEME["text_main"], font=("Segoe UI", 10))
         self.style.configure("TFrame", background=THEME["bg_card"])
         self.style.configure("Dark.TFrame", background=THEME["bg_dark"])
-        self.style.configure("Sidebar.TFrame", background=THEME["sidebar_bg"])
 
-        # Buttons
         self.style.configure("Accent.TButton", 
-                             background=THEME["accent"], 
+                             background=THEME["accent_blue"], 
                              foreground="#ffffff", 
                              font=("Segoe UI", 10, "bold"),
                              borderwidth=0,
                              padding=8)
-        self.style.map("Accent.TButton", background=[("active", THEME["accent_hover"])])
+        self.style.map("Accent.TButton", background=[("active", THEME["accent_blue_hover"])])
 
         self.style.configure("Secondary.TButton", 
                              background=THEME["bg_input"], 
@@ -200,13 +214,11 @@ class ModernSetupWizard(tk.Tk):
                              padding=8)
         self.style.map("Secondary.TButton", background=[("active", THEME["border"])])
 
-        # Progress bar
         self.style.configure("Modern.Horizontal.TProgressbar", 
                              troughcolor=THEME["bg_input"], 
-                             background=THEME["accent"], 
+                             background=THEME["accent_blue"], 
                              thickness=12)
 
-        # Checkbuttons
         self.style.configure("TCheckbutton", 
                              background=THEME["bg_card"], 
                              foreground=THEME["text_main"],
@@ -219,14 +231,14 @@ class ModernSetupWizard(tk.Tk):
         self.main_container.pack(fill=tk.BOTH, expand=True)
 
         # Left Sidebar (Step Indicators)
-        self.sidebar = tk.Frame(self.main_container, bg=THEME["sidebar_bg"], width=220)
+        self.sidebar = tk.Frame(self.main_container, bg=THEME["sidebar_bg"], width=230)
         self.sidebar.pack(side=tk.LEFT, fill=tk.Y)
         self.sidebar.pack_propagate(False)
         self._build_sidebar()
 
-        # Right Content Area
-        self.content_area = tk.Frame(self.main_container, bg=THEME["bg_card"], padx=28, pady=24)
-        self.content_area.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
+        # Right Content Area (Card Background)
+        self.content_area = tk.Frame(self.main_container, bg=THEME["bg_card"], padx=28, pady=24, highlightbackground=THEME["border"], highlightthickness=1)
+        self.content_area.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(0, 16), pady=16)
 
         # Content Dynamic Frame
         self.step_container = tk.Frame(self.content_area, bg=THEME["bg_card"])
@@ -238,40 +250,43 @@ class ModernSetupWizard(tk.Tk):
         self._build_nav_buttons()
 
     def _build_sidebar(self):
-        # App Title & Branding in Sidebar
         brand_frame = tk.Frame(self.sidebar, bg=THEME["sidebar_bg"], pady=20, padx=16)
         brand_frame.pack(fill=tk.X)
 
-        tk.Label(brand_frame, text="⚡ " + APP_NAME, font=("Segoe UI", 14, "bold"), fg=THEME["text_main"], bg=THEME["sidebar_bg"], anchor="w").pack(fill=tk.X)
-        tk.Label(brand_frame, text=f"v{APP_VERSION} Multi-OS Setup", font=("Segoe UI", 9), fg=THEME["text_muted"], bg=THEME["sidebar_bg"], anchor="w").pack(fill=tk.X)
+        tk.Label(brand_frame, text="⚡ " + APP_NAME, font=("Segoe UI", 15, "bold"), fg=THEME["text_main"], bg=THEME["sidebar_bg"], anchor="w").pack(fill=tk.X)
+        tk.Label(brand_frame, text=f"v{APP_VERSION} Universal Setup", font=("Segoe UI", 9), fg=THEME["text_muted"], bg=THEME["sidebar_bg"], anchor="w").pack(fill=tk.X)
 
-        # Divider
-        tk.Frame(self.sidebar, bg=THEME["border"], height=1).pack(fill=tk.X, padx=16, pady=10)
+        tk.Frame(self.sidebar, bg=THEME["border"], height=1).pack(fill=tk.X, padx=16, pady=12)
 
-        # Step Labels
+        self.step_frames = []
         self.step_labels = []
         step_keys = ["step_welcome", "step_check", "step_options", "step_install", "step_finish"]
         
         for i, key in enumerate(step_keys):
             lbl_text = I18N[self.lang][key]
-            lbl = tk.Label(self.sidebar, text=lbl_text, font=("Segoe UI", 10), fg=THEME["step_idle"], bg=THEME["sidebar_bg"], anchor="w", padx=20, pady=8)
+            card = tk.Frame(self.sidebar, bg=THEME["step_idle_bg"], padx=12, pady=8)
+            card.pack(fill=tk.X, padx=14, pady=4)
+            
+            lbl = tk.Label(card, text=lbl_text, font=("Segoe UI", 9, "bold"), fg=THEME["text_muted"], bg=THEME["step_idle_bg"], anchor="w")
             lbl.pack(fill=tk.X)
+            
+            self.step_frames.append(card)
             self.step_labels.append(lbl)
 
         # Language Selector at bottom of sidebar
         lang_frame = tk.Frame(self.sidebar, bg=THEME["sidebar_bg"], padx=16, pady=16)
         lang_frame.pack(side=tk.BOTTOM, fill=tk.X)
         
-        self.lbl_lang_text = tk.Label(lang_frame, text="Bahasa / Lang:", font=("Segoe UI", 9), fg=THEME["text_muted"], bg=THEME["sidebar_bg"], anchor="w")
-        self.lbl_lang_text.pack(fill=tk.X, pady=(0, 4))
+        self.lbl_lang_text = tk.Label(lang_frame, text=I18N[self.lang]["lang_select"], font=("Segoe UI", 9), fg=THEME["text_muted"], bg=THEME["sidebar_bg"], anchor="w")
+        self.lbl_lang_text.pack(fill=tk.X, pady=(0, 6))
         
         btn_lang_box = tk.Frame(lang_frame, bg=THEME["sidebar_bg"])
         btn_lang_box.pack(fill=tk.X)
         
-        self.btn_lang_id = tk.Button(btn_lang_box, text="🇮🇩 ID", font=("Segoe UI", 8, "bold"), fg="#fff", bg=THEME["accent"] if self.lang=="id" else THEME["bg_input"], borderwidth=0, padx=8, pady=3, command=lambda: self.set_language("id"))
-        self.btn_lang_id.pack(side=tk.LEFT, padx=(0, 4))
+        self.btn_lang_id = tk.Button(btn_lang_box, text="🇮🇩 ID", font=("Segoe UI", 8, "bold"), fg="#fff", bg=THEME["accent_blue"] if self.lang=="id" else THEME["bg_input"], borderwidth=0, padx=10, pady=4, command=lambda: self.set_language("id"))
+        self.btn_lang_id.pack(side=tk.LEFT, padx=(0, 6))
         
-        self.btn_lang_en = tk.Button(btn_lang_box, text="🇬🇧 EN", font=("Segoe UI", 8, "bold"), fg="#fff", bg=THEME["accent"] if self.lang=="en" else THEME["bg_input"], borderwidth=0, padx=8, pady=3, command=lambda: self.set_language("en"))
+        self.btn_lang_en = tk.Button(btn_lang_box, text="🇬🇧 EN", font=("Segoe UI", 8, "bold"), fg="#fff", bg=THEME["accent_blue"] if self.lang=="en" else THEME["bg_input"], borderwidth=0, padx=10, pady=4, command=lambda: self.set_language("en"))
         self.btn_lang_en.pack(side=tk.LEFT)
 
     def _build_nav_buttons(self):
@@ -287,8 +302,9 @@ class ModernSetupWizard(tk.Tk):
     def set_language(self, lang_code):
         self.lang = lang_code
         self.title(I18N[self.lang]["title"])
-        self.btn_lang_id.configure(bg=THEME["accent"] if self.lang=="id" else THEME["bg_input"])
-        self.btn_lang_en.configure(bg=THEME["accent"] if self.lang=="en" else THEME["bg_input"])
+        self.btn_lang_id.configure(bg=THEME["accent_blue"] if self.lang=="id" else THEME["bg_input"])
+        self.btn_lang_en.configure(bg=THEME["accent_blue"] if self.lang=="en" else THEME["bg_input"])
+        self.lbl_lang_text.configure(text=I18N[self.lang]["lang_select"])
         self._update_sidebar_labels()
         self._show_step(self.current_step)
 
@@ -298,13 +314,16 @@ class ModernSetupWizard(tk.Tk):
             self.step_labels[i].configure(text=I18N[self.lang][key])
 
     def _update_sidebar_active_step(self):
-        for i, lbl in enumerate(self.step_labels):
+        for i, (card, lbl) in enumerate(zip(self.step_frames, self.step_labels)):
             if i == self.current_step:
-                lbl.configure(fg=THEME["step_active"], font=("Segoe UI", 10, "bold"))
+                card.configure(bg=THEME["step_active_bg"])
+                lbl.configure(bg=THEME["step_active_bg"], fg="#ffffff", font=("Segoe UI", 9, "bold"))
             elif i < self.current_step:
-                lbl.configure(fg=THEME["step_done"], font=("Segoe UI", 10))
+                card.configure(bg=THEME["step_idle_bg"])
+                lbl.configure(bg=THEME["step_idle_bg"], fg=THEME["accent_green"], font=("Segoe UI", 9))
             else:
-                lbl.configure(fg=THEME["step_idle"], font=("Segoe UI", 10))
+                card.configure(bg=THEME["step_idle_bg"])
+                lbl.configure(bg=THEME["step_idle_bg"], fg=THEME["text_muted"], font=("Segoe UI", 9))
 
     def _clear_step_container(self):
         for widget in self.step_container.winfo_children():
@@ -317,7 +336,6 @@ class ModernSetupWizard(tk.Tk):
 
         step_name = self.steps[step_idx]
         
-        # Navigation button states
         if step_idx == 0:
             self.btn_back.pack_forget()
             self.btn_next.configure(text=I18N[self.lang]["btn_next"], state="normal")
@@ -353,8 +371,7 @@ class ModernSetupWizard(tk.Tk):
     def _render_welcome_step(self):
         f = self.step_container
         
-        # Header Badge
-        badge = tk.Label(f, text="READY TO INSTALL", font=("Segoe UI", 8, "bold"), fg=THEME["accent"], bg=THEME["bg_input"], padx=8, pady=2)
+        badge = tk.Label(f, text="READY TO INSTALL", font=("Segoe UI", 8, "bold"), fg=THEME["accent_cyan"], bg=THEME["bg_input"], padx=8, pady=2)
         badge.pack(anchor="w", pady=(0, 6))
 
         title = tk.Label(f, text=I18N[self.lang]["welcome_title"], font=("Segoe UI", 16, "bold"), fg=THEME["text_main"], bg=THEME["bg_card"], anchor="w")
@@ -363,14 +380,12 @@ class ModernSetupWizard(tk.Tk):
         sub = tk.Label(f, text=I18N[self.lang]["welcome_sub"], font=("Segoe UI", 10), fg=THEME["text_muted"], bg=THEME["bg_card"], anchor="w")
         sub.pack(fill=tk.X, pady=(0, 16))
 
-        # Description Card
         card = tk.Frame(f, bg=THEME["bg_dark"], padx=16, pady=16, highlightbackground=THEME["border"], highlightthickness=1)
         card.pack(fill=tk.BOTH, expand=True, pady=(0, 12))
 
         desc = tk.Label(card, text=I18N[self.lang]["welcome_desc"], font=("Segoe UI", 10), fg=THEME["text_main"], bg=THEME["bg_dark"], justify=tk.LEFT, wraplength=480)
         desc.pack(fill=tk.BOTH, expand=True)
 
-        # Highlight Points Box
         pts_box = tk.Frame(card, bg=THEME["bg_dark"], pady=8)
         pts_box.pack(fill=tk.X)
 
@@ -383,7 +398,7 @@ class ModernSetupWizard(tk.Tk):
         for title_ft, desc_ft in features:
             item = tk.Frame(pts_box, bg=THEME["bg_dark"], pady=2)
             item.pack(fill=tk.X)
-            tk.Label(item, text=f"✔  {title_ft}: ", font=("Segoe UI", 9, "bold"), fg=THEME["accent_green"], bg=THEME["bg_dark"]).pack(side=tk.LEFT)
+            tk.Label(item, text=f"[OK]  {title_ft}: ", font=("Segoe UI", 9, "bold"), fg=THEME["accent_green"], bg=THEME["bg_dark"]).pack(side=tk.LEFT)
             tk.Label(item, text=desc_ft, font=("Segoe UI", 9), fg=THEME["text_muted"], bg=THEME["bg_dark"]).pack(side=tk.LEFT)
 
     # ------------------- STEP 2: SYSTEM CHECK -------------------
@@ -396,14 +411,10 @@ class ModernSetupWizard(tk.Tk):
         sub = tk.Label(f, text=I18N[self.lang]["sys_sub"], font=("Segoe UI", 10), fg=THEME["text_muted"], bg=THEME["bg_card"], anchor="w")
         sub.pack(fill=tk.X, pady=(0, 16))
 
-        # Diagnosed Items Card
         diag_card = tk.Frame(f, bg=THEME["bg_dark"], padx=16, pady=16, highlightbackground=THEME["border"], highlightthickness=1)
         diag_card.pack(fill=tk.BOTH, expand=True, pady=(0, 12))
 
-        # Check Hypervisor & Tools
         os_info = f"{platform.system()} {platform.release()} ({platform.machine()})"
-        
-        # Check Hypervisor
         hyp_status, hyp_color = self._check_hypervisor()
         qemu_status, qemu_color = self._check_qemu()
         py_status = f"Python {platform.python_version()} ({'OK' if sys.version_info >= (3,8) else 'Update Recommended'})"
@@ -421,8 +432,7 @@ class ModernSetupWizard(tk.Tk):
             tk.Label(row, text=label_text, font=("Segoe UI", 9, "bold"), fg=THEME["text_muted"], bg=THEME["bg_dark"], width=20, anchor="w").pack(side=tk.LEFT)
             tk.Label(row, text=val_text, font=("Segoe UI", 9, "bold"), fg=color, bg=THEME["bg_dark"], anchor="w").pack(side=tk.LEFT, fill=tk.X, expand=True)
 
-        # Status Summary
-        summary_lbl = tk.Label(diag_card, text="✔ " + I18N[self.lang]["sys_status_ready"], font=("Segoe UI", 10, "bold"), fg=THEME["accent_green"], bg=THEME["bg_dark"], anchor="w")
+        summary_lbl = tk.Label(diag_card, text="[OK] " + I18N[self.lang]["sys_status_ready"], font=("Segoe UI", 10, "bold"), fg=THEME["accent_green"], bg=THEME["bg_dark"], anchor="w")
         summary_lbl.pack(fill=tk.X, pady=(16, 0))
 
     def _check_hypervisor(self):
@@ -430,7 +440,7 @@ class ModernSetupWizard(tk.Tk):
         if "linux" in sys_name:
             if os.path.exists("/dev/kvm"):
                 return "KVM Hardware Acceleration (Tersedia / Available)", THEME["accent_green"]
-            return "KVM (/dev/kvm) belum aktif, akan dikonfigurasi", THEME["accent"]
+            return "KVM (/dev/kvm) belum aktif, akan dikonfigurasi", THEME["accent_cyan"]
         elif "darwin" in sys_name:
             return "HVF (Hypervisor.framework Apple Silicon & Intel)", THEME["accent_green"]
         elif "windows" in sys_name:
@@ -441,7 +451,7 @@ class ModernSetupWizard(tk.Tk):
         qemu_bin = shutil.which("qemu-system-x86_64") or shutil.which("qemu-system-aarch64")
         if qemu_bin:
             return f"QEMU Terpasang ({os.path.basename(qemu_bin)})", THEME["accent_green"]
-        return "QEMU akan diinstall otomatis oleh setup", THEME["accent"]
+        return "QEMU akan diinstall otomatis oleh setup", THEME["accent_cyan"]
 
     # ------------------- STEP 3: OPTIONS -------------------
     def _render_options_step(self):
@@ -453,7 +463,6 @@ class ModernSetupWizard(tk.Tk):
         sub = tk.Label(f, text=I18N[self.lang]["opt_sub"], font=("Segoe UI", 10), fg=THEME["text_muted"], bg=THEME["bg_card"], anchor="w")
         sub.pack(fill=tk.X, pady=(0, 16))
 
-        # Target Path Card
         path_card = tk.Frame(f, bg=THEME["bg_dark"], padx=16, pady=16, highlightbackground=THEME["border"], highlightthickness=1)
         path_card.pack(fill=tk.X, pady=(0, 16))
 
@@ -468,7 +477,6 @@ class ModernSetupWizard(tk.Tk):
         btn_browse = tk.Button(path_box, text=I18N[self.lang]["opt_browse"], font=("Segoe UI", 9), bg=THEME["bg_input"], fg="#fff", borderwidth=0, padx=12, pady=4, command=self._browse_path)
         btn_browse.pack(side=tk.RIGHT)
 
-        # Shortcut Options Card
         opts_card = tk.Frame(f, bg=THEME["bg_dark"], padx=16, pady=16, highlightbackground=THEME["border"], highlightthickness=1)
         opts_card.pack(fill=tk.BOTH, expand=True)
 
@@ -501,7 +509,6 @@ class ModernSetupWizard(tk.Tk):
         sub = tk.Label(f, text=I18N[self.lang]["inst_sub"], font=("Segoe UI", 10), fg=THEME["text_muted"], bg=THEME["bg_card"], anchor="w")
         sub.pack(fill=tk.X, pady=(0, 16))
 
-        # Progress Box
         prog_card = tk.Frame(f, bg=THEME["bg_dark"], padx=16, pady=16, highlightbackground=THEME["border"], highlightthickness=1)
         prog_card.pack(fill=tk.X, pady=(0, 12))
 
@@ -512,7 +519,6 @@ class ModernSetupWizard(tk.Tk):
         self.progress_bar.pack(fill=tk.X, pady=(0, 4))
         self.progress_bar["value"] = 0
 
-        # Log Window
         log_header_box = tk.Frame(f, bg=THEME["bg_card"])
         log_header_box.pack(fill=tk.X, pady=(4, 4))
         
@@ -523,7 +529,6 @@ class ModernSetupWizard(tk.Tk):
         self.log_text = tk.Text(self.log_frame, bg="#000", fg="#22c55e", font=("Consolas", 8), height=8, wrap=tk.NONE)
         self.log_text.pack(fill=tk.BOTH, expand=True)
 
-        # Start Installation Thread
         threading.Thread(target=self._execute_installation, daemon=True).start()
 
     def _toggle_logs(self):
@@ -555,11 +560,23 @@ class ModernSetupWizard(tk.Tk):
             self.log_msg(f"Target Directory: {target_dir}")
             self.set_progress_val(10, I18N[self.lang]["status_copying"])
 
-            os.makedirs(target_dir, exist_ok=True)
+            # Attempt directory creation with safe user-space fallback if access denied
+            try:
+                os.makedirs(target_dir, exist_ok=True)
+            except PermissionError:
+                if "windows" in self.system_os:
+                    local_appdata = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~\\AppData\\Local")
+                    target_dir = os.path.join(local_appdata, "Programs", APP_NAME)
+                    self.install_path_var.set(target_dir)
+                    self.log_msg(f"Access Denied on system folder. Falling back to safe user directory: {target_dir}")
+                    os.makedirs(target_dir, exist_ok=True)
+                else:
+                    raise
+
             time.sleep(0.3)
 
             # Copy essential items
-            items_to_copy = ["bootbridge.py", "core", "ui", "assets", "desktop", "README.md", "README.id.md", "LICENSE"]
+            items_to_copy = ["bootbridge.py", "bootbridge.bat", "setup_wizard.py", "gui_installer.py", "core", "ui", "assets", "desktop", "README.md", "README.id.md", "LICENSE"]
             for item in items_to_copy:
                 src = os.path.join(BASE_DIR, item)
                 dst = os.path.join(target_dir, item)
@@ -576,7 +593,6 @@ class ModernSetupWizard(tk.Tk):
             # Platform Specific Setup
             if "linux" in self.system_os:
                 self.log_msg("Configuring Linux environment...")
-                # Create wrapper executable /usr/local/bin or ~/.local/bin
                 user_bin = os.path.expanduser("~/.local/bin")
                 os.makedirs(user_bin, exist_ok=True)
                 wrapper_path = os.path.join(user_bin, "bootbridge")
@@ -587,7 +603,6 @@ class ModernSetupWizard(tk.Tk):
 
             elif "windows" in self.system_os:
                 self.log_msg("Configuring Windows environment...")
-                # Create bat launcher
                 launcher_bat = os.path.join(target_dir, "bootbridge.bat")
                 with open(launcher_bat, "w") as f:
                     f.write(f'@echo off\ncd /d "{target_dir}"\nstart "" python bootbridge.py %*\n')
@@ -607,7 +622,6 @@ class ModernSetupWizard(tk.Tk):
             self.log_msg("Setup finished successfully!")
             time.sleep(0.5)
 
-            # Transition to Step 5 (Finish)
             self.after(500, lambda: self._show_step(4))
 
         except Exception as e:
@@ -661,7 +675,6 @@ class ModernSetupWizard(tk.Tk):
         sub = tk.Label(f, text=I18N[self.lang]["fin_sub"], font=("Segoe UI", 10), fg=THEME["text_muted"], bg=THEME["bg_card"], anchor="w")
         sub.pack(fill=tk.X, pady=(0, 16))
 
-        # Finish Info Card
         fin_card = tk.Frame(f, bg=THEME["bg_dark"], padx=16, pady=20, highlightbackground=THEME["border"], highlightthickness=1)
         fin_card.pack(fill=tk.BOTH, expand=True, pady=(0, 16))
 
