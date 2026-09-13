@@ -22,3 +22,14 @@ def save_config(config):
             json.dump(config, f, indent=2)
     except Exception as e:
         print(f"[BootBridge] Error saving config: {e}")
+
+def add_remote_history(entry):
+    """Adds a remote connection entry (dict with host, port, proto, user) to saved history."""
+    cfg = load_config()
+    history = cfg.get("remote_history", [])
+    # Deduplicate by host & port
+    history = [h for h in history if not (h.get("host") == entry.get("host") and h.get("port") == entry.get("port"))]
+    history.insert(0, entry)
+    cfg["remote_history"] = history[:10]  # Keep last 10 entries
+    save_config(cfg)
+

@@ -10,7 +10,7 @@ gi.require_version('Gdk', '3.0')
 gi.require_version('GdkPixbuf', '2.0')
 from gi.repository import Gtk, Gdk, GdkPixbuf, GLib
 
-from core.config import load_config, save_config
+from core.config import load_config, save_config, add_remote_history
 from core.disk_manager import DiskManager
 from core.safety_checker import SafetyChecker
 from core.qemu_launcher import QEMULauncher
@@ -655,6 +655,14 @@ class BootBridgeApp(Gtk.Window):
         clip = self.page_remote.clip_chk.get_active()
         sound = self.page_remote.sound_chk.get_active()
         dynres = self.page_remote.dynres_chk.get_active()
+
+        add_remote_history({
+            "host": host,
+            "port": port,
+            "proto": proto,
+            "user": user
+        })
+        self.page_remote.refresh_history()
 
         self.remote_launcher.start_remote_session(
             protocol=proto,
