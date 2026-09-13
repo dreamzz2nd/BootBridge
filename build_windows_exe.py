@@ -11,6 +11,14 @@ import sys
 import subprocess
 import shutil
 
+# Ensure standard UTF-8 stream handling
+if sys.platform == "win32":
+    try:
+        if sys.stdout.encoding != 'utf-8':
+            sys.stdout.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DIST_DIR = os.path.join(BASE_DIR, "dist")
 
@@ -22,7 +30,7 @@ def ensure_icon_ico():
             from PIL import Image
             img = Image.open(png_path)
             img.save(ico_path, format="ICO", sizes=[(256, 256), (128, 128), (64, 64), (48, 48), (32, 32), (16, 16)])
-            print("[✔] Generated assets/icon.ico from bootbridge.png")
+            print("[OK] Generated assets/icon.ico from bootbridge.png")
             return ico_path
         except Exception as e:
             print(f"[!] Pillow not available to convert icon: {e}")
@@ -68,7 +76,7 @@ def build_windows_exe():
 
     try:
         subprocess.run(cmd_setup, check=True)
-        print("[✔] BootBridge-Setup.exe compiled successfully in dist/")
+        print("[OK] BootBridge-Setup.exe compiled successfully in dist/")
     except Exception as e:
         print(f"[!] Warning during Setup Wizard compilation: {e}")
 
@@ -89,7 +97,7 @@ def build_windows_exe():
 
     try:
         subprocess.run(cmd_app, check=True)
-        print("[✔] BootBridge.exe compiled successfully in dist/")
+        print("[OK] BootBridge.exe compiled successfully in dist/")
     except Exception as e:
         print(f"[!] Warning during Main Application compilation: {e}")
 

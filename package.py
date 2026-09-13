@@ -11,6 +11,13 @@ import subprocess
 import tarfile
 import zipfile
 
+if sys.platform == "win32":
+    try:
+        if sys.stdout.encoding != 'utf-8':
+            sys.stdout.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
+
 VERSION = "1.0.0"
 APP_NAME = "BootBridge"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -78,7 +85,7 @@ def package_all():
     make_zip(win_stage, os.path.join(DIST_DIR, f"{APP_NAME}-v{VERSION}-Windows-Package.zip"))
     make_zip(mac_stage, os.path.join(DIST_DIR, f"{APP_NAME}-v{VERSION}-macOS-Package.zip"))
     make_targz(linux_stage, os.path.join(DIST_DIR, f"{APP_NAME}-v{VERSION}-Linux-x64-Package.tar.gz"))
-    print("[✔] Portable ZIP and TAR.GZ packages generated.")
+    print("[OK] Portable ZIP and TAR.GZ packages generated.")
 
     # 2. Linux .DEB Package
     print("\n[2/4] Assembling Linux .DEB Package...")
