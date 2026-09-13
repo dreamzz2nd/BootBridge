@@ -55,7 +55,11 @@ class BootBridgeApp(Gtk.Window):
         self.disks = []
         self.selected_disk = None
         self.deps = SafetyChecker.check_system_dependencies()
-        self.launcher = QEMULauncher(log_callback=self.log_message, status_callback=self.on_vm_status_changed)
+        self.launcher = QEMULauncher(
+            log_callback=self.log_message,
+            status_callback=self.on_vm_status_changed,
+            help_callback=lambda: self._show_launch_guide_dialog(is_manual=True)
+        )
 
         # Load Custom CSS Styling
         self.load_css()
@@ -527,6 +531,7 @@ class BootBridgeApp(Gtk.Window):
             flags=0
         )
         dialog.set_modal(True)
+        dialog.set_keep_above(True)
         dialog.set_default_size(500, -1)
 
         box = dialog.get_content_area()
