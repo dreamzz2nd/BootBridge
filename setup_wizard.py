@@ -15,9 +15,13 @@ import platform
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-APP_NAME = "BootBridge"
-APP_VERSION = "1.0.0"
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    BASE_DIR = sys._MEIPASS
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
 
 # Unified Color Palette matching BootBridge Main App Window
 THEME = {

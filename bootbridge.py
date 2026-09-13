@@ -7,8 +7,12 @@ Main Application Entry Point (Dual-Engine: GTK3 & Native Universal Tkinter)
 import os
 import sys
 
-# Ensure root directory is in sys.path
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Support PyInstaller frozen bundle (_MEIPASS) and standard source execution
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    BASE_DIR = sys._MEIPASS
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
@@ -40,15 +44,15 @@ def run_tkinter():
     app.mainloop()
 
 def main():
-    # 1. On Windows, default to Native Tkinter for instant zero-dependency launch
-    if sys.platform == "win32":
+    # 1. On Windows or when frozen by PyInstaller, launch Universal Native Tkinter GUI
+    if sys.platform == "win32" or getattr(sys, 'frozen', False):
         try:
             run_tkinter()
             return
         except Exception as e:
             print(f"[BootBridge] Tkinter launch note: {e}")
 
-    # 2. On Linux/macOS, try GTK3 first for native desktop integration
+    # 2. On Linux/macOS, try GTK3 first for desktop integration
     try:
         run_gtk()
     except Exception as e:

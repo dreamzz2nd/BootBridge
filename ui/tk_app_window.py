@@ -19,7 +19,10 @@ from core.qemu_launcher import QEMULauncher
 from core.remote_launcher import RemoteLauncher
 from ui.i18n import tr
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    BASE_DIR = sys._MEIPASS
+else:
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 THEME = {
     "bg_dark": "#090d16",       # Deepest Navy/Slate

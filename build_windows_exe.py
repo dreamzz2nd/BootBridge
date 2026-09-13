@@ -59,6 +59,23 @@ def build_windows_exe():
         f"--add-data=LICENSE{sep}."
     ]
 
+    hidden_imports = [
+        "--collect-all=tkinter",
+        "--collect-all=ui",
+        "--collect-all=core",
+        "--hidden-import=tkinter",
+        "--hidden-import=tkinter.ttk",
+        "--hidden-import=tkinter.messagebox",
+        "--hidden-import=tkinter.filedialog",
+        "--hidden-import=ui.tk_app_window",
+        "--hidden-import=ui.i18n",
+        "--hidden-import=core.config",
+        "--hidden-import=core.disk_manager",
+        "--hidden-import=core.safety_checker",
+        "--hidden-import=core.qemu_launcher",
+        "--hidden-import=core.remote_launcher"
+    ]
+
     # 1. Build Standalone Setup Wizard EXE (BootBridge-Setup.exe)
     print("\n[1/2] Compiling Setup Wizard (BootBridge-Setup.exe)...")
     cmd_setup = [
@@ -69,6 +86,7 @@ def build_windows_exe():
         "--windowed",
         "--name=BootBridge-Setup",
         *add_data,
+        *hidden_imports,
         "setup_wizard.py"
     ]
     if icon_path and os.path.exists(icon_path):
@@ -90,6 +108,7 @@ def build_windows_exe():
         "--windowed",
         "--name=BootBridge",
         *add_data,
+        *hidden_imports,
         "bootbridge.py"
     ]
     if icon_path and os.path.exists(icon_path):

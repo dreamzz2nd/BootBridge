@@ -2,6 +2,12 @@
 TITLE BootBridge
 cd /d "%~dp0"
 
+REM 0. Check standalone BootBridge.exe
+if exist "%~dp0BootBridge.exe" (
+    start "" "%~dp0BootBridge.exe" %*
+    exit /b 0
+)
+
 REM 1. Check Python in PATH
 where python >nul 2>&1
 if %errorlevel% equ 0 (
