@@ -1,6 +1,7 @@
+import socket
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk, Gdk, GLib
 
 from core.remote_launcher import RemoteLauncher
 from core.config import load_config
@@ -72,6 +73,33 @@ class RemotePage(Gtk.ScrolledWindow):
 
         easy_hdr, self.easy_title_lbl = make_card_header("emblem-system-symbolic", app.tr("remote_mode_easy"))
         self.easy_card.pack_start(easy_hdr, False, False, 0)
+
+        # TeamViewer / AnyDesk "My Computer ID" Banner
+        my_id_card = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        my_id_hdr = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        
+        self.my_id_title_lbl = Gtk.Label()
+        self.my_id_title_lbl.set_markup(f"<b>{app.tr('remote_my_id_title')}</b>")
+        self.my_id_title_lbl.set_xalign(0)
+
+        self.my_id_val_lbl = Gtk.Label()
+        local_ip = self._get_local_ip()
+        self.my_id_val_lbl.set_markup(f"<span size='x-large' weight='bold' foreground='#3584e4'>{local_ip}</span>")
+        self.my_id_val_lbl.set_xalign(0)
+
+        my_id_hdr.pack_start(self.my_id_title_lbl, False, False, 0)
+        my_id_hdr.pack_start(self.my_id_val_lbl, False, False, 0)
+
+        self.copy_id_btn, self.copy_id_btn_lbl = make_icon_button(
+            "edit-copy-symbolic",
+            app.tr("remote_copy_id_btn"),
+            style_class="btn-secondary"
+        )
+        self.copy_id_btn.connect("clicked", self.on_copy_my_id_clicked)
+
+        my_id_card.pack_start(my_id_hdr, True, True, 0)
+        my_id_card.pack_start(self.copy_id_btn, False, False, 0)
+        self.easy_card.pack_start(my_id_card, False, False, 0)
 
         # Target Preset (Windows PC vs VM)
         preset_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
@@ -511,12 +539,29 @@ class RemotePage(Gtk.ScrolledWindow):
         dialog.run()
         dialog.destroy()
 
+    def _get_local_ip(self):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(('8.8.8.8', 80))
+            ip = s.getsockname()[0]
+            s.close()
+            return ip
+        except Exception:
+            return "127.0.0.1"
+
+    def on_copy_my_id_clicked(self, widget):
+        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        clipboard.set_text(self._get_local_ip(), -1)
+        self.app.set_status("ID / Alamat IP Komputer Ini disalin ke clipboard!")
+
     def apply_language(self):
         self.dep_title_lbl.set_text(self.app.tr("remote_dep_title"))
         self.install_dep_btn_lbl.set_text(self.app.tr("install_remote_dep_btn"))
         self.easy_mode_btn.set_label(self.app.tr("remote_mode_easy"))
         self.adv_mode_btn.set_label(self.app.tr("remote_mode_adv"))
         self.easy_title_lbl.set_text(self.app.tr("remote_mode_easy"))
+        self.my_id_title_lbl.set_markup(f"<b>{self.app.tr('remote_my_id_title')}</b>")
+        self.copy_id_btn_lbl.set_text(self.app.tr("remote_copy_id_btn"))
         self.preset_lbl.set_text(self.app.tr("remote_target_preset"))
         self.scan_title_lbl.set_text(self.app.tr("remote_scan_title"))
         self.scan_btn_lbl.set_text(self.app.tr("remote_scan_btn"))

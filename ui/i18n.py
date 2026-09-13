@@ -105,6 +105,9 @@ TRANSLATIONS = {
 
         "remote_mode_easy": "Mode Sederhana (Orang Awam)",
         "remote_mode_adv": "Mode Lanjutan (Spesialis)",
+        "remote_my_id_title": "ID / Alamat IP Komputer Ini (Perangkat Anda):",
+        "remote_copy_id_btn": "Salin ID",
+        "remote_partner_id_title": "ID / Alamat IP Komputer Tujuan (Partner):",
         "remote_target_preset": "Jenis Perangkat Target:",
         "remote_preset_win": "Laptop / Komputer Windows (RDP)",
         "remote_preset_vm": "Mesin Virtual / VM Local (SPICE)",
