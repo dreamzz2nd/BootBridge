@@ -272,6 +272,7 @@ When the QEMU VM window is focused, use the following shortcuts for seamless int
 | :--- | :--- | :--- |
 | **`Ctrl + Alt + F`** | **Toggle Fullscreen** | Switches between windowed and full-screen mode instantly |
 | **`Ctrl + Alt + G`** | **Release / Grab Focus** | Releases mouse cursor and keyboard focus back to Linux host or captures it back |
+| **`Ctrl + Alt + H`** | **Shortcut Guide Overlay** | Displays the VM control tips & shortcut guide dialog overlay anytime |
 | **`Ctrl + C` / `Ctrl + V`** | **Shared Clipboard** | Bidirectional text copy and paste between Linux Host and Windows VM |
 | **`Super / Windows Key`** | **Windows Start Menu** | Captured directly by Windows VM Start Menu when window is focused |
 | **`Machine -> Send Key`** | **Send System Keys** | Sends `Ctrl+Alt+Del`, `PrintScreen`, or `Pause` commands to Windows |

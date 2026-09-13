@@ -12,11 +12,12 @@ from core.safety_checker import SafetyChecker
 class QEMULauncher:
     """Manages QEMU/KVM virtual machine creation, execution, and process control."""
 
-    def __init__(self, log_callback=None, status_callback=None):
+    def __init__(self, log_callback=None, status_callback=None, help_callback=None):
         self.process = None
         self.is_running = False
         self.log_callback = log_callback or (lambda text: print(f"[QEMU] {text}"))
         self.status_callback = status_callback or (lambda status: None)
+        self.help_callback = help_callback
         self.monitor_thread = None
         self.vars_copy_path = None
 
@@ -236,6 +237,9 @@ class QEMULauncher:
                 # Remove window decorations (titlebar and close button) pasca-launch
                 threading.Thread(target=self._strip_window_decorations, daemon=True).start()
 
+                # Start global X11 hotkey listener for Ctrl+Alt+H inside VM
+                threading.Thread(target=self._start_global_hotkey_listener, daemon=True).start()
+
                 self.process.wait()
                 rc = self.process.returncode
                 self.is_running = False
@@ -251,6 +255,44 @@ class QEMULauncher:
         self.monitor_thread.daemon = True
         self.monitor_thread.start()
         return True
+
+    def _start_global_hotkey_listener(self):
+        """Monitors global Ctrl+Alt+H hotkey while VM is running to toggle shortcut guide."""
+        try:
+            from Xlib import X, display, XK
+            disp = display.Display()
+            root = disp.screen().root
+            keysym = XK.string_to_keysym('h')
+            keycode = disp.keysym_to_keycode(keysym)
+            if not keycode:
+                return
+
+            modifiers = X.ControlMask | X.Mod1Mask
+            for numlock_mask in [0, X.Mod2Mask, X.LockMask, X.Mod2Mask | X.LockMask]:
+                try:
+                    root.grab_key(keycode, modifiers | numlock_mask, True, X.GrabModeAsync, X.GrabModeAsync)
+                except Exception:
+                    pass
+            disp.sync()
+
+            while self.is_running and self.process and self.process.poll() is None:
+                if disp.pending_events() > 0:
+                    event = disp.next_event()
+                    if event.type == X.KeyPress:
+                        if self.help_callback:
+                            from gi.repository import GLib
+                            GLib.idle_add(self.help_callback)
+                else:
+                    time.sleep(0.1)
+
+            for numlock_mask in [0, X.Mod2Mask, X.LockMask, X.Mod2Mask | X.LockMask]:
+                try:
+                    root.ungrab_key(keycode, modifiers | numlock_mask)
+                except Exception:
+                    pass
+            disp.close()
+        except Exception as e:
+            self.log_callback(f"Notice global hotkey listener: {e}")
 
     def _strip_window_decorations(self):
         """Removes titlebar, frame, and close button from QEMU GTK window using xprop / wmctrl."""
