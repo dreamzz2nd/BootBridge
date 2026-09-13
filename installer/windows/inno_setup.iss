@@ -19,16 +19,17 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
 LicenseFile=..\..\LICENSE
-; Visuals & Output
+; Visuals & Icon Branding
 OutputDir=..\..\dist
 OutputBaseFilename=BootBridge-v{#MyAppVersion}-Windows-Setup
+SetupIconFile=..\..\assets\icon.ico
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 ArchitecturesInstallIn64BitMode=x64compatible
-UninstallDisplayIcon={app}\assets\bootbridge.png
+UninstallDisplayIcon={app}\assets\icon.ico
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -59,8 +60,8 @@ Source: "..\..\assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recurses
 Source: "..\..\desktop\*"; DestDir: "{app}\desktop"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\bootbridge.bat"; IconFilename: "{app}\assets\bootbridge.png"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\bootbridge.bat"; IconFilename: "{app}\assets\bootbridge.png"; Tasks: desktopicon
+Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\bootbridge.bat"; IconFilename: "{app}\assets\icon.ico"
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\bootbridge.bat"; IconFilename: "{app}\assets\icon.ico"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\bootbridge.bat"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: shellexec postinstall nowait skipifsilent
