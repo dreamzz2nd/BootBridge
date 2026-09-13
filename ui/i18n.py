@@ -1,9 +1,7 @@
 """
-BootBridge i18n Translations Dictionary & Google Translate API Handler
-No Unicode emojis/emoticons in text strings. Supports all Google Translate languages dynamically.
+BootBridge i18n Translations Dictionary Handler
+Lightweight, instant (0ms), 100% offline, zero-network dependency static multi-language support.
 """
-
-from core.translator import translate_text, batch_translate_keys, SUPPORTED_LANGUAGES
 
 TRANSLATIONS = {
     "id": {
@@ -80,7 +78,7 @@ TRANSLATIONS = {
         "theme_setting": "Mode Tema UI:",
         "theme_dark": "Mode Gelap (Postman Studio Dark)",
         "theme_light": "Mode Terang (Postman Studio Light)",
-        "lang_setting": "Bahasa Aplikasi (Google Translate API):",
+        "lang_setting": "Bahasa Aplikasi:",
         "sys_info_title": "Spesifikasi & Info Hypervisor Host",
         "progress_ready": "Siap menjalankan Windows VM",
         "progress_booting": "Memulai Windows VM... Mengaktifkan Hypervisor KVM",
@@ -233,7 +231,7 @@ TRANSLATIONS = {
         "theme_setting": "UI Theme Mode:",
         "theme_dark": "Dark Mode (Postman Studio Dark)",
         "theme_light": "Light Mode (Postman Studio Light)",
-        "lang_setting": "Application Language (Google Translate API):",
+        "lang_setting": "Application Language:",
         "sys_info_title": "Host Specifications & Hypervisor Info",
         "progress_ready": "Ready to launch Windows VM",
         "progress_booting": "Booting Windows VM... Initializing KVM Hypervisor",
@@ -311,31 +309,91 @@ TRANSLATIONS = {
             "3. <b>Enter Credentials &amp; Connect:</b>\n"
             "   Enter target Windows Username &amp; Password, then click the <b>CONNECT NOW (1-CLICK)</b> button. Done!"
         ),
+    },
+    "es": {
+        "nav_title": "NAVEGACIÓN",
+        "nav_dashboard": "Panel de control y disco",
+        "nav_safety": "Protección y seguridad",
+        "nav_hardware": "Configuración de hardware",
+        "nav_guides": "Guías y accesos directos",
+        "nav_diagnostics": "Consola de diagnóstico",
+        "nav_remote": "Escritorio y PC remoto",
+        "nav_settings": "Configuración y tema",
+        "app_subtitle": "Lanzador seguro y ligero de VM dual-boot de Windows físico",
+        "kvm_active": "KVM: ACELERADO",
+        "kvm_disabled": "KVM: DESACTIVADO",
+        "dep_title": "Faltan componentes del sistema",
+        "copy_cmd": "Copiar comando de instalación",
+        "disk_card_title": "Unidad de almacenamiento físico (Dual-Boot Windows)",
+        "target_disk": "Disco objetivo:",
+        "win_installed": " [Windows Detectado]",
+        "safety_card_title": "Protección de datos y sistema de archivos",
+        "unmount_btn": "Desmontar particiones de Linux de forma segura",
+        "unmount_btn_done": "Particiones desmontadas (Seguro)",
+        "fix_ntfs_btn": "Restablecer estado NTFS / Inicio rápido",
+        "fix_ntfs_btn_done": "Estado de NTFS limpio",
+        "enable_fast_btn": "Desactivar inicio rápido (Predeterminado / Seguro)",
+        "enable_fast_btn_done": "Inicio rápido desactivado (Seguro)",
+        "settings_card_title": "Apariencia y preferencias de la aplicación",
+        "theme_setting": "Modo de tema UI:",
+        "theme_dark": "Modo oscuro (Postman Studio Dark)",
+        "theme_light": "Modo claro (Postman Studio Light)",
+        "lang_setting": "Idioma de la aplicación:",
+        "sys_info_title": "Especificaciones e información del hipervisor host",
+        "start_btn": "INICIAR VM DE WINDOWS",
+        "stop_btn": "DETENER VM",
+        "remote_mode_easy": "Modo Fácil (Principiantes)",
+        "remote_mode_adv": "Modo Avanzado (Experto)",
+        "remote_target_preset": "Tipo de dispositivo de destino:",
+        "remote_preset_win": "PC / Laptop Windows remota (RDP)",
+        "remote_preset_vm": "Máquina virtual local (SPICE)",
+        "remote_history_lbl": "Historial de reconexión rápida:",
+        "connect_remote_btn": "CONECTAR AHORA (1-CLIC)",
+        "disconnect_remote_btn": "DESCONECTAR SESIÓN REMOTA"
+    },
+    "de": {
+        "nav_title": "NAVIGATION",
+        "nav_dashboard": "Dashboard & Laufwerk",
+        "nav_safety": "Schutz & Sicherheit",
+        "nav_hardware": "Hardware-Konfiguration",
+        "nav_guides": "Anleitungen & Verknüpfungen",
+        "nav_diagnostics": "Diagnosekonsole",
+        "nav_remote": "Remote-PC & Desktop",
+        "nav_settings": "Einstellungen & Thema",
+        "app_subtitle": "Sicherer & leichtgewichtiger Dual-Boot Physical Windows VM Launcher",
+        "kvm_active": "KVM: BESCHLEUNIGT",
+        "kvm_disabled": "KVM: DEAKTIVIERT",
+        "settings_card_title": "Erscheinungsbild & Anwendungseinstellungen",
+        "theme_setting": "UI-Themenmodus:",
+        "theme_dark": "Dunkelmodus (Postman Studio Dark)",
+        "theme_light": "Hellmodus (Postman Studio Light)",
+        "lang_setting": "Anwendungssprache:",
+        "sys_info_title": "Host-Spezifikationen & Hypervisor-Info",
+        "start_btn": "WINDOWS VM STARTEN",
+        "stop_btn": "VM STOPPEN",
+        "remote_mode_easy": "Einfacher Modus (Anfänger)",
+        "remote_mode_adv": "Erweiterter Modus (Experte)",
+        "connect_remote_btn": "JETZT VERBINDEN (1-KLICK)",
+        "disconnect_remote_btn": "REMOTE-SITZUNG TRENNEN"
     }
 }
 
-def batch_translate_language(target_lang, callback=None):
-    """Batch translates all base Indonesian strings to target language in 1 single HTTP request."""
-    id_dict = TRANSLATIONS.get("id", {})
-    batch_translate_keys(id_dict, target_lang=target_lang, source_lang="id", callback=callback)
+SUPPORTED_LANGUAGES = [
+    ("id", "Bahasa Indonesia"),
+    ("en", "English"),
+    ("es", "Español (Spanish)"),
+    ("de", "Deutsch (German)")
+]
 
 def tr(key, lang="id", **kwargs):
     """
-    Translates a translation key into the requested language with optional string formatting.
-    Uses instant in-memory cache lookup for Google Translate API translated strings.
+    Translates a key with 0ms lag, 100% offline, zero network dependency.
     """
-    id_dict = TRANSLATIONS.get("id", {})
+    lang_dict = TRANSLATIONS.get(lang, TRANSLATIONS.get("en", TRANSLATIONS["id"]))
+    base_dict = TRANSLATIONS.get("id", {})
     en_dict = TRANSLATIONS.get("en", {})
 
-    if lang == "en":
-        base_text = en_dict.get(key, id_dict.get(key, key))
-    else:
-        base_text = id_dict.get(key, en_dict.get(key, key))
-
-    if lang in ("id", "en"):
-        text = base_text
-    else:
-        text = translate_text(base_text, target_lang=lang, source_lang="id")
+    text = lang_dict.get(key, en_dict.get(key, base_dict.get(key, key)))
 
     if kwargs:
         try:

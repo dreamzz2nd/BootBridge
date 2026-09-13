@@ -16,7 +16,7 @@ from core.safety_checker import SafetyChecker
 from core.qemu_launcher import QEMULauncher
 from core.remote_launcher import RemoteLauncher
 
-from ui.i18n import tr, batch_translate_language
+from ui.i18n import tr
 from ui.components import make_icon_button, set_button_state
 from ui.pages.dashboard_page import DashboardPage
 from ui.pages.safety_page import SafetyPage
@@ -78,9 +78,6 @@ class BootBridgeApp(Gtk.Window):
 
         # Refresh disk listing & apply language
         self.apply_language()
-
-        if self.current_lang not in ("id", "en"):
-            batch_translate_language(self.current_lang, callback=lambda s: GLib.idle_add(self.apply_language))
 
     def tr(self, key, **kwargs):
         return tr(key, lang=self.current_lang, **kwargs)
@@ -285,18 +282,7 @@ class BootBridgeApp(Gtk.Window):
             self.current_lang = new_lang
             self.config["language"] = new_lang
             save_config(self.config)
-
-            if new_lang in ("id", "en"):
-                self.apply_language()
-            else:
-                self.log_message(f"Translating application UI to '{new_lang}' via Google Translate API...")
-                def on_done(success):
-                    GLib.idle_add(self.apply_language)
-                    if success:
-                        self.log_message(f"Translation to '{new_lang}' completed successfully!")
-                    else:
-                        self.log_message(f"Translation to '{new_lang}' complete (using fallback).")
-                batch_translate_language(new_lang, callback=on_done)
+            self.apply_language()
 
     def apply_language(self):
         if hasattr(self, "header"):
