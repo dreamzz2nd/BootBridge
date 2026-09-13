@@ -212,6 +212,22 @@ button.btn-success:hover {
     background-color: #388e3c;
 }
 
+button.btn-used {
+    background-color: #383838;
+    color: #b0b0b0;
+    border: 1px solid #4a4a4a;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px 18px;
+}
+
+button.btn-used:hover {
+    background-color: #424242;
+    color: #e0e0e0;
+}
+
+
 
 /* Bottom Action Launcher Bar */
 .bottom-bar {

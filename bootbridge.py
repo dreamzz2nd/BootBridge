@@ -222,17 +222,27 @@ def make_icon_button(icon_name, label_text, style_class=None):
         btn.get_style_context().add_class(style_class)
     return btn, label
 
-def set_button_state(btn, label_widget, icon_name, text, is_success):
-    """Updates GTK button label, icon, and toggles between btn-warning and btn-success CSS classes."""
+def set_button_state(btn, label_widget, icon_name, text, state_mode):
+    """
+    Updates GTK button label, icon, and CSS class based on state_mode:
+    - 'used': Gray button (action currently active/already executed)
+    - 'warning': Orange button (ready to be executed)
+    - 'success': Green button (safety check passed)
+    """
     if not btn or not label_widget:
         return
     label_widget.set_text(text)
     ctx = btn.get_style_context()
-    if is_success:
-        ctx.remove_class("btn-warning")
+    
+    ctx.remove_class("btn-warning")
+    ctx.remove_class("btn-success")
+    ctx.remove_class("btn-used")
+
+    if state_mode == "used":
+        ctx.add_class("btn-used")
+    elif state_mode == "success":
         ctx.add_class("btn-success")
     else:
-        ctx.remove_class("btn-success")
         ctx.add_class("btn-warning")
 
     child = btn.get_child()
@@ -241,6 +251,7 @@ def set_button_state(btn, label_widget, icon_name, text, is_success):
             if isinstance(box_child, Gtk.Image):
                 box_child.set_from_icon_name(icon_name, Gtk.IconSize.BUTTON)
                 break
+
 
 def make_icon_card_title(icon_name, title_text):
     """Creates a card header box with a symbolic icon header."""
@@ -980,7 +991,7 @@ class BootBridgeApp(Gtk.Window):
                 self.unmount_btn_lbl,
                 "drive-removable-media-symbolic",
                 self.tr("unmount_btn"),
-                is_success=False
+                state_mode="warning"
             )
             self.unmount_btn_box.show_all()
         else:
@@ -992,7 +1003,7 @@ class BootBridgeApp(Gtk.Window):
                 self.unmount_btn_lbl,
                 "emblem-ok-symbolic",
                 self.tr("unmount_btn_done"),
-                is_success=True
+                state_mode="success"
             )
             self.unmount_btn_box.show_all()
 
@@ -1069,38 +1080,54 @@ class BootBridgeApp(Gtk.Window):
         ntfs_reset_done = self.config.get("ntfs_reset_done", False)
 
         if ntfs_reset_done:
+            # Fix NTFS / Reset status was executed: Fix NTFS button is GRAY (used), Enable Fast Startup is ORANGE (ready)
             set_button_state(
                 self.fix_ntfs_btn,
                 self.fix_ntfs_btn_lbl,
                 "emblem-ok-symbolic",
                 self.tr("fix_ntfs_btn_done"),
-                is_success=True
+                state_mode="used"
             )
-        else:
-            set_button_state(
-                self.fix_ntfs_btn,
-                self.fix_ntfs_btn_lbl,
-                "system-run-symbolic",
-                self.tr("fix_ntfs_btn"),
-                is_success=False
-            )
-
-        if fast_startup_active:
-            set_button_state(
-                self.enable_fast_btn,
-                self.enable_fast_btn_lbl,
-                "emblem-ok-symbolic",
-                self.tr("enable_fast_btn_done"),
-                is_success=True
-            )
-        else:
             set_button_state(
                 self.enable_fast_btn,
                 self.enable_fast_btn_lbl,
                 "system-run-symbolic",
                 self.tr("enable_fast_btn"),
-                is_success=False
+                state_mode="warning"
             )
+        elif fast_startup_active:
+            # Enable Fast Startup was executed: Enable Fast Startup is GRAY (used), Fix NTFS button is ORANGE (ready)
+            set_button_state(
+                self.enable_fast_btn,
+                self.enable_fast_btn_lbl,
+                "emblem-ok-symbolic",
+                self.tr("enable_fast_btn_done"),
+                state_mode="used"
+            )
+            set_button_state(
+                self.fix_ntfs_btn,
+                self.fix_ntfs_btn_lbl,
+                "system-run-symbolic",
+                self.tr("fix_ntfs_btn"),
+                state_mode="warning"
+            )
+        else:
+            # Neutral / default state: both buttons are ORANGE (ready to be used)
+            set_button_state(
+                self.fix_ntfs_btn,
+                self.fix_ntfs_btn_lbl,
+                "system-run-symbolic",
+                self.tr("fix_ntfs_btn"),
+                state_mode="warning"
+            )
+            set_button_state(
+                self.enable_fast_btn,
+                self.enable_fast_btn_lbl,
+                "system-run-symbolic",
+                self.tr("enable_fast_btn"),
+                state_mode="warning"
+            )
+
 
     def on_start_vm_clicked(self, widget):
         if not self.selected_disk:
