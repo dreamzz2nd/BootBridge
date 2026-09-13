@@ -8,23 +8,23 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python Version](https://img.shields.io/badge/Python-3.8%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
-[![GUI Framework](https://img.shields.io/badge/GUI-GTK3-4B8BBE.svg?logo=gnome&logoColor=white)](https://www.gtk.org/)
+[![GUI Framework](https://img.shields.io/badge/GUI-GTK3%20%7C%20Tkinter-4B8BBE.svg?logo=gnome&logoColor=white)](https://www.gtk.org/)
 [![Hypervisor Engines](https://img.shields.io/badge/Hypervisor-KVM%20%7C%20HVF%20%7C%20WHPX-FF6600.svg?logo=qemu&logoColor=white)](https://www.qemu.org/)
-[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-blue.svg)](https://github.com/dreamzz2nd/BootBridge)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue.svg)](https://github.com/dreamzz2nd/BootBridge)
 
 <p align="center">
   <b>Bahasa / Languages:</b> <a href="README.md">English</a> | <b><a href="README.id.md">Bahasa Indonesia</a></b>
 </p>
 
 <p align="center">
-  <a href="https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/BootBridge-v1.0.0-Windows-Package.zip">
-    <img src="https://img.shields.io/badge/Unduh-Paket%20Windows%20(ZIP)-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Unduh Paket Windows" />
+  <a href="https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/BootBridge-v1.0.0-Windows-Setup.exe">
+    <img src="https://img.shields.io/badge/Unduh-Windows%20(.EXE)-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Unduh Windows EXE" />
   </a>
-  <a href="https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/BootBridge-v1.0.0-macOS-Package.zip">
-    <img src="https://img.shields.io/badge/Unduh-Paket%20macOS%20(ZIP)-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Unduh Paket macOS" />
+  <a href="https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/BootBridge-v1.0.0-macOS.dmg">
+    <img src="https://img.shields.io/badge/Unduh-macOS%20(.DMG)-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Unduh macOS DMG" />
   </a>
-  <a href="https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/BootBridge-v1.0.0-Linux-x64-Package.tar.gz">
-    <img src="https://img.shields.io/badge/Unduh-Paket%20Linux%20(TAR.GZ)-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Unduh Paket Linux" />
+  <a href="https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/bootbridge_1.0.0_all.deb">
+    <img src="https://img.shields.io/badge/Unduh-Linux%20(.DEB)-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Unduh Linux DEB" />
   </a>
   <a href="https://github.com/dreamzz2nd/BootBridge/releases/tag/v1.0.0">
     <img src="https://img.shields.io/badge/Rilis-v1.0.0%20(Semua%20Paket)-brightgreen?style=for-the-badge&logo=github" alt="GitHub Release v1.0.0" />
@@ -35,12 +35,17 @@
 </p>
 
 <p align="center">
+  <b>🌐 <a href="web/index.html">Halaman Unduh Cerdas (Smart OS Auto-Detect)</a></b> — Otomatis mendeteksi sistem operasi Anda dan memberikan paket installer yang tepat (.exe / .dmg / .deb).
+</p>
+
+<p align="center">
   <b>BootBridge</b> adalah aplikasi desktop khusus yang dirancang untuk menjalankan sistem operasi Windows dual-boot fisik kamu secara aman di dalam Virtual Machine (QEMU dengan akselerasi hardware native) langsung dari desktop—<b>tanpa perlu merestart (reboot) komputer kamu</b>.
 </p>
 
 [Fitur Utama](#fitur-utama) •
 [Dukungan Lintas Platform](#dukungan-lintas-platform) •
-[Panduan Instalasi](#panduan-instalasi) •
+[Panduan Instalasi Multi-Platform](#panduan-instalasi-multi-platform) •
+[Setup Wizard](#setup-wizard-modern-5-langkah) •
 [Remote Desktop](#fitur-remote-desktop-sederhana) •
 [Matriks Perbandingan](#matriks-perbandingan) •
 [Troubleshooting](#troubleshooting--faq)
@@ -54,10 +59,12 @@
 - [Gambaran Umum](#gambaran-umum)
 - [Fitur Utama](#fitur-utama)
 - [Dukungan Lintas Platform](#dukungan-lintas-platform)
-- [Panduan Instalasi](#panduan-instalasi)
-  - [Opsi A: Installer Visual GUI 1-Klik (Tanpa Terminal / Untuk Awam)](#opsi-a-installer-visual-gui-1-klik-tanpa-terminal--untuk-awam)
-  - [Opsi B: Perintah Terminal Otomatis 1-Baris](#opsi-b-perintah-terminal-otomatis-1-baris)
-  - [Opsi C: Instalasi Manual](#opsi-c-instalasi-manual)
+- [Panduan Instalasi Multi-Platform](#panduan-instalasi-multi-platform)
+  - [1. Microsoft Windows (.exe)](#1-microsoft-windows-exe)
+  - [2. Apple macOS (.dmg)](#2-apple-macos-dmg)
+  - [3. Linux (.deb & Tarball)](#3-linux-deb--tarball)
+  - [4. Skrip Terminal Otomatis 1-Baris](#4-skrip-terminal-otomatis-1-baris)
+- [Setup Wizard Modern (5-Langkah)](#setup-wizard-modern-5-langkah)
 - [Fitur Remote Desktop Sederhana](#fitur-remote-desktop-sederhana)
 - [Matriks Perbandingan](#matriks-perbandingan)
 - [Arsitektur Sistem](#arsitektur-sistem)
@@ -79,15 +86,17 @@ Dengan BootBridge, partisi Windows fisik kamu akan di-boot secara native di dala
 
 ## Fitur Utama
 
-- **Zero-Reboot Dual Booting**: Jalankan drive Windows fisik kamu di dalam sistem operasi utama dengan kecepatan mendekati bare-metal 1:1.
-- **Dukungan Lintas Platform**: Mendukung penuh **Linux**, **macOS** (Intel & Apple Silicon M1-M4), dan **Windows**.
-- **Installer Visual GUI 1-Klik**: Cukup klik 2x `Install_BootBridge.desktop` atau jalankan `gui_installer.py` untuk wizard instalasi visual tanpa terminal.
-- **Fitur Remote Desktop Sederhana**: Fitur koneksi remote desktop 7-langkah intuitif dengan ID perangkat unik otomatis, tombol salin IP 1-klik, pemindai jaringan Wi-Fi otomatis, dan tombol sambungkan instan.
-- **Mount Safety Guard**: Protokol perlindungan internal yang memverifikasi status mount disk, memberi peringatan terhadap akses partisi terbagi, dan melepas (unmount) drive NTFS terikat secara aman untuk mencegah kerusakan data.
-- **Fast Startup & Modifier Registry Offline**: Pengubah registry offline satu-klik untuk mengatur status Fast Startup Windows (`HiberbootEnabled = 1`) tanpa merusak filesystem.
-- **Perlindungan Jendela Frameless**: Jendela tampilan QEMU berjalan dalam mode frameless (tanpa tombol close) untuk mencegah VM terhenti secara tidak sengaja.
-- **Shared Clipboard Dua Arah**: Integrasi `qemu-vdagent` internal untuk copy-paste teks (`Ctrl+C` / `Ctrl+V`) dua arah antara host dan VM Windows.
-- **100% Gratis & Sangat Ringan**: Dibangun murni dengan Python 3 & GTK 3 (penggunaan RAM hanya ~30–50 MB, 0% CPU idle footprint). Tanpa runtime web/Electron yang berat.
+- ⚡ **Zero-Reboot Dual Booting**: Jalankan drive Windows fisik kamu di dalam sistem operasi utama dengan kecepatan mendekati bare-metal 1:1.
+- 🌐 **Dukungan Lintas Platform & Paket Native**:
+  - **Windows**: Installer `.exe` (Inno Setup) & Standalone executable.
+  - **macOS**: Disk Image `.dmg` dengan integrasi `/Applications` (Intel & Apple Silicon M1-M4).
+  - **Linux**: Paket Debian `.deb` dengan integrasi sistem `/usr/bin/bootbridge` & menu aplikasi.
+- 🧙 **Setup Wizard Visual 5-Langkah**: Panduan instalasi interaktif untuk cek kesiapan hypervisor, pemilihan direktori, pembuatan shortcut, dan instalasi dependensi.
+- 🛡️ **Mount Safety Guard**: Protokol perlindungan internal yang memverifikasi status mount disk, memberi peringatan terhadap akses partisi terbagi, dan melepas (unmount) drive NTFS terikat secara aman untuk mencegah kerusakan data.
+- 🔧 **Fast Startup & Modifier Registry Offline**: Pengubah registry offline satu-klik untuk mengatur status Fast Startup Windows (`HiberbootEnabled = 1`) tanpa merusak filesystem.
+- 📋 **Shared Clipboard Dua Arah**: Integrasi `qemu-vdagent` internal untuk copy-paste teks (`Ctrl+C` / `Ctrl+V`) dua arah antara host dan VM Windows.
+- 🖥️ **Fitur Remote Desktop Sederhana**: Fitur koneksi remote desktop 7-langkah intuitif dengan ID perangkat unik otomatis, tombol salin IP 1-klik, dan pemindai Wi-Fi instan.
+- 🪶 **100% Gratis & Sangat Ringan**: Penggunaan RAM hanya ~30–50 MB, 0% CPU idle footprint. Tanpa runtime web/Electron yang berat.
 
 ---
 
@@ -95,30 +104,55 @@ Dengan BootBridge, partisi Windows fisik kamu akan di-boot secara native di dala
 
 BootBridge dirancang untuk berjalan lancar di semua sistem operasi desktop utama dengan akselerasi hardware native:
 
-| Sistem Operasi | Mesin Akselerasi Hypervisor | Antarmuka Penyimpanan | Client Remote Desktop |
-| :--- | :--- | :--- | :--- |
-| **Linux** (Ubuntu, Debian, Fedora, Arch, Mint) | **KVM** (`-accel kvm`) | `/dev/nvme*` atau `/dev/sd*` | `xfreerdp` / `spicy` |
-| **macOS** (Intel & Apple Silicon M1/M2/M3/M4) | **HVF** (`-accel hvf`) | `/dev/disk*` | `freerdp` / `remote-viewer` |
-| **Windows** (Windows 10 & Windows 11) | **WHPX** (`-accel whpx`) | `\\.\PhysicalDrive*` | Bawaan Native `mstsc.exe` |
+| Sistem Operasi | Format Installer | Mesin Hypervisor | Antarmuka Penyimpanan | Remote Desktop Client |
+| :--- | :--- | :--- | :--- | :--- |
+| **Windows** (10 / 11) | **`.exe`** (Setup Wizard) | **WHPX** (`-accel whpx`) | `\\.\PhysicalDrive*` | Bawaan Native `mstsc.exe` |
+| **macOS** (Intel / M1–M4) | **`.dmg`** (Disk Image) | **HVF** (`-accel hvf`) | `/dev/disk*` | `freerdp` / `remote-viewer` |
+| **Linux** (Debian, Ubuntu, Mint, Arch, Fedora) | **`.deb`** / **`.tar.gz`** | **KVM** (`-accel kvm`) | `/dev/nvme*` atau `/dev/sd*` | `xfreerdp` / `spicy` |
 
 ---
 
-## Panduan Instalasi
+## Panduan Instalasi Multi-Platform
 
-### Opsi A: Installer Visual GUI 1-Klik (Tanpa Terminal / Untuk Awam)
+### 1. Microsoft Windows (`.exe`)
 
-1. Unduh & Ekstrak folder repository atau file ZIP BootBridge.
-2. Klik 2x pada file **`Install_BootBridge.desktop`** di dalam folder.
-3. Jendela **BootBridge Setup Wizard** akan muncul di layar:
-   - Pilih Sistem Operasi kamu (Linux, Windows, atau macOS).
-   - Klik tombol **`Install Sekarang`**.
-4. Wizard akan secara otomatis mengunduh komponen pendukung, mendaftarkan shortcut di menu desktop, dan menjalankan BootBridge!
+1. Unduh **[BootBridge-v1.0.0-Windows-Setup.exe](https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/BootBridge-v1.0.0-Windows-Setup.exe)**.
+2. Klik 2x pada file `.exe` untuk memulai Setup Wizard.
+3. Ikuti petunjuk wizard untuk memilih lokasi instalasi dan membuat shortcut di Desktop / Start Menu.
+4. Atau jalankan `bootbridge_installer.bat` dari paket ZIP portabel.
 
 ---
 
-### Opsi B: Perintah Terminal Otomatis 1-Baris
+### 2. Apple macOS (`.dmg`)
 
-Buka terminal kamu, salin, dan jalankan 1 perintah ini:
+1. Unduh **[BootBridge-v1.0.0-macOS.dmg](https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/BootBridge-v1.0.0-macOS.dmg)**.
+2. Klik 2x file `.dmg` untuk membukanya.
+3. Tarik ikon **BootBridge.app** ke folder **Applications**.
+4. Buka BootBridge dari Launchpad atau folder Applications.
+
+---
+
+### 3. Linux (`.deb` & Tarball)
+
+#### Opsi A: Menggunakan Paket Debian (.deb)
+```bash
+# Unduh paket .deb
+wget https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/bootbridge_1.0.0_all.deb
+
+# Pasang paket beserta dependensinya
+sudo apt install ./bootbridge_1.0.0_all.deb
+```
+
+#### Opsi B: Menggunakan Setup Wizard GUI
+```bash
+python3 setup_wizard.py
+```
+
+---
+
+### 4. Skrip Terminal Otomatis 1-Baris
+
+Buka terminal dan jalankan 1 perintah berikut:
 
 ```bash
 git clone https://github.com/dreamzz2nd/BootBridge.git && cd BootBridge && ./install.sh
@@ -126,32 +160,19 @@ git clone https://github.com/dreamzz2nd/BootBridge.git && cd BootBridge && ./ins
 
 ---
 
-### Opsi C: Instalasi Manual
+## Setup Wizard Modern (5-Langkah)
 
-#### 1. Install Komponen Pendukung Sistem
+BootBridge dilengkapi dengan **Setup Wizard Multi-Step** modern (`setup_wizard.py`) yang dapat berjalan langsung tanpa dependensi eksternal yang berat:
 
-* **Ubuntu / Linux Mint / Debian**:
-  ```bash
-  sudo apt update && sudo apt install -y qemu-system-x86-64 ovmf qemu-utils swtpm freerdp2-x11 spice-client-gtk python3-gi
-  ```
-* **macOS (via Homebrew)**:
-  ```bash
-  brew install gtk+3 gobject-introspection qemu freerdp
-  ```
-* **Arch Linux / Manjaro**:
-  ```bash
-  sudo pacman -S --needed qemu-desktop ovmf qemu-img swtpm freerdp python-gobject
-  ```
-* **Fedora**:
-  ```bash
-  sudo dnf install -y qemu-system-x86 edk2-ovmf qemu-img swtpm freerdp python3-gobject
-  ```
+1. **Langkah 1 (Sambutan & Bahasa)**: Pilihan bahasa (Bahasa Indonesia 🇮🇩 / English 🇬🇧) dan overview fitur.
+2. **Langkah 2 (Cek Kesiapan Sistem)**: Deteksi otomatis akselerasi hardware (KVM, WHPX, HVF), QEMU, dan Python.
+3. **Langkah 3 (Opsi & Folder Tujuan)**: Pemilihan folder instalasi, shortcut Desktop, Start Menu, dan PATH.
+4. **Langkah 4 (Proses Instalasi)**: Real-time progress bar dan expandable terminal logs.
+5. **Langkah 5 (Selesai)**: Ringkasan instalasi sukses dan opsi langsung menjalankan aplikasi.
 
-#### 2. Jalankan BootBridge
 ```bash
-git clone https://github.com/dreamzz2nd/BootBridge.git
-cd BootBridge
-./start.sh
+# Jalankan wizard kapan saja:
+python setup_wizard.py
 ```
 
 ---
@@ -191,10 +212,11 @@ BootBridge dilengkapi dengan fitur koneksi Remote Desktop 7-langkah yang sangat 
 | **Perlu Reboot / Restart** | Ya | Tidak | **Tidak** |
 | **Menggunakan Windows Fisik Terinstall**| Ya | Tidak (Perlu install OS ulang) | **Ya** |
 | **Performa** | 100% Native | 60% - 80% Virtualized | **90% - 98% Mendekati Native** |
+| **Format Installer Native** | N/A | Terbatas | **.exe (Win), .dmg (Mac), .deb (Linux)** |
 | **Dukungan Lintas Platform** | N/A | Ya | **Ya (Linux, macOS, Windows)** |
 | **Perlindungan Keamanan Disk** | Tidak Ada | N/A | **Automated Mount Protection Guard** |
 | **Fitur Remote Desktop** | Tidak Ada | Terbatas | **Modul Remote 7-Langkah Praktis** |
-| **Penggunaan Memory (RAM)** | N/A | 500 MB+ (Web wrapper) | **~30 – 50 MB (GTK3 Native)** |
+| **Penggunaan Memory (RAM)** | N/A | 500 MB+ (Web wrapper) | **~30 – 50 MB (Native GTK/Tkinter)** |
 
 ---
 
@@ -203,7 +225,7 @@ BootBridge dilengkapi dengan fitur koneksi Remote Desktop 7-langkah yang sangat 
 ```mermaid
 flowchart TD
     subgraph Host ["Sistem Operasi Utama (Linux / macOS / Windows)"]
-        UI["Aplikasi GTK3 BootBridge"]
+        UI["Aplikasi BootBridge"]
         SC["Protokol Safety Checker"]
         DM["Manajer Disk"]
         TPM["swtpm (Daemon TPM 2.0)"]
@@ -253,13 +275,13 @@ flowchart TD
 ## Panduan Penggunaan
 
 1. **Jalankan BootBridge**:
-   Jalankan `./start.sh` atau klik 2x pada file **`Install_BootBridge.desktop`**.
+   Buka melalui shortcut aplikasi atau jalankan `bootbridge` di terminal.
 
 2. **Pilih Disk Fisik Target**:
    Pilih drive fisik yang berisi instalasi Windows kamu di menu dropdown **Target Disk**.
 
 3. **Verifikasi Status Safety Guard**:
-   - Jika partisi NTFS sedang di-mount oleh Linux, klik **`Unmount Partisi Linux Secara Aman`**.
+   - Jika partisi NTFS sedang di-mount oleh sistem operasi host, klik **`Unmount Partisi Secara Aman`**.
    - Jika Windows terkunci oleh Fast Startup, klik **`Reset Status NTFS / Fast Startup`**.
 
 4. **Jalankan VM**:

@@ -1,0 +1,130 @@
+name: Build and Release Multi-Platform Installers
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Build Windows (.exe & .zip)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+
+      - name: Build Standalone Exe via PyInstaller
+        run: |
+          python build_windows_exe.py
+
+      - name: Build Windows Inno Setup (.exe Installer)
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        with:
+          path: installer/windows/inno_setup.iss
+        continue-on-error: true
+
+      - name: Build Windows Portable ZIP
+        run: |
+          python package.py
+
+      - name: Upload Windows Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release
+          path: |
+            dist/*.exe
+            dist/*Windows*.zip
+
+  build-macos:
+    name: Build macOS (.dmg & .zip)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build macOS .dmg and .zip
+        run: |
+          chmod +x installer/macos/build_dmg.sh
+          bash installer/macos/build_dmg.sh
+          python3 package.py
+
+      - name: Upload macOS Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-release
+          path: |
+            dist/*.dmg
+            dist/*macOS*.zip
+
+  build-linux:
+    name: Build Linux (.deb & .tar.gz)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build Linux .deb & .tar.gz
+        run: |
+          chmod +x installer/linux/build_deb.sh
+          bash installer/linux/build_deb.sh
+          python3 package.py
+
+      - name: Upload Linux Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-release
+          path: |
+            dist/*.deb
+            dist/*Linux*.tar.gz
+
+  release:
+    name: Publish GitHub Release
+    needs: [build-windows, build-macos, build-linux]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - name: List Artifacts for Release
+        run: |
+          mkdir -p final-dist
+          find release-artifacts -type f -exec cp {} final-dist/ \;
+          ls -la final-dist/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: final-dist/*
+          draft: false
+          prerelease: false
+          generate_release_notes: true
