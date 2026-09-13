@@ -40,14 +40,14 @@ TRANSLATIONS = {
         "display_engine": "Mesin Tampilan:",
         "fullscreen_chk": "Jalankan VM Langsung dalam Mode Layar Penuh (Fullscreen)",
         "recommended": "Rekomendasi",
-        "shortcut_title": "Fitur Canggih & Shortcut Layar VM (Fullscreen, Mouse, Keys)",
+        "shortcut_title": "Fitur Canggih & Shortcut Layar VM (Fullscreen, Mouse, Keys, Copy-Paste)",
         "shortcut_markup": (
             "<b>Daftar Fitur &amp; Shortcut QEMU VM yang Bisa Kamu Gunakan:</b>\n\n"
-            "• <b>Toggle Fullscreen:</b> Tekan <b><tt>Ctrl + Alt + F</tt></b> di dalam jendela VM untuk masuk/keluar mode Fullscreen kapan saja.\n"
-            "• <b>Lepas / Tangkap Mouse:</b> Tekan <b><tt>Ctrl + Alt + G</tt></b> jika kursor kaku atau ingin melepas kursor dari VM.\n"
-            "• <b>Layar Auto-Fit:</b> Di bar atas jendela VM, klik <b><i>View → Zoom to Fit</i></b> agar tampilan Windows pas secara otomatis dengan resolusi layar.\n"
-            "• <b>Kirim Ctrl+Alt+Del:</b> Di bar atas jendela VM, klik <b><i>Machine → Send Key → Ctrl-Alt-Del</i></b> untuk membuka Task Manager / Lock Screen.\n"
-            "• <b>Hard Reset VM:</b> Di bar atas jendela VM, klik <b><i>Machine → Reset</i></b> jika Windows macet."
+            "• <b>Proteksi Jendela (Tanpa Tombol Close):</b> Jendela QEMU dirancang tanpa titlebar &amp; tombol close agar tidak sengaja mati saat digunakan.\n"
+            "• <b>Tombol Logo Windows:</b> Penekanan tombol Logo Windows di keyboard langsung diarahkan ke Start Menu Windows VM.\n"
+            "• <b>Toggle Fullscreen:</b> Tekan <b><tt>Ctrl + Alt + F</tt></b> di dalam jendela VM untuk masuk/keluar mode Layar Penuh.\n"
+            "• <b>Shared Clipboard (Copy-Paste):</b> Gunakan <b><tt>Ctrl + C</tt></b> &amp; <b><tt>Ctrl + V</tt></b> untuk menyalin/merekat teks secara langsung antara Linux Host dan Windows VM.\n"
+            "• <b>Lepas / Tangkap Mouse:</b> Tekan <b><tt>Ctrl + Alt + G</tt></b> jika kursor kaku atau ingin melepas kursor dari VM."
         ),
         "help_title": "Panduan Troubleshooting Boot Windows",
         "help_markup": (
@@ -115,14 +115,14 @@ TRANSLATIONS = {
         "display_engine": "Display Engine:",
         "fullscreen_chk": "Launch VM Directly in Fullscreen Mode",
         "recommended": "Recommended",
-        "shortcut_title": "VM Features & Screen Shortcuts (Fullscreen, Mouse, Keys)",
+        "shortcut_title": "VM Features & Screen Shortcuts (Fullscreen, Mouse, Keys, Copy-Paste)",
         "shortcut_markup": (
             "<b>Available QEMU VM Features &amp; Shortcuts:</b>\n\n"
+            "• <b>Window Protection (No Close Button):</b> QEMU display window is framed without titlebar &amp; close button to prevent accidental VM termination.\n"
+            "• <b>Windows Logo Key:</b> Pressing the Windows key is captured directly by Windows VM Start Menu.\n"
             "• <b>Toggle Fullscreen:</b> Press <b><tt>Ctrl + Alt + F</tt></b> inside VM window to toggle Fullscreen mode.\n"
-            "• <b>Release / Grab Mouse:</b> Press <b><tt>Ctrl + Alt + G</tt></b> to ungrab/release mouse pointer from VM.\n"
-            "• <b>Screen Auto-Fit:</b> On VM window menu, click <b><i>View → Zoom to Fit</i></b> to fit Windows resolution automatically.\n"
-            "• <b>Send Ctrl+Alt+Del:</b> On VM window menu, click <b><i>Machine → Send Key → Ctrl-Alt-Del</i></b> to access Task Manager / Lock Screen.\n"
-            "• <b>Hard Reset VM:</b> On VM window menu, click <b><i>Machine → Reset</i></b> if Windows hangs."
+            "• <b>Shared Clipboard (Copy-Paste):</b> Use <b><tt>Ctrl + C</tt></b> &amp; <b><tt>Ctrl + V</tt></b> to copy/paste text seamlessly between Linux Host and Windows VM.\n"
+            "• <b>Release / Grab Mouse:</b> Press <b><tt>Ctrl + Alt + G</tt></b> to ungrab/release mouse pointer from VM."
         ),
         "help_title": "Windows Boot Troubleshooting & Fix Guide",
         "help_markup": (

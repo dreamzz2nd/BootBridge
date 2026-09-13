@@ -128,12 +128,19 @@ class QEMULauncher:
                 "-device", "ide-hd,bus=ahci.0,drive=drive0"
             ])
 
-        # VGA Graphics & Display (QXL paravirtual display adapter with auto zoom-to-fit scaling)
+        # Bidirectional Host <-> Guest Clipboard Sharing (qemu-vdagent)
+        cmd.extend([
+            "-chardev", "qemu-vdagent,id=chd,name=vdagent,clipboard=on",
+            "-device", "virtio-serial-pci",
+            "-device", "virtserialport,chardev=chd,name=com.redhat.spice.0"
+        ])
+
+        # VGA Graphics & Display (QXL paravirtual display adapter with auto zoom-to-fit scaling & keyboard grab)
         if display_type == "gtk":
+            opts = "gtk,zoom-to-fit=on,show-menubar=off,window-close=off,grab-on-hover=on"
             if fullscreen:
-                cmd.extend(["-vga", "qxl", "-display", "gtk,zoom-to-fit=on,window-close=off,full-screen=on"])
-            else:
-                cmd.extend(["-vga", "qxl", "-display", "gtk,zoom-to-fit=on,window-close=off"])
+                opts += ",full-screen=on"
+            cmd.extend(["-vga", "qxl", "-display", opts])
         elif display_type == "sdl":
             if fullscreen:
                 cmd.extend(["-vga", "qxl", "-display", "sdl,zoom-to-fit=on", "-full-screen"])
@@ -142,10 +149,10 @@ class QEMULauncher:
         elif display_type == "spice":
             cmd.extend(["-vga", "qxl", "-spice", "port=5900,disable-ticketing=on", "-display", "none"])
         else: # Default fallback GTK
+            opts = "gtk,zoom-to-fit=on,show-menubar=off,window-close=off,grab-on-hover=on"
             if fullscreen:
-                cmd.extend(["-vga", "qxl", "-display", "gtk,zoom-to-fit=on,window-close=off,full-screen=on"])
-            else:
-                cmd.extend(["-vga", "qxl", "-display", "gtk,zoom-to-fit=on,window-close=off"])
+                opts += ",full-screen=on"
+            cmd.extend(["-vga", "qxl", "-display", opts])
 
         # USB Tablet Pointer (prevents mouse lock inside VM window)
         cmd.extend(["-usb", "-device", "usb-tablet"])
@@ -226,6 +233,9 @@ class QEMULauncher:
                 t_out.start()
                 t_err.start()
 
+                # Remove window decorations (titlebar and close button) pasca-launch
+                threading.Thread(target=self._strip_window_decorations, daemon=True).start()
+
                 self.process.wait()
                 rc = self.process.returncode
                 self.is_running = False
@@ -241,6 +251,21 @@ class QEMULauncher:
         self.monitor_thread.daemon = True
         self.monitor_thread.start()
         return True
+
+    def _strip_window_decorations(self):
+        """Removes titlebar, frame, and close button from QEMU GTK window using xprop / wmctrl."""
+        time.sleep(1.0)
+        try:
+            res = subprocess.run(["wmctrl", "-l"], capture_output=True, text=True)
+            if res.returncode == 0:
+                for line in res.stdout.splitlines():
+                    if "qemu" in line.lower():
+                        win_id = line.split()[0]
+                        subprocess.run(["xprop", "-id", win_id, "-f", "_MOTIF_WM_HINTS", "32c", "-set", "_MOTIF_WM_HINTS", "0x2, 0x0, 0x0, 0x0, 0x0"], capture_output=True)
+                        self.log_callback("Removed window titlebar and close button from QEMU display.")
+                        break
+        except Exception as e:
+            self.log_callback(f"Notice stripping window decorations: {e}")
 
     def stop_vm(self, force=False):
         """Stops the running VM process."""
