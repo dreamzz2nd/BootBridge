@@ -66,8 +66,11 @@ TRANSLATIONS = {
         "win_installed": " [Windows Terdeteksi]",
         "safety_card_title": "Proteksi & Keamanan Data File System",
         "unmount_btn": "Unmount Partisi Linux dengan Aman",
+        "unmount_btn_done": "✓ Partisi Unmounted (Aman)",
         "fix_ntfs_btn": "Reset Status NTFS / Fast Startup",
+        "fix_ntfs_btn_done": "✓ Status NTFS Clean",
         "enable_fast_btn": "Aktifkan Fast Startup",
+        "enable_fast_btn_done": "✓ Fast Startup Aktif",
         "mount_active_hdr": "PROTEKSI MOUNT AKTIF:",
         "mount_active_msg": "Partisi Windows sedang di-mount oleh Linux. Harap unmount terlebih dahulu untuk mencegah kerusakan file NTFS.",
         "mount_safe_hdr": "PROTEKSI MOUNT: UNMOUNTED",
@@ -137,8 +140,11 @@ TRANSLATIONS = {
         "win_installed": " [Windows Installed]",
         "safety_card_title": "Safety & Data Protection Guard",
         "unmount_btn": "Safe Unmount Linux Partitions",
+        "unmount_btn_done": "✓ Partitions Unmounted (Safe)",
         "fix_ntfs_btn": "Reset NTFS Status / Fast Startup",
+        "fix_ntfs_btn_done": "✓ NTFS Status Clean",
         "enable_fast_btn": "Enable Fast Startup",
+        "enable_fast_btn_done": "✓ Fast Startup Active",
         "mount_active_hdr": "MOUNT PROTECTION ACTIVE:",
         "mount_active_msg": "Windows partitions are currently mounted by Linux. Please unmount them first to prevent NTFS file corruption.",
         "mount_safe_hdr": "MOUNT GUARD: UNMOUNTED",
@@ -215,6 +221,26 @@ def make_icon_button(icon_name, label_text, style_class=None):
     if style_class:
         btn.get_style_context().add_class(style_class)
     return btn, label
+
+def set_button_state(btn, label_widget, icon_name, text, is_success):
+    """Updates GTK button label, icon, and toggles between btn-warning and btn-success CSS classes."""
+    if not btn or not label_widget:
+        return
+    label_widget.set_text(text)
+    ctx = btn.get_style_context()
+    if is_success:
+        ctx.remove_class("btn-warning")
+        ctx.add_class("btn-success")
+    else:
+        ctx.remove_class("btn-success")
+        ctx.add_class("btn-warning")
+
+    child = btn.get_child()
+    if isinstance(child, Gtk.Box):
+        for box_child in child.get_children():
+            if isinstance(box_child, Gtk.Image):
+                box_child.set_from_icon_name(icon_name, Gtk.IconSize.BUTTON)
+                break
 
 def make_icon_card_title(icon_name, title_text):
     """Creates a card header box with a symbolic icon header."""
@@ -456,7 +482,7 @@ class BootBridgeApp(Gtk.Window):
         self.fix_ntfs_btn.connect("clicked", self.on_fix_ntfs_clicked)
         self.unmount_btn_box.pack_start(self.fix_ntfs_btn, False, False, 0)
 
-        self.enable_fast_btn, self.enable_fast_btn_lbl = make_icon_button("emblem-ok-symbolic", self.tr("enable_fast_btn"), style_class="btn-success")
+        self.enable_fast_btn, self.enable_fast_btn_lbl = make_icon_button("system-run-symbolic", self.tr("enable_fast_btn"), style_class="btn-warning")
         self.enable_fast_btn.connect("clicked", self.on_enable_fast_startup_clicked)
         self.unmount_btn_box.pack_start(self.enable_fast_btn, False, False, 0)
 
@@ -799,6 +825,7 @@ class BootBridgeApp(Gtk.Window):
         if hasattr(self, "unmount_btn_lbl"): self.unmount_btn_lbl.set_text(self.tr("unmount_btn"))
         if hasattr(self, "fix_ntfs_btn_lbl"): self.fix_ntfs_btn_lbl.set_text(self.tr("fix_ntfs_btn"))
         if hasattr(self, "enable_fast_btn_lbl"): self.enable_fast_btn_lbl.set_text(self.tr("enable_fast_btn"))
+        self.update_safety_button_styles()
         if hasattr(self, "config_title_lbl"): self.config_title_lbl.set_text(self.tr("config_card_title"))
         if hasattr(self, "ram_lbl"): self.ram_lbl.set_text(self.tr("ram_alloc"))
         if hasattr(self, "cpu_lbl"): self.cpu_lbl.set_text(self.tr("cpu_cores"))
@@ -948,11 +975,25 @@ class BootBridgeApp(Gtk.Window):
             hdr = self.tr("mount_active_hdr")
             body = self.tr("mount_active_msg")
             msg_lines.append(f"<span foreground='#ef5350'><b>{hdr}</b></span> {body}")
+            set_button_state(
+                self.unmount_btn,
+                self.unmount_btn_lbl,
+                "drive-removable-media-symbolic",
+                self.tr("unmount_btn"),
+                is_success=False
+            )
             self.unmount_btn_box.show_all()
         else:
             hdr = self.tr("mount_safe_hdr")
             body = self.tr("mount_safe_msg")
             msg_lines.append(f"<span foreground='#73c991'><b>{hdr}</b></span> {body}")
+            set_button_state(
+                self.unmount_btn,
+                self.unmount_btn_lbl,
+                "emblem-ok-symbolic",
+                self.tr("unmount_btn_done"),
+                is_success=True
+            )
             self.unmount_btn_box.show_all()
 
         if safety["is_host_disk"]:
@@ -961,6 +1002,7 @@ class BootBridgeApp(Gtk.Window):
             msg_lines.append(f"<span foreground='#64b5f6'><b>{hdr}</b></span> {body}")
 
         self.safety_status_label.set_markup("\n".join(msg_lines))
+        self.update_safety_button_styles()
 
         # Enable/Disable Start Button
         can_start = is_safe and self.deps.get("qemu_installed") and not self.launcher.is_running
@@ -994,6 +1036,11 @@ class BootBridgeApp(Gtk.Window):
             self.log_message(f"Fixing NTFS dirty flag for partition {p['path']}...")
             success, msg = SafetyChecker.fix_ntfs_dirty_flag(p["path"])
             self.log_message(msg)
+            if success:
+                self.config["ntfs_reset_done"] = True
+                self.config["fast_startup_active"] = False
+                save_config(self.config)
+                self.update_safety_button_styles()
 
     def on_enable_fast_startup_clicked(self, widget):
         if not self.selected_disk:
@@ -1008,6 +1055,52 @@ class BootBridgeApp(Gtk.Window):
             self.log_message(f"Mengaktifkan Fast Startup untuk partisi {p['path']}...")
             success, msg = SafetyChecker.enable_fast_startup(p["path"])
             self.log_message(msg)
+            if success:
+                self.config["fast_startup_active"] = True
+                self.config["ntfs_reset_done"] = False
+                save_config(self.config)
+                self.update_safety_button_styles()
+
+    def update_safety_button_styles(self):
+        if not hasattr(self, "fix_ntfs_btn") or not hasattr(self, "enable_fast_btn"):
+            return
+
+        fast_startup_active = self.config.get("fast_startup_active", False)
+        ntfs_reset_done = self.config.get("ntfs_reset_done", False)
+
+        if ntfs_reset_done:
+            set_button_state(
+                self.fix_ntfs_btn,
+                self.fix_ntfs_btn_lbl,
+                "emblem-ok-symbolic",
+                self.tr("fix_ntfs_btn_done"),
+                is_success=True
+            )
+        else:
+            set_button_state(
+                self.fix_ntfs_btn,
+                self.fix_ntfs_btn_lbl,
+                "system-run-symbolic",
+                self.tr("fix_ntfs_btn"),
+                is_success=False
+            )
+
+        if fast_startup_active:
+            set_button_state(
+                self.enable_fast_btn,
+                self.enable_fast_btn_lbl,
+                "emblem-ok-symbolic",
+                self.tr("enable_fast_btn_done"),
+                is_success=True
+            )
+        else:
+            set_button_state(
+                self.enable_fast_btn,
+                self.enable_fast_btn_lbl,
+                "system-run-symbolic",
+                self.tr("enable_fast_btn"),
+                is_success=False
+            )
 
     def on_start_vm_clicked(self, widget):
         if not self.selected_disk:
