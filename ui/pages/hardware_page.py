@@ -101,13 +101,33 @@ class HardwarePage(Gtk.ScrolledWindow):
 
     def update_scale_marks(self):
         rec_lbl = self.app.tr("recommended")
+        
         self.ram_scale.clear_marks()
         self.ram_scale.add_mark(self.rec_ram_mb, Gtk.PositionType.BOTTOM, f"{rec_lbl} ({int(self.rec_ram_mb/1024)} GB)")
-        self.ram_scale.connect("format-value", lambda scale, val: f"{int(val/1024)} GB ({int(val)} MB)" + (f" ({rec_lbl})" if int(val) == self.rec_ram_mb else ""))
+        
+        if hasattr(self, "ram_signal_id") and self.ram_signal_id:
+            try:
+                self.ram_scale.disconnect(self.ram_signal_id)
+            except Exception:
+                pass
+        self.ram_signal_id = self.ram_scale.connect(
+            "format-value",
+            lambda scale, val: f"{int(val/1024)} GB ({int(val)} MB)"
+        )
 
         self.cpu_scale.clear_marks()
         self.cpu_scale.add_mark(self.rec_cores, Gtk.PositionType.BOTTOM, f"{rec_lbl} ({self.rec_cores} Cores)")
-        self.cpu_scale.connect("format-value", lambda scale, val: f"{int(val)} Core" + ("s" if int(val) > 1 else "") + (f" ({rec_lbl})" if int(val) == self.rec_cores else ""))
+        
+        if hasattr(self, "cpu_signal_id") and self.cpu_signal_id:
+            try:
+                self.cpu_scale.disconnect(self.cpu_signal_id)
+            except Exception:
+                pass
+        self.cpu_signal_id = self.cpu_scale.connect(
+            "format-value",
+            lambda scale, val: f"{int(val)} Core" + ("s" if int(val) > 1 else "")
+        )
+
 
     def apply_language(self):
         self.config_title_lbl.set_text(self.app.tr("config_card_title"))
