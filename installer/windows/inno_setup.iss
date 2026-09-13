@@ -20,10 +20,9 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
 LicenseFile=..\..\LICENSE
-; Visuals & Branding
+; Visuals & Output
 OutputDir=..\..\dist
 OutputBaseFilename=BootBridge-v{#MyAppVersion}-Windows-Setup
-SetupIconFile=..\..\assets\icon.ico
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern

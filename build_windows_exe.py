@@ -14,15 +14,31 @@ import shutil
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DIST_DIR = os.path.join(BASE_DIR, "dist")
 
+def ensure_icon_ico():
+    ico_path = os.path.join(BASE_DIR, "assets", "icon.ico")
+    png_path = os.path.join(BASE_DIR, "assets", "bootbridge.png")
+    if not os.path.exists(ico_path) and os.path.exists(png_path):
+        try:
+            from PIL import Image
+            img = Image.open(png_path)
+            img.save(ico_path, format="ICO", sizes=[(256, 256), (128, 128), (64, 64), (48, 48), (32, 32), (16, 16)])
+            print("[✔] Generated assets/icon.ico from bootbridge.png")
+            return ico_path
+        except Exception as e:
+            print(f"[!] Pillow not available to convert icon: {e}")
+            return None
+    elif os.path.exists(ico_path):
+        return ico_path
+    return None
+
 def build_windows_exe():
     print("===================================================")
     print("   Building Standalone Windows .EXE Packages")
     print("===================================================")
 
     os.makedirs(DIST_DIR, exist_ok=True)
-    icon_path = os.path.join(BASE_DIR, "assets", "bootbridge.png")
-    
-    # Common PyInstaller arguments
+    icon_path = ensure_icon_ico()
+
     sep = ";" if sys.platform == "win32" else ":"
     
     add_data = [
@@ -41,18 +57,18 @@ def build_windows_exe():
         sys.executable, "-m", "PyInstaller",
         "--noconfirm",
         "--clean",
-        "--onedir",
+        "--onefile",
         "--windowed",
         "--name=BootBridge-Setup",
         *add_data,
         "setup_wizard.py"
     ]
-    if os.path.exists(icon_path):
+    if icon_path and os.path.exists(icon_path):
         cmd_setup.append(f"--icon={icon_path}")
 
     try:
         subprocess.run(cmd_setup, check=True)
-        print("[✔] BootBridge-Setup.exe compiled successfully in dist/BootBridge-Setup/")
+        print("[✔] BootBridge-Setup.exe compiled successfully in dist/")
     except Exception as e:
         print(f"[!] Warning during Setup Wizard compilation: {e}")
 
@@ -62,18 +78,18 @@ def build_windows_exe():
         sys.executable, "-m", "PyInstaller",
         "--noconfirm",
         "--clean",
-        "--onedir",
+        "--onefile",
         "--windowed",
         "--name=BootBridge",
         *add_data,
         "bootbridge.py"
     ]
-    if os.path.exists(icon_path):
+    if icon_path and os.path.exists(icon_path):
         cmd_app.append(f"--icon={icon_path}")
 
     try:
         subprocess.run(cmd_app, check=True)
-        print("[✔] BootBridge.exe compiled successfully in dist/BootBridge/")
+        print("[✔] BootBridge.exe compiled successfully in dist/")
     except Exception as e:
         print(f"[!] Warning during Main Application compilation: {e}")
 
