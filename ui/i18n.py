@@ -149,7 +149,7 @@ TRANSLATIONS = {
         "remote_dynres_chk": "Aktifkan Penyesuaian Resolusi Otomatis (Dynamic Resolution)",
         "connect_remote_btn": "SAMBUNGKAN SEKARANG (1-KLIK)",
         "disconnect_remote_btn": "HENTIKAN KONEKSI REMOTE",
-        "remote_guide_title": "Panduan Alur Remote Desktop 7 Langkah (Gaya AnyDesk)",
+        "remote_guide_title": "Panduan Alur Remote Desktop 7 Langkah (Sederhana & Praktis)",
         "remote_guide_markup": (
             "<b>Alur Kerja Remote Desktop 7 Langkah (Sederhana & Mudah):</b>\n\n"
             "<b>1. Siapkan Komponen:</b> Pastikan komponen client remote sudah terpasang (1-klik pasang otomatis).\n"

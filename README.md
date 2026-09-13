@@ -19,7 +19,7 @@
 [Key Features](#key-features) •
 [Cross-Platform Support](#cross-platform-support) •
 [Installation Guide](#installation-guide) •
-[Remote Desktop (AnyDesk Style)](#remote-desktop-workflow-anydesk-style) •
+[Remote Desktop](#easy-remote-desktop-suite) •
 [Comparison](#comparison-matrix) •
 [Troubleshooting](#troubleshooting--faq)
 
@@ -36,7 +36,7 @@
   - [Option A: 1-Click Graphical Setup Wizard (No-Terminal / Beginners)](#option-a-1-click-graphical-setup-wizard-no-terminal--beginners)
   - [Option B: 1-Line Automated Terminal Installer](#option-b-1-line-automated-terminal-installer)
   - [Option C: Manual Installation](#option-c-manual-installation)
-- [Remote Desktop Workflow (AnyDesk Style)](#remote-desktop-workflow-anydesk-style)
+- [Easy Remote Desktop Suite](#easy-remote-desktop-suite)
 - [Comparison Matrix](#comparison-matrix)
 - [System Architecture](#system-architecture)
 - [System Requirements](#system-requirements)
@@ -60,7 +60,7 @@ With BootBridge, your physical Windows partition is booted natively inside a hig
 - **Zero-Reboot Dual Booting**: Boot your physical Windows drive inside your host OS at near-native speed.
 - **Cross-Platform Compatibility**: Full support for **Linux**, **macOS** (Intel & Apple Silicon), and **Windows**.
 - **1-Click Setup Wizard**: Double-click `Install_BootBridge.desktop` or run `gui_installer.py` for a beginner-friendly setup.
-- **AnyDesk-Style Remote Desktop**: 7-step simple remote desktop workflow with auto-generated Device ID, 1-click IP copy, Wi-Fi device auto-scanning, and 1-click connect.
+- **Easy Remote Desktop Suite**: 7-step simple remote desktop workflow with auto-generated Device ID, 1-click IP copy, Wi-Fi device auto-scanning, and 1-click connect.
 - **Mount Safety Guard**: Built-in protection protocol that verifies disk mount states, warns against shared host partition access, and safely unmounts host-mounted NTFS drives to prevent data corruption.
 - **Fast Startup & Offline Registry Modifier**: One-click Fast Startup enablement (`HiberbootEnabled = 1`) and reset via direct offline REGF Windows registry hive modification.
 - **Frameless Window Protection**: QEMU display window runs frameless to prevent accidental VM termination.
@@ -134,9 +134,9 @@ cd BootBridge
 
 ---
 
-## Remote Desktop Workflow (AnyDesk Style)
+## Easy Remote Desktop Suite
 
-BootBridge includes an intuitive, 7-step Remote Desktop connection suite inspired by AnyDesk / TeamViewer for effortless remote PC access:
+BootBridge includes an intuitive, 7-step Remote Desktop connection suite designed for effortless remote PC access:
 
 ```
 +-----------------------------------------------------------------------------+
@@ -151,7 +151,7 @@ BootBridge includes an intuitive, 7-step Remote Desktop connection suite inspire
 +-----------------------------------------------------------------------------+
 ```
 
-### The 7-Step AnyDesk Workflow:
+### The 7-Step Remote Desktop Workflow:
 
 1. **Step 1 & 2 (Automatic Component Setup)**: BootBridge checks required remote desktop client binaries on launch. Missing components can be installed with 1 click.
 2. **Step 3 (Your Device ID)**: Your unique Device ID / IP Address is displayed at the top banner with a 1-click **Copy ID** button to share with partners.
@@ -164,15 +164,15 @@ BootBridge includes an intuitive, 7-step Remote Desktop connection suite inspire
 
 ## Comparison Matrix
 
-| Feature | Native Reboot Dual-Boot | Standard VirtualBox / VMware | BootBridge |
+| Feature | Native Reboot Dual-Boot | Standard Virtual Machines | BootBridge |
 | :--- | :---: | :---: | :---: |
 | **Reboot Required** | Yes | No | **No** |
 | **Uses Physical Installed Windows**| Yes | No (Requires duplicate OS install) | **Yes** |
 | **Performance** | 100% Native | 60% - 80% Virtualized | **90% - 98% Near-Native** |
 | **Cross-Platform Support** | N/A | Yes | **Yes (Linux, macOS, Windows)** |
 | **Data Safety Protection** | None | N/A | **Automated Mount Protection Guard** |
-| **Remote Desktop Suite** | None | Limited | **7-Step AnyDesk-Style Suite** |
-| **RAM Footprint** | N/A | 500 MB+ (Electron) | **~30 – 50 MB (Native GTK3)** |
+| **Remote Desktop Suite** | None | Limited | **7-Step Easy Suite** |
+| **RAM Footprint** | N/A | 500 MB+ (Web wrappers) | **~30 – 50 MB (Native GTK3)** |
 
 ---
 
@@ -284,6 +284,6 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 Developed by **[Rizky Ibrahim Nasrullah (dreamzz2nd)](https://github.com/dreamzz2nd)**
 
-*BootBridge is an independent open-source tool and is not affiliated with Microsoft Corporation or QEMU maintainers.*
+*BootBridge is an independent open-source application.*
 
 </div>

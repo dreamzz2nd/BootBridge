@@ -74,7 +74,7 @@ class RemotePage(Gtk.ScrolledWindow):
         easy_hdr, self.easy_title_lbl = make_card_header("emblem-system-symbolic", app.tr("remote_mode_easy"))
         self.easy_card.pack_start(easy_hdr, False, False, 0)
 
-        # TeamViewer / AnyDesk "My Computer ID" Banner
+        # BootBridge "My Computer ID" Banner
         my_id_card = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         my_id_hdr = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
         
