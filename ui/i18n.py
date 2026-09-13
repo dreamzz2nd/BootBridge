@@ -10,6 +10,7 @@ TRANSLATIONS = {
         "nav_hardware": "Konfigurasi Hardware",
         "nav_guides": "Panduan & Shortcut",
         "nav_diagnostics": "Konsol Diagnostik",
+        "nav_remote": "Remote PC & Desktop",
         "nav_settings": "Pengaturan & Tema",
         "app_subtitle": "Peluncur VM Dual-Boot Windows Fisik yang Aman & Ringan",
         "kvm_active": "KVM: AKTIF",
@@ -100,6 +101,39 @@ TRANSLATIONS = {
         "dont_show_again": "Jangan tampilkan petunjuk ini lagi saat memulai VM",
         "btn_continue": "Lanjutkan Boot VM",
         "btn_cancel": "Batal",
+
+        "remote_dep_title": "Komponen Remote Desktop Belum Terpasang",
+        "remote_dep_msg": "Aplikasi membutuhkan komponen <b>freerdp2-x11</b> untuk meremote PC Windows.\nKlik tombol di bawah untuk memasang komponen secara otomatis:",
+        "install_remote_dep_btn": "Pasang Komponen Remote Desktop (1-Klik)",
+        "remote_scan_title": "Pindai Komputer Windows di Jaringan Wi-Fi / LAN (Otomatis)",
+        "remote_scan_btn": "Pindai Jaringan Wi-Fi",
+        "remote_scanning": "Memindai Jaringan...",
+        "remote_scan_placeholder": "Klik 'Pindai Jaringan Wi-Fi' untuk menemukan PC Windows otomatis...",
+        "remote_no_devices_found": "Tidak ada PC Windows RDP yang terdeteksi di jaringan lokal",
+        "remote_select_detected": "-- Pilih Komputer Windows Terdeteksi --",
+        "remote_card_title": "Konfigurasi Remote Desktop & Server Connection",
+        "remote_proto": "Protokol Remote:",
+        "remote_host": "IP / Host Target:",
+        "remote_port": "Port Connection:",
+        "remote_user": "Username (RDP):",
+        "remote_pass": "Password Target:",
+        "remote_options_title": "Pengaturan Performa & Layar Remote",
+        "remote_fullscreen_chk": "Jalankan Remote Desktop dalam Mode Layar Penuh (Fullscreen)",
+        "remote_clip_chk": "Aktifkan Shared Clipboard (Copy-Paste Dua Arah)",
+        "remote_audio_chk": "Aktifkan Passthrough Suara / Audio (PulseAudio)",
+        "remote_dynres_chk": "Aktifkan Penyesuaian Resolusi Otomatis (Dynamic Resolution)",
+        "connect_remote_btn": "HUBUNGKAN KE REMOTE PC",
+        "disconnect_remote_btn": "HENTIKAN KONEKSI REMOTE",
+        "remote_guide_title": "Panduan Praktis Cara Meremote PC Windows (Untuk Orang Awam)",
+        "remote_guide_markup": (
+            "<b>Cara Mudah Mengakses Laptop / PC Windows Lain:</b>\n\n"
+            "1. <b>Aktifkan Remote Desktop di PC Windows Target:</b>\n"
+            "   Di PC Windows yang mau di-remote, buka <b>Settings</b> ➡️ <b>System</b> ➡️ <b>Remote Desktop</b> ➡️ Aktifkan tombol <b>Enable Remote Desktop</b>.\n\n"
+            "2. <b>Pindai Otomatis di BootBridge:</b>\n"
+            "   Klik tombol <b>'Pindai Jaringan Wi-Fi'</b> di atas. BootBridge akan otomatis menemukan PC Windows tersebut tanpa kamu harus mengetik nomor IP!\n\n"
+            "3. <b>Masukkan Username &amp; Password:</b>\n"
+            "   Isi Username dan Password login Windows target, lalu klik tombol biru <b>HUBUNGKAN KE REMOTE PC</b>. Selesai!"
+        ),
     },
     "en": {
         "nav_title": "NAVIGATION",
@@ -108,6 +142,7 @@ TRANSLATIONS = {
         "nav_hardware": "Resource Config",
         "nav_guides": "Help & Shortcuts",
         "nav_diagnostics": "Live Diagnostics",
+        "nav_remote": "Remote PC & Desktop",
         "nav_settings": "Settings & Theme",
         "app_subtitle": "Safe & Lightweight Dual-Boot Physical Windows VM Launcher",
         "kvm_active": "KVM: ACCELERATED",
@@ -198,6 +233,39 @@ TRANSLATIONS = {
         "dont_show_again": "Don't show this shortcut guide again when launching VM",
         "btn_continue": "Continue Boot VM",
         "btn_cancel": "Cancel",
+
+        "remote_dep_title": "Remote Desktop Components Missing",
+        "remote_dep_msg": "The application requires the <b>freerdp2-x11</b> package to connect to remote Windows PCs.\nClick the button below to install components automatically:",
+        "install_remote_dep_btn": "Install Remote Desktop Components (1-Click)",
+        "remote_scan_title": "Auto-Scan Windows PCs on Wi-Fi / LAN Network",
+        "remote_scan_btn": "Scan Wi-Fi Network",
+        "remote_scanning": "Scanning Network...",
+        "remote_scan_placeholder": "Click 'Scan Wi-Fi Network' to discover Windows PCs automatically...",
+        "remote_no_devices_found": "No active RDP Windows PCs detected on local network",
+        "remote_select_detected": "-- Select Detected Windows PC --",
+        "remote_card_title": "Remote Desktop & Server Connection Configuration",
+        "remote_proto": "Remote Protocol:",
+        "remote_host": "Target IP / Host:",
+        "remote_port": "Connection Port:",
+        "remote_user": "Username (RDP):",
+        "remote_pass": "Target Password:",
+        "remote_options_title": "Remote Performance & Display Settings",
+        "remote_fullscreen_chk": "Launch Remote Desktop in Fullscreen Mode",
+        "remote_clip_chk": "Enable Shared Clipboard (Bidirectional Copy-Paste)",
+        "remote_audio_chk": "Enable Audio / Sound Passthrough (PulseAudio)",
+        "remote_dynres_chk": "Enable Automatic Resolution Scaling (Dynamic Resolution)",
+        "connect_remote_btn": "CONNECT TO REMOTE PC",
+        "disconnect_remote_btn": "DISCONNECT REMOTE SESSION",
+        "remote_guide_title": "Beginner's Guide to Remote Windows PCs",
+        "remote_guide_markup": (
+            "<b>Easy 3-Step Remote Desktop Setup:</b>\n\n"
+            "1. <b>Enable Remote Desktop on Windows:</b>\n"
+            "   On the target Windows PC, open <b>Settings</b> ➡️ <b>System</b> ➡️ <b>Remote Desktop</b> ➡️ turn ON <b>Enable Remote Desktop</b>.\n\n"
+            "2. <b>Auto-Scan in BootBridge:</b>\n"
+            "   Click <b>'Scan Wi-Fi Network'</b> above. BootBridge automatically discovers the Windows PC without needing to type IP addresses!\n\n"
+            "3. <b>Enter Credentials &amp; Connect:</b>\n"
+            "   Enter target Windows Username &amp; Password, then click the blue <b>CONNECT TO REMOTE PC</b> button. Done!"
+        ),
     }
 }
 

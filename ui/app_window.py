@@ -14,6 +14,7 @@ from core.config import load_config, save_config
 from core.disk_manager import DiskManager
 from core.safety_checker import SafetyChecker
 from core.qemu_launcher import QEMULauncher
+from core.remote_launcher import RemoteLauncher
 
 from ui.i18n import tr
 from ui.components import make_icon_button, set_button_state
@@ -22,6 +23,7 @@ from ui.pages.safety_page import SafetyPage
 from ui.pages.hardware_page import HardwarePage
 from ui.pages.guides_page import GuidesPage
 from ui.pages.diagnostics_page import DiagnosticsPage
+from ui.pages.remote_page import RemotePage
 from ui.pages.settings_page import SettingsPage
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -59,6 +61,10 @@ class BootBridgeApp(Gtk.Window):
             log_callback=self.log_message,
             status_callback=self.on_vm_status_changed,
             help_callback=lambda: self._show_launch_guide_dialog(is_manual=True)
+        )
+        self.remote_launcher = RemoteLauncher(
+            log_callback=self.log_message,
+            status_callback=self.on_remote_status_changed
         )
 
         # Load Custom CSS Styling
@@ -141,6 +147,7 @@ class BootBridgeApp(Gtk.Window):
             ("dashboard", "drive-harddisk-symbolic", "nav_dashboard"),
             ("safety", "security-high-symbolic", "nav_safety"),
             ("hardware", "preferences-system-symbolic", "nav_hardware"),
+            ("remote", "network-workgroup-symbolic", "nav_remote"),
             ("guides", "input-keyboard-symbolic", "nav_guides"),
             ("diagnostics", "utilities-terminal-symbolic", "nav_diagnostics"),
             ("settings", "emblem-system-symbolic", "nav_settings")
@@ -179,6 +186,7 @@ class BootBridgeApp(Gtk.Window):
         self.page_dashboard = DashboardPage(self)
         self.page_safety = SafetyPage(self)
         self.page_hardware = HardwarePage(self)
+        self.page_remote = RemotePage(self)
         self.page_guides = GuidesPage(self)
         self.page_diagnostics = DiagnosticsPage(self)
         self.page_settings = SettingsPage(self)
@@ -210,6 +218,7 @@ class BootBridgeApp(Gtk.Window):
         self.stack.add_named(self.page_dashboard, "dashboard")
         self.stack.add_named(self.page_safety, "safety")
         self.stack.add_named(self.page_hardware, "hardware")
+        self.stack.add_named(self.page_remote, "remote")
         self.stack.add_named(self.page_guides, "guides")
         self.stack.add_named(self.page_diagnostics, "diagnostics")
         self.stack.add_named(self.page_settings, "settings")
@@ -280,6 +289,8 @@ class BootBridgeApp(Gtk.Window):
         self.page_dashboard.apply_language()
         self.page_safety.apply_language()
         self.page_hardware.apply_language()
+        if hasattr(self, "page_remote"):
+            self.page_remote.apply_language()
         self.page_guides.apply_language()
         self.page_diagnostics.apply_language()
         self.page_settings.apply_language()
@@ -626,6 +637,51 @@ class BootBridgeApp(Gtk.Window):
                 self.progress_bar.set_fraction(0.0)
         GLib.idle_add(update_ui)
 
+
+    def on_connect_remote_clicked(self, widget):
+        if not hasattr(self, "page_remote") or not hasattr(self, "remote_launcher"):
+            return
+
+        proto = self.page_remote.proto_combo.get_active_id() or "rdp"
+        host = self.page_remote.host_entry.get_text().strip() or "127.0.0.1"
+        try:
+            port = int(self.page_remote.port_entry.get_text().strip())
+        except ValueError:
+            port = 3389 if proto == "rdp" else 5900
+
+        user = self.page_remote.user_entry.get_text().strip()
+        pwd = self.page_remote.pass_entry.get_text().strip()
+        fullscreen = self.page_remote.fullscreen_chk.get_active()
+        clip = self.page_remote.clip_chk.get_active()
+        sound = self.page_remote.sound_chk.get_active()
+        dynres = self.page_remote.dynres_chk.get_active()
+
+        self.remote_launcher.start_remote_session(
+            protocol=proto,
+            host=host,
+            port=port,
+            username=user,
+            password=pwd,
+            fullscreen=fullscreen,
+            clipboard=clip,
+            sound=sound,
+            dynamic_res=dynres
+        )
+
+    def on_disconnect_remote_clicked(self, widget):
+        if hasattr(self, "remote_launcher"):
+            self.remote_launcher.stop_remote_session()
+
+    def on_remote_status_changed(self, status):
+        def update_ui():
+            if hasattr(self, "page_remote"):
+                if status == "RUNNING":
+                    self.page_remote.connect_btn.set_sensitive(False)
+                    self.page_remote.disconnect_btn.set_sensitive(True)
+                else:
+                    self.page_remote.connect_btn.set_sensitive(True)
+                    self.page_remote.disconnect_btn.set_sensitive(False)
+        GLib.idle_add(update_ui)
 
     def log_message(self, message):
         def append_log():
