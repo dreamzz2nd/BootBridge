@@ -77,6 +77,7 @@ class BootBridgeApp(Gtk.Window):
         self.build_ui()
 
         # Refresh disk listing & apply language
+        self.refresh_disks()
         self.apply_language()
 
     def tr(self, key, **kwargs):
@@ -308,6 +309,31 @@ class BootBridgeApp(Gtk.Window):
 
         if hasattr(self, "start_btn_lbl"): self.start_btn_lbl.set_text(self.tr("start_btn"))
         if hasattr(self, "stop_btn_lbl"): self.stop_btn_lbl.set_text(self.tr("stop_btn"))
+
+        self.update_disk_combo_labels()
+
+    def update_disk_combo_labels(self):
+        if not hasattr(self, "disk_combo") or not self.disks:
+            return
+
+        active_idx = self.disk_combo.get_active()
+        if active_idx < 0:
+            active_idx = 0
+
+        self.disk_combo.handler_block_by_func(self.on_disk_selected)
+        self.disk_combo.remove_all()
+        win_suffix = self.tr("win_installed")
+
+        for disk in self.disks:
+            label = f"{disk['path']} — {disk['model']} ({disk['size_str']})"
+            if disk.get("has_windows"):
+                label += win_suffix
+            self.disk_combo.append_text(label)
+
+        if len(self.disks) > 0 and active_idx < len(self.disks):
+            self.disk_combo.set_active(active_idx)
+
+        self.disk_combo.handler_unblock_by_func(self.on_disk_selected)
 
 
     def update_dependency_ui(self):
@@ -544,7 +570,7 @@ class BootBridgeApp(Gtk.Window):
 
     def on_key_press_event(self, widget, event):
         """Global keypress handler for application shortcuts (Ctrl + Alt + H, F11)."""
-        if event.keyval in (Gdk.KEY_F11, Gdk.KEY_f11):
+        if event.keyval == Gdk.KEY_F11:
             self.toggle_fullscreen()
             return True
 
