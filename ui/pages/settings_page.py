@@ -88,3 +88,12 @@ class SettingsPage(Gtk.ScrolledWindow):
         self.sett_theme_lbl.set_text(self.app.tr("theme_setting"))
         self.sett_lang_lbl.set_text(self.app.tr("lang_setting"))
         self.sys_title_lbl.set_text(self.app.tr("sys_info_title"))
+
+        self.sett_theme_combo.remove_all()
+        self.sett_theme_combo.append("dark", self.app.tr("theme_dark"))
+        self.sett_theme_combo.append("light", self.app.tr("theme_light"))
+        self.sett_theme_combo.set_active_id(self.app.current_theme)
+
+        self.sett_lang_combo.handler_block_by_func(self.app.on_language_changed)
+        self.sett_lang_combo.set_active_id(self.app.current_lang)
+        self.sett_lang_combo.handler_unblock_by_func(self.app.on_language_changed)

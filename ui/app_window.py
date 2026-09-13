@@ -119,6 +119,8 @@ class BootBridgeApp(Gtk.Window):
         self.header.props.subtitle = self.tr("app_subtitle")
         self.set_titlebar(self.header)
 
+        self.is_fullscreen = False
+
         # Refresh Button
         refresh_btn = Gtk.Button()
         refresh_btn.set_tooltip_text("Refresh Physical Disks")
@@ -126,6 +128,14 @@ class BootBridgeApp(Gtk.Window):
         refresh_btn.add(refresh_icon)
         refresh_btn.connect("clicked", lambda x: self.refresh_disks())
         self.header.pack_start(refresh_btn)
+
+        # Fullscreen Toggle Button
+        fullscreen_btn = Gtk.Button()
+        fullscreen_btn.set_tooltip_text("Toggle Fullscreen (F11)")
+        fullscreen_icon = Gtk.Image.new_from_icon_name("view-fullscreen-symbolic", Gtk.IconSize.BUTTON)
+        fullscreen_btn.add(fullscreen_icon)
+        fullscreen_btn.connect("clicked", lambda x: self.toggle_fullscreen())
+        self.header.pack_end(fullscreen_btn)
 
         # Main Horizontal Window Box (Sidebar + Main Content Area)
         main_h_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
@@ -135,6 +145,7 @@ class BootBridgeApp(Gtk.Window):
         # LEFT NAVIGATION SIDEBAR
         # ==========================================
         sidebar_container = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
+        sidebar_container.set_size_request(220, -1)
         sidebar_container.get_style_context().add_class("sidebar")
 
         self.sidebar_title_lbl = Gtk.Label(label=self.tr("nav_title"))
@@ -311,8 +322,6 @@ class BootBridgeApp(Gtk.Window):
 
         if hasattr(self, "start_btn_lbl"): self.start_btn_lbl.set_text(self.tr("start_btn"))
         if hasattr(self, "stop_btn_lbl"): self.stop_btn_lbl.set_text(self.tr("stop_btn"))
-
-        self.refresh_disks()
 
 
     def update_dependency_ui(self):
@@ -539,8 +548,20 @@ class BootBridgeApp(Gtk.Window):
                 state_mode="warning"
             )
 
+    def toggle_fullscreen(self):
+        if getattr(self, "is_fullscreen", False):
+            self.unfullscreen()
+            self.is_fullscreen = False
+        else:
+            self.fullscreen()
+            self.is_fullscreen = True
+
     def on_key_press_event(self, widget, event):
-        """Global keypress handler for application shortcuts (Ctrl + Alt + H)."""
+        """Global keypress handler for application shortcuts (Ctrl + Alt + H, F11)."""
+        if event.keyval in (Gdk.KEY_F11, Gdk.KEY_f11):
+            self.toggle_fullscreen()
+            return True
+
         state = event.state & Gdk.ModifierType.MODIFIER_MASK
         ctrl_alt = (Gdk.ModifierType.CONTROL_MASK | Gdk.ModifierType.MOD1_MASK)
         if (state & ctrl_alt) == ctrl_alt and event.keyval in (Gdk.KEY_h, Gdk.KEY_H):

@@ -1,7 +1,7 @@
 """
 Google Translate API Integration Module for BootBridge
 Provides lightweight, zero-dependency multi-language translation with local caching.
-Supports batch translation in 1 single HTTP request for 0ms lag!
+Uses parallel ThreadPoolExecutor workers for fast, reliable translation of all UI keys.
 """
 
 import os
@@ -9,6 +9,7 @@ import json
 import urllib.request
 import urllib.parse
 import threading
+from concurrent.futures import ThreadPoolExecutor
 
 CACHE_FILE = os.path.expanduser("~/.config/bootbridge/translation_cache.json")
 _cache = {}
@@ -56,7 +57,7 @@ load_cache()
 
 def batch_translate_keys(keys_dict, target_lang="en", source_lang="id", callback=None):
     """
-    Translates an entire dictionary of keys/values in 1 single batch HTTP request.
+    Translates an entire dictionary of keys/values concurrently using ThreadPoolExecutor workers.
     Stores translated strings in local JSON cache.
     """
     if target_lang in ("id", "en"):
@@ -64,10 +65,9 @@ def batch_translate_keys(keys_dict, target_lang="en", source_lang="id", callback
             callback(True)
         return
 
-    keys = list(keys_dict.keys())
-    values = [keys_dict[k] for k in keys if isinstance(keys_dict[k], str)]
+    values = [val for val in keys_dict.values() if isinstance(val, str) and val.strip()]
 
-    # Filter out values already cached
+    # Filter missing values
     missing_values = []
     for val in values:
         ck = f"{target_lang}:{val}"
@@ -80,39 +80,36 @@ def batch_translate_keys(keys_dict, target_lang="en", source_lang="id", callback
             callback(True)
         return
 
-    def run_batch():
-        DELIMITER = "\n---BB_SEP---\n"
-        combined_text = DELIMITER.join(missing_values)
+    def translate_single(val):
         try:
-            q = urllib.parse.quote(combined_text)
+            q = urllib.parse.quote(val)
             url = f"https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl={source_lang}&tl={target_lang}&q={q}"
             req = urllib.request.Request(
                 url,
                 headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
             )
-            with urllib.request.urlopen(req, timeout=6) as resp:
+            with urllib.request.urlopen(req, timeout=4) as resp:
                 data = json.loads(resp.read().decode('utf-8'))
-                translated_blob = ""
+                res = val
                 if isinstance(data, list) and len(data) > 0:
                     if isinstance(data[0], list):
-                        translated_blob = data[0][0]
+                        res = data[0][0]
                     elif isinstance(data[0], str):
-                        translated_blob = data[0]
+                        res = data[0]
 
-                parts = [p.strip() for p in translated_blob.split("---BB_SEP---")]
                 with _cache_lock:
-                    for idx, orig_val in enumerate(missing_values):
-                        if idx < len(parts) and parts[idx]:
-                            _cache[f"{target_lang}:{orig_val}"] = parts[idx]
-                        else:
-                            _cache[f"{target_lang}:{orig_val}"] = orig_val
-                save_cache()
-                if callback:
-                    callback(True)
+                    _cache[f"{target_lang}:{val}"] = res
         except Exception as e:
-            print(f"[Translator] Batch translation error ({target_lang}): {e}")
-            if callback:
-                callback(False)
+            print(f"[Translator] Error translating '{val[:15]}' ({target_lang}): {e}")
+            with _cache_lock:
+                _cache[f"{target_lang}:{val}"] = val
+
+    def run_batch():
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            list(executor.map(translate_single, missing_values))
+        save_cache()
+        if callback:
+            callback(True)
 
     threading.Thread(target=run_batch, daemon=True).start()
 
