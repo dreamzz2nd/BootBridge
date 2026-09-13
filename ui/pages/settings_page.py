@@ -3,6 +3,7 @@ import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
+from core.translator import SUPPORTED_LANGUAGES
 from ui.components import make_card_header
 
 class SettingsPage(Gtk.ScrolledWindow):
@@ -41,14 +42,14 @@ class SettingsPage(Gtk.ScrolledWindow):
         self.sett_theme_combo.connect("changed", app.on_theme_changed)
         sett_grid.attach(self.sett_theme_combo, 1, 0, 1, 1)
 
-        # Language Selector
+        # Language Selector (Google Translate API)
         self.sett_lang_lbl = Gtk.Label(label=app.tr("lang_setting"))
         self.sett_lang_lbl.set_xalign(0)
         sett_grid.attach(self.sett_lang_lbl, 0, 1, 1, 1)
 
         self.sett_lang_combo = Gtk.ComboBoxText()
-        self.sett_lang_combo.append("id", "Bahasa Indonesia")
-        self.sett_lang_combo.append("en", "English")
+        for code, label in SUPPORTED_LANGUAGES:
+            self.sett_lang_combo.append(code, label)
         self.sett_lang_combo.set_active_id(app.current_lang)
         self.sett_lang_combo.connect("changed", app.on_language_changed)
         sett_grid.attach(self.sett_lang_combo, 1, 1, 1, 1)

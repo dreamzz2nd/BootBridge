@@ -1,6 +1,9 @@
 """
-BootBridge i18n Translations Dictionary & Handler
+BootBridge i18n Translations Dictionary & Google Translate API Handler
+No Unicode emojis/emoticons in text strings. Supports all Google Translate languages dynamically.
 """
+
+from core.translator import translate_text, SUPPORTED_LANGUAGES
 
 TRANSLATIONS = {
     "id": {
@@ -77,7 +80,7 @@ TRANSLATIONS = {
         "theme_setting": "Mode Tema UI:",
         "theme_dark": "Mode Gelap (Postman Studio Dark)",
         "theme_light": "Mode Terang (Postman Studio Light)",
-        "lang_setting": "Bahasa Aplikasi:",
+        "lang_setting": "Bahasa Aplikasi (Google Translate API):",
         "sys_info_title": "Spesifikasi & Info Hypervisor Host",
         "progress_ready": "Siap menjalankan Windows VM",
         "progress_booting": "Memulai Windows VM... Mengaktifkan Hypervisor KVM",
@@ -102,23 +105,23 @@ TRANSLATIONS = {
         "btn_continue": "Lanjutkan Boot VM",
         "btn_cancel": "Batal",
 
-        "remote_mode_easy": "✨ Mode Sederhana (Orang Awam)",
-        "remote_mode_adv": "⚙️ Mode Lanjutan (Spesialis)",
+        "remote_mode_easy": "Mode Sederhana (Orang Awam)",
+        "remote_mode_adv": "Mode Lanjutan (Spesialis)",
         "remote_target_preset": "Jenis Perangkat Target:",
-        "remote_preset_win": "💻 Laptop / Komputer Windows (RDP)",
-        "remote_preset_vm": "🖥️ Mesin Virtual / VM Local (SPICE)",
-        "remote_history_lbl": "⚡ Riwayat Koneksi Terakhir:",
+        "remote_preset_win": "Laptop / Komputer Windows (RDP)",
+        "remote_preset_vm": "Mesin Virtual / VM Local (SPICE)",
+        "remote_history_lbl": "Riwayat Koneksi Terakhir:",
         "remote_history_empty": "-- Belum ada riwayat komputer tersimpan --",
         "remote_easy_host": "Alamat IP / Nama PC Windows:",
         "remote_easy_host_placeholder": "Contoh: 192.168.1.15 atau LAPTOP-SAYA",
         "remote_easy_user_placeholder": "Nama akun Windows target (opsional)",
         "remote_easy_pass_placeholder": "Password login Windows target",
-        "remote_guide_win_btn": "💡 Cara Aktifkan Remote Desktop di Windows (Panduan 1-Menit)",
+        "remote_guide_win_btn": "Cara Aktifkan Remote Desktop di Windows (Panduan 1-Menit)",
         "remote_guide_dialog_title": "Panduan Mengaktifkan Remote Desktop di Windows Target",
         "remote_guide_dialog_markup": (
             "<b>Langkah Mudah Mengaktifkan Remote Desktop di PC Windows Target:</b>\n\n"
             "1. <b>Buka Pengaturan Windows:</b> Di PC Windows yang ingin kamu akses, tekan tombol <b><tt>Win + I</tt></b> di keyboard.\n"
-            "2. <b>Masuk ke Menu Remote:</b> Klik menu <b>System</b> ➡️ lalu gulir ke bawah dan pilih <b>Remote Desktop</b>.\n"
+            "2. <b>Masuk ke Menu Remote:</b> Klik menu <b>System</b> -> lalu gulir ke bawah dan pilih <b>Remote Desktop</b>.\n"
             "3. <b>Aktifkan Remote Desktop:</b> Geser sakelar <b>Enable Remote Desktop</b> ke posisi <b>ON</b> (Aktif).\n"
             "4. <b>Sambungkan via BootBridge:</b> Klik tombol <i>'Pindai Jaringan Wi-Fi'</i> di BootBridge, pilih komputer yang muncul, masukkan password Windows kamu, dan klik <b>Hubungkan Sekarang!</b>"
         ),
@@ -143,17 +146,17 @@ TRANSLATIONS = {
         "remote_clip_chk": "Aktifkan Shared Clipboard (Copy-Paste Dua Arah)",
         "remote_audio_chk": "Aktifkan Passthrough Suara / Audio (PulseAudio)",
         "remote_dynres_chk": "Aktifkan Penyesuaian Resolusi Otomatis (Dynamic Resolution)",
-        "connect_remote_btn": "🚀 SAMBUNGKAN SEKARANG (1-KLIK)",
+        "connect_remote_btn": "SAMBUNGKAN SEKARANG (1-KLIK)",
         "disconnect_remote_btn": "HENTIKAN KONEKSI REMOTE",
         "remote_guide_title": "Panduan Praktis Cara Meremote PC Windows (Untuk Orang Awam)",
         "remote_guide_markup": (
             "<b>Cara Mudah Mengakses Laptop / PC Windows Lain:</b>\n\n"
             "1. <b>Aktifkan Remote Desktop di PC Windows Target:</b>\n"
-            "   Di PC Windows yang mau di-remote, buka <b>Settings</b> ➡️ <b>System</b> ➡️ <b>Remote Desktop</b> ➡️ Aktifkan tombol <b>Enable Remote Desktop</b>.\n\n"
+            "   Di PC Windows yang mau di-remote, buka <b>Settings</b> -> <b>System</b> -> <b>Remote Desktop</b> -> Aktifkan tombol <b>Enable Remote Desktop</b>.\n\n"
             "2. <b>Pindai Otomatis di BootBridge:</b>\n"
             "   Klik tombol <b>'Pindai Jaringan Wi-Fi'</b> di atas. BootBridge akan otomatis menemukan PC Windows tersebut tanpa kamu harus mengetik nomor IP!\n\n"
             "3. <b>Masukkan Username &amp; Password:</b>\n"
-            "   Isi Username dan Password login Windows target, lalu klik tombol hijau <b>🚀 SAMBUNGKAN SEKARANG (1-KLIK)</b>. Selesai!"
+            "   Isi Username dan Password login Windows target, lalu klik tombol <b>SAMBUNGKAN SEKARANG (1-KLIK)</b>. Selesai!"
         ),
     },
     "en": {
@@ -230,7 +233,7 @@ TRANSLATIONS = {
         "theme_setting": "UI Theme Mode:",
         "theme_dark": "Dark Mode (Postman Studio Dark)",
         "theme_light": "Light Mode (Postman Studio Light)",
-        "lang_setting": "Application Language:",
+        "lang_setting": "Application Language (Google Translate API):",
         "sys_info_title": "Host Specifications & Hypervisor Info",
         "progress_ready": "Ready to launch Windows VM",
         "progress_booting": "Booting Windows VM... Initializing KVM Hypervisor",
@@ -255,23 +258,23 @@ TRANSLATIONS = {
         "btn_continue": "Continue Boot VM",
         "btn_cancel": "Cancel",
 
-        "remote_mode_easy": "✨ Easy Mode (Beginners)",
-        "remote_mode_adv": "⚙️ Advanced Mode (Expert)",
+        "remote_mode_easy": "Easy Mode (Beginners)",
+        "remote_mode_adv": "Advanced Mode (Expert)",
         "remote_target_preset": "Select Target Device Type:",
-        "remote_preset_win": "💻 Remote Windows PC / Laptop (RDP)",
-        "remote_preset_vm": "🖥️ Local Virtual Machine (SPICE)",
-        "remote_history_lbl": "⚡ Quick Reconnect History:",
+        "remote_preset_win": "Remote Windows PC / Laptop (RDP)",
+        "remote_preset_vm": "Local Virtual Machine (SPICE)",
+        "remote_history_lbl": "Quick Reconnect History:",
         "remote_history_empty": "-- No saved remote computer history --",
         "remote_easy_host": "IP Address / Windows PC Name:",
         "remote_easy_host_placeholder": "Example: 192.168.1.15 or MY-DESKTOP",
         "remote_easy_user_placeholder": "Target Windows account username (optional)",
         "remote_easy_pass_placeholder": "Target Windows login password",
-        "remote_guide_win_btn": "💡 How to Enable Remote Desktop on Windows (1-Min Guide)",
+        "remote_guide_win_btn": "How to Enable Remote Desktop on Windows (1-Min Guide)",
         "remote_guide_dialog_title": "How to Enable Remote Desktop on Target Windows PC",
         "remote_guide_dialog_markup": (
             "<b>Easy Steps to Enable Remote Desktop on Target Windows PC:</b>\n\n"
             "1. <b>Open Windows Settings:</b> On the target Windows PC, press <b><tt>Win + I</tt></b> on your keyboard.\n"
-            "2. <b>Navigate to Remote Menu:</b> Click <b>System</b> ➡️ scroll down and select <b>Remote Desktop</b>.\n"
+            "2. <b>Navigate to Remote Menu:</b> Click <b>System</b> -> scroll down and select <b>Remote Desktop</b>.\n"
             "3. <b>Enable Remote Desktop:</b> Toggle the <b>Enable Remote Desktop</b> switch to <b>ON</b>.\n"
             "4. <b>Connect via BootBridge:</b> Click <i>'Scan Wi-Fi Network'</i> in BootBridge, select the discovered PC, enter your Windows password, and click <b>Connect Now!</b>"
         ),
@@ -296,25 +299,43 @@ TRANSLATIONS = {
         "remote_clip_chk": "Enable Shared Clipboard (Bidirectional Copy-Paste)",
         "remote_audio_chk": "Enable Audio / Sound Passthrough (PulseAudio)",
         "remote_dynres_chk": "Enable Automatic Resolution Scaling (Dynamic Resolution)",
-        "connect_remote_btn": "🚀 CONNECT NOW (1-CLICK)",
+        "connect_remote_btn": "CONNECT NOW (1-CLICK)",
         "disconnect_remote_btn": "DISCONNECT REMOTE SESSION",
         "remote_guide_title": "Beginner's Guide to Remote Windows PCs",
         "remote_guide_markup": (
             "<b>Easy 3-Step Remote Desktop Setup:</b>\n\n"
             "1. <b>Enable Remote Desktop on Windows:</b>\n"
-            "   On the target Windows PC, open <b>Settings</b> ➡️ <b>System</b> ➡️ <b>Remote Desktop</b> ➡️ turn ON <b>Enable Remote Desktop</b>.\n\n"
+            "   On the target Windows PC, open <b>Settings</b> -> <b>System</b> -> <b>Remote Desktop</b> -> turn ON <b>Enable Remote Desktop</b>.\n\n"
             "2. <b>Auto-Scan in BootBridge:</b>\n"
             "   Click <b>'Scan Wi-Fi Network'</b> above. BootBridge automatically discovers the Windows PC without needing to type IP addresses!\n\n"
             "3. <b>Enter Credentials &amp; Connect:</b>\n"
-            "   Enter target Windows Username &amp; Password, then click the green <b>🚀 CONNECT NOW (1-CLICK)</b> button. Done!"
+            "   Enter target Windows Username &amp; Password, then click the <b>CONNECT NOW (1-CLICK)</b> button. Done!"
         ),
     }
 }
 
 def tr(key, lang="id", **kwargs):
-    """Translates a translation key into the requested language with optional string formatting."""
-    lang_dict = TRANSLATIONS.get(lang, TRANSLATIONS["id"])
-    text = lang_dict.get(key, TRANSLATIONS["id"].get(key, key))
+    """
+    Translates a translation key into the requested language with optional string formatting.
+    If lang is not 'id' or 'en', dynamically uses Google Translate API with local caching.
+    """
+    id_dict = TRANSLATIONS.get("id", {})
+    en_dict = TRANSLATIONS.get("en", {})
+
+    if lang == "en":
+        base_text = en_dict.get(key, id_dict.get(key, key))
+    else:
+        base_text = id_dict.get(key, en_dict.get(key, key))
+
+    if lang in ("id", "en"):
+        text = base_text
+    else:
+        text = translate_text(base_text, target_lang=lang, source_lang="id")
+
     if kwargs:
-        text = text.format(**kwargs)
+        try:
+            text = text.format(**kwargs)
+        except Exception:
+            pass
+
     return text

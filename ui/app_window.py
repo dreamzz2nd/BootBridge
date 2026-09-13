@@ -271,7 +271,21 @@ class BootBridgeApp(Gtk.Window):
             self.current_lang = new_lang
             self.config["language"] = new_lang
             save_config(self.config)
-            self.apply_language()
+
+            if new_lang in ("id", "en"):
+                self.apply_language()
+            else:
+                self.log_message(f"Translating application UI to '{new_lang}' via Google Translate API...")
+                import threading
+                def fetch_and_apply():
+                    # Pre-translate navigation keys & major UI labels
+                    from ui.i18n import TRANSLATIONS
+                    id_dict = TRANSLATIONS.get("id", {})
+                    for k in id_dict.keys():
+                        self.tr(k)
+                    GLib.idle_add(self.apply_language)
+                    self.log_message(f"Translation to '{new_lang}' completed!")
+                threading.Thread(target=fetch_and_apply, daemon=True).start()
 
     def apply_language(self):
         if hasattr(self, "header"):

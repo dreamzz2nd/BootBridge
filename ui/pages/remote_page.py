@@ -371,7 +371,7 @@ class RemotePage(Gtk.ScrolledWindow):
             self.history_box.show_all()
             self.history_combo.append("none", self.app.tr("remote_history_empty"))
             for idx, item in enumerate(history):
-                label = f"💻 {item.get('host')} ({item.get('proto', 'RDP').upper()})"
+                label = f"{item.get('host')} ({item.get('proto', 'RDP').upper()})"
                 if item.get('user'):
                     label += f" - User: {item.get('user')}"
                 self.history_combo.append(str(idx), label)
