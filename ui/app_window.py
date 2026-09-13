@@ -602,7 +602,7 @@ class BootBridgeApp(Gtk.Window):
         hdr_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         icon = Gtk.Image.new_from_icon_name("help-about-symbolic", Gtk.IconSize.DND)
         lbl_hdr = Gtk.Label()
-        lbl_hdr.set_markup(f"<b><big>{self.tr('guide_dialog_title')}</big></b>")
+        lbl_hdr.set_markup(f"<b><big>{GLib.markup_escape_text(self.tr('guide_dialog_title'))}</big></b>")
         hdr_box.pack_start(icon, False, False, 0)
         hdr_box.pack_start(lbl_hdr, False, False, 0)
         box.pack_start(hdr_box, False, False, 0)
