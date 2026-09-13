@@ -29,26 +29,26 @@ else:
 # Dark & Light Themes Matching GTK3 CSS (style_dark.css & style_light.css)
 THEMES = {
     "dark": {
-        "bg_window": "#1c1c1c",     # GTK Dark Window BG
-        "header_bg": "#252525",     # GTK HeaderBar BG
-        "sidebar_bg": "#181818",    # GTK Sidebar BG
-        "sidebar_active": "#33221e",# GTK Active Row BG
+        "bg_window": "#0b0f19",     # Deep Charcoal Black
+        "header_bg": "#131b2e",     # Dark HeaderBar
+        "sidebar_bg": "#0b0f19",    # Dark Sidebar
+        "sidebar_active": "#261a15",# Dark Orange Tinted Row BG
         "sidebar_active_fg": "#ff6c37", # Coral/Orange Accent Text
-        "sidebar_hover": "#2a2a2a",
-        "card_bg": "#262626",       # Postman Dark Card Container
-        "card_header": "#333333",   # Card Border / Header
-        "input_bg": "#2a2a2a",      # Input / Combo Box
+        "sidebar_hover": "#1e293b",
+        "card_bg": "#131b2e",       # Dark Orange Card Container
+        "card_header": "#1e293b",   # Card Sub-header
+        "input_bg": "#1e293b",      # Input / Combo Box
         "text_main": "#ffffff",     # Primary White Text
-        "text_muted": "#9e9e9e",    # Muted Gray
-        "border": "#333333",        # Border
-        "accent_blue": "#ff6c37",   # Postman Coral/Orange Accent (Primary Action)
+        "text_muted": "#94a3b8",    # Muted Gray
+        "border": "#1e293b",        # Border
+        "accent_blue": "#ff6c37",   # Dark Orange Accent (Primary Action)
         "accent_blue_hover": "#e0531f",
-        "accent_green": "#73c991",
-        "accent_cyan": "#64b5f6",
-        "accent_red": "#c62828",
-        "accent_yellow": "#ffb74d",
-        "log_bg": "#141414",
-        "log_fg": "#73c991"
+        "accent_green": "#10b981",
+        "accent_cyan": "#38bdf8",
+        "accent_red": "#ef4444",
+        "accent_yellow": "#f59e0b",
+        "log_bg": "#090d16",
+        "log_fg": "#34d399"
     },
     "light": {
         "bg_window": "#f5f5f5",
@@ -211,18 +211,35 @@ class BootBridgeTkApp(tk.Tk):
         self.header_frame = tk.Frame(self, bg=self.T["header_bg"], padx=16, pady=8, highlightbackground=self.T["border"], highlightthickness=1)
         self.header_frame.pack(fill=tk.X)
 
-        # Header Left: Refresh Button + Title
+        # Header Left: Refresh Button + BootBridge Logo & Title
         hdr_left = tk.Frame(self.header_frame, bg=self.T["header_bg"])
         hdr_left.pack(side=tk.LEFT)
 
-        btn_refresh = tk.Button(hdr_left, text="🔄", font=("Segoe UI", 10, "bold"), bg=self.T["input_bg"], fg=self.T["text_main"], borderwidth=0, padx=8, pady=4, command=self.refresh_disks)
+        btn_refresh = tk.Button(hdr_left, text="Refresh", font=("Segoe UI", 9, "bold"), bg=self.T["input_bg"], fg=self.T["text_main"], borderwidth=0, padx=10, pady=4, command=self.refresh_disks)
         btn_refresh.pack(side=tk.LEFT, padx=(0, 12))
 
         title_box = tk.Frame(hdr_left, bg=self.T["header_bg"])
         title_box.pack(side=tk.LEFT)
 
-        self.hdr_title = tk.Label(title_box, text="BootBridge", font=("Segoe UI", 13, "bold"), fg=self.T["text_main"], bg=self.T["header_bg"], anchor="w")
-        self.hdr_title.pack(fill=tk.X)
+        hdr_top_row = tk.Frame(title_box, bg=self.T["header_bg"])
+        hdr_top_row.pack(fill=tk.X)
+
+        # Load BootBridge logo image
+        png_path = os.path.join(BASE_DIR, "assets", "bootbridge.png")
+        self.hdr_logo_img = None
+        if os.path.exists(png_path):
+            try:
+                full_img = tk.PhotoImage(file=png_path)
+                w, h = full_img.width(), full_img.height()
+                factor = max(1, w // 24)
+                self.hdr_logo_img = full_img.subsample(factor, factor)
+                logo_lbl = tk.Label(hdr_top_row, image=self.hdr_logo_img, bg=self.T["header_bg"])
+                logo_lbl.pack(side=tk.LEFT, padx=(0, 8))
+            except Exception:
+                pass
+
+        self.hdr_title = tk.Label(hdr_top_row, text="BootBridge", font=("Segoe UI", 13, "bold"), fg=self.T["text_main"], bg=self.T["header_bg"], anchor="w")
+        self.hdr_title.pack(side=tk.LEFT)
 
         self.hdr_sub = tk.Label(title_box, text=self.tr("app_subtitle"), font=("Segoe UI", 8), fg=self.T["text_muted"], bg=self.T["header_bg"], anchor="w")
         self.hdr_sub.pack(fill=tk.X)
@@ -231,16 +248,16 @@ class BootBridgeTkApp(tk.Tk):
         hdr_right = tk.Frame(self.header_frame, bg=self.T["header_bg"])
         hdr_right.pack(side=tk.RIGHT)
 
-        btn_wiz = tk.Button(hdr_right, text="🧙 Setup Wizard", font=("Segoe UI", 9, "bold"), bg=self.T["input_bg"], fg=self.T["accent_cyan"], borderwidth=0, padx=10, pady=4, command=self._launch_setup_wizard)
+        btn_wiz = tk.Button(hdr_right, text="Setup Wizard", font=("Segoe UI", 9, "bold"), bg=self.T["input_bg"], fg=self.T["accent_cyan"], borderwidth=0, padx=10, pady=4, command=self._launch_setup_wizard)
         btn_wiz.pack(side=tk.LEFT, padx=(0, 8))
 
-        self.btn_theme = tk.Button(hdr_right, text="☀️" if self.current_theme_name=="dark" else "🌙", font=("Segoe UI", 9), bg=self.T["input_bg"], fg=self.T["text_main"], borderwidth=0, padx=8, pady=4, command=self.toggle_theme)
+        self.btn_theme = tk.Button(hdr_right, text="Dark" if self.current_theme_name=="dark" else "Light", font=("Segoe UI", 9, "bold"), bg=self.T["input_bg"], fg=self.T["text_main"], borderwidth=0, padx=8, pady=4, command=self.toggle_theme)
         self.btn_theme.pack(side=tk.LEFT, padx=(0, 8))
 
-        self.btn_lang = tk.Button(hdr_right, text="🇮🇩 ID" if self.current_lang=="id" else "🇬🇧 EN", font=("Segoe UI", 9, "bold"), bg=self.T["input_bg"], fg=self.T["text_main"], borderwidth=0, padx=8, pady=4, command=self.toggle_language)
+        self.btn_lang = tk.Button(hdr_right, text="ID" if self.current_lang=="id" else "EN", font=("Segoe UI", 9, "bold"), bg=self.T["input_bg"], fg=self.T["text_main"], borderwidth=0, padx=8, pady=4, command=self.toggle_language)
         self.btn_lang.pack(side=tk.LEFT, padx=(0, 8))
 
-        btn_fs = tk.Button(hdr_right, text="⛶", font=("Segoe UI", 10), bg=self.T["input_bg"], fg=self.T["text_main"], borderwidth=0, padx=8, pady=4, command=self.toggle_fullscreen)
+        btn_fs = tk.Button(hdr_right, text="Fullscreen", font=("Segoe UI", 9), bg=self.T["input_bg"], fg=self.T["text_main"], borderwidth=0, padx=8, pady=4, command=self.toggle_fullscreen)
         btn_fs.pack(side=tk.LEFT)
 
         # ==========================================
@@ -258,15 +275,15 @@ class BootBridgeTkApp(tk.Tk):
         self.lbl_nav_title = tk.Label(self.sidebar_frame, text=self.tr("nav_title"), font=("Segoe UI", 8, "bold"), fg=self.T["text_muted"], bg=self.T["sidebar_bg"], anchor="w", padx=16, pady=12)
         self.lbl_nav_title.pack(fill=tk.X)
 
-        # 7 Sidebar Navigation Buttons (Exact Match with Linux GTK3 ListBox)
+        # 7 Sidebar Navigation Buttons (Clean Text, No Emojis)
         self.nav_items = [
-            ("dashboard", "🖥️  " + self.tr("nav_dashboard")),
-            ("safety", "🛡️  " + self.tr("nav_safety")),
-            ("hardware", "⚙️  " + self.tr("nav_hardware")),
-            ("remote", "🌐  " + self.tr("nav_remote")),
-            ("guides", "📖  " + self.tr("nav_guides")),
-            ("diagnostics", "🔍  " + self.tr("nav_diagnostics")),
-            ("settings", "⚙️  " + self.tr("nav_settings"))
+            ("dashboard", self.tr("nav_dashboard")),
+            ("safety", self.tr("nav_safety")),
+            ("hardware", self.tr("nav_hardware")),
+            ("remote", self.tr("nav_remote")),
+            ("guides", self.tr("nav_guides")),
+            ("diagnostics", self.tr("nav_diagnostics")),
+            ("settings", self.tr("nav_settings"))
         ]
 
         self.nav_buttons = {}
@@ -295,10 +312,10 @@ class BootBridgeTkApp(tk.Tk):
         btn_box = tk.Frame(self.bottom_bar, bg=self.T["card_bg"])
         btn_box.pack(fill=tk.X)
 
-        self.btn_start_vm = ttk.Button(btn_box, text="▶  " + self.tr("start_btn"), style="Primary.TButton", command=self.on_start_vm_clicked)
+        self.btn_start_vm = ttk.Button(btn_box, text=self.tr("start_btn"), style="Primary.TButton", command=self.on_start_vm_clicked)
         self.btn_start_vm.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 8))
 
-        self.btn_stop_vm = ttk.Button(btn_box, text="⏹  " + self.tr("stop_btn"), style="Danger.TButton", state="disabled", command=self.on_stop_vm_clicked)
+        self.btn_stop_vm = ttk.Button(btn_box, text=self.tr("stop_btn"), style="Danger.TButton", state="disabled", command=self.on_stop_vm_clicked)
         self.btn_stop_vm.pack(side=tk.RIGHT)
 
         self.current_page_id = "dashboard"
@@ -341,7 +358,7 @@ class BootBridgeTkApp(tk.Tk):
         card_disk = tk.Frame(f, bg=self.T["card_bg"], padx=18, pady=16, highlightbackground=self.T["border"], highlightthickness=1)
         card_disk.pack(fill=tk.X, pady=(0, 12))
 
-        tk.Label(card_disk, text="💾  " + self.tr("disk_card_title"), font=("Segoe UI", 11, "bold"), fg=self.T["text_main"], bg=self.T["card_bg"]).pack(anchor="w", pady=(0, 10))
+        tk.Label(card_disk, text=self.tr("disk_card_title"), font=("Segoe UI", 11, "bold"), fg=self.T["text_main"], bg=self.T["card_bg"]).pack(anchor="w", pady=(0, 10))
 
         row_sel = tk.Frame(card_disk, bg=self.T["card_bg"])
         row_sel.pack(fill=tk.X, pady=(0, 10))
@@ -366,9 +383,9 @@ class BootBridgeTkApp(tk.Tk):
         card_status = tk.Frame(f, bg=self.T["card_bg"], padx=18, pady=16, highlightbackground=self.T["border"], highlightthickness=1)
         card_status.pack(fill=tk.BOTH, expand=True)
 
-        tk.Label(card_status, text="⚡  Status Virtual Machine", font=("Segoe UI", 11, "bold"), fg=self.T["text_main"], bg=self.T["card_bg"]).pack(anchor="w", pady=(0, 8))
+        tk.Label(card_status, text="Status Virtual Machine", font=("Segoe UI", 11, "bold"), fg=self.T["text_main"], bg=self.T["card_bg"]).pack(anchor="w", pady=(0, 8))
 
-        self.status_banner = tk.Label(card_status, text="✔ " + self.tr("mount_safe_hdr") + " " + self.tr("mount_safe_msg"), font=("Segoe UI", 10, "bold"), fg=self.T["accent_green"], bg=self.T["card_bg"], anchor="w")
+        self.status_banner = tk.Label(card_status, text=self.tr("mount_safe_hdr") + " " + self.tr("mount_safe_msg"), font=("Segoe UI", 10, "bold"), fg=self.T["accent_green"], bg=self.T["card_bg"], anchor="w")
         self.status_banner.pack(fill=tk.X, pady=(0, 12))
 
         # Specs grid overview
@@ -426,17 +443,17 @@ class BootBridgeTkApp(tk.Tk):
         card = tk.Frame(f, bg=self.T["card_bg"], padx=18, pady=16, highlightbackground=self.T["border"], highlightthickness=1)
         card.pack(fill=tk.BOTH, expand=True)
 
-        tk.Label(card, text="🛡️  " + self.tr("safety_card_title"), font=("Segoe UI", 11, "bold"), fg=self.T["text_main"], bg=self.T["card_bg"]).pack(anchor="w", pady=(0, 6))
+        tk.Label(card, text=self.tr("safety_card_title"), font=("Segoe UI", 11, "bold"), fg=self.T["text_main"], bg=self.T["card_bg"]).pack(anchor="w", pady=(0, 6))
         tk.Label(card, text=self.tr("mount_active_msg"), font=("Segoe UI", 9), fg=self.T["text_muted"], bg=self.T["card_bg"], wraplength=600, justify=tk.LEFT).pack(anchor="w", pady=(0, 16))
 
         # Actions
-        btn_unmount = ttk.Button(card, text="🛡️  " + self.tr("unmount_btn"), style="Card.TButton", command=self.on_unmount_clicked)
+        btn_unmount = ttk.Button(card, text=self.tr("unmount_btn"), style="Card.TButton", command=self.on_unmount_clicked)
         btn_unmount.pack(anchor="w", pady=(0, 10))
 
-        btn_fix_ntfs = ttk.Button(card, text="🔧  " + self.tr("fix_ntfs_btn"), style="Card.TButton", command=self.on_fix_ntfs_clicked)
+        btn_fix_ntfs = ttk.Button(card, text=self.tr("fix_ntfs_btn"), style="Card.TButton", command=self.on_fix_ntfs_clicked)
         btn_fix_ntfs.pack(anchor="w", pady=(0, 10))
 
-        btn_fast = ttk.Button(card, text="⚡  " + self.tr("enable_fast_btn"), style="Card.TButton", command=self.on_disable_fastboot_clicked)
+        btn_fast = ttk.Button(card, text=self.tr("enable_fast_btn"), style="Card.TButton", command=self.on_disable_fastboot_clicked)
         btn_fast.pack(anchor="w")
 
     # ==========================================
@@ -449,7 +466,7 @@ class BootBridgeTkApp(tk.Tk):
         card = tk.Frame(f, bg=self.T["card_bg"], padx=18, pady=16, highlightbackground=self.T["border"], highlightthickness=1)
         card.pack(fill=tk.BOTH, expand=True)
 
-        tk.Label(card, text="⚙️  " + self.tr("config_card_title"), font=("Segoe UI", 11, "bold"), fg=self.T["text_main"], bg=self.T["card_bg"]).pack(anchor="w", pady=(0, 16))
+        tk.Label(card, text=self.tr("config_card_title"), font=("Segoe UI", 11, "bold"), fg=self.T["text_main"], bg=self.T["card_bg"]).pack(anchor="w", pady=(0, 16))
 
         # RAM Slider
         ram_box = tk.Frame(card, bg=self.T["card_bg"])
@@ -506,7 +523,7 @@ class BootBridgeTkApp(tk.Tk):
         card = tk.Frame(f, bg=self.T["card_bg"], padx=18, pady=16, highlightbackground=self.T["border"], highlightthickness=1)
         card.pack(fill=tk.BOTH, expand=True)
 
-        tk.Label(card, text="🌐  Remote Desktop 7-Langkah Praktis", font=("Segoe UI", 11, "bold"), fg=self.T["text_main"], bg=self.T["card_bg"]).pack(anchor="w", pady=(0, 6))
+        tk.Label(card, text="Remote Desktop 7-Langkah Praktis", font=("Segoe UI", 11, "bold"), fg=self.T["text_main"], bg=self.T["card_bg"]).pack(anchor="w", pady=(0, 6))
 
         # My ID Banner
         my_id_card = tk.Frame(card, bg=self.T["input_bg"], padx=14, pady=10, highlightbackground=self.T["border"], highlightthickness=1)
@@ -516,7 +533,7 @@ class BootBridgeTkApp(tk.Tk):
         tk.Label(my_id_card, text="ID Perangkat Anda (IP):", font=("Segoe UI", 9, "bold"), fg=self.T["text_muted"], bg=self.T["input_bg"]).pack(side=tk.LEFT)
         tk.Label(my_id_card, text=f"  {my_ip}", font=("Segoe UI", 11, "bold"), fg=self.T["accent_green"], bg=self.T["input_bg"]).pack(side=tk.LEFT)
 
-        btn_copy = tk.Button(my_id_card, text="📋 Salin ID", font=("Segoe UI", 8, "bold"), bg=self.T["card_bg"], fg=self.T["text_main"], borderwidth=0, padx=8, pady=3, command=lambda: self.clipboard_clear() or self.clipboard_append(my_ip))
+        btn_copy = tk.Button(my_id_card, text="Salin ID", font=("Segoe UI", 8, "bold"), bg=self.T["card_bg"], fg=self.T["text_main"], borderwidth=0, padx=10, pady=4, command=lambda: self.clipboard_clear() or self.clipboard_append(my_ip))
         btn_copy.pack(side=tk.RIGHT)
 
         # Target IP Box
@@ -526,7 +543,7 @@ class BootBridgeTkApp(tk.Tk):
         self.remote_ip_entry.pack(fill=tk.X, ipady=6, pady=(0, 12))
         self.remote_ip_entry.insert(0, "192.168.1.")
 
-        btn_connect = tk.Button(card, text="⚡  SAMBUNGKAN SEKARANG (1-KLIK)", font=("Segoe UI", 11, "bold"), bg=self.T["accent_blue"], fg="#ffffff", borderwidth=0, padx=16, pady=10, command=self._start_remote_connect)
+        btn_connect = tk.Button(card, text="SAMBUNGKAN SEKARANG (1-KLIK)", font=("Segoe UI", 11, "bold"), bg=self.T["accent_blue"], fg="#ffffff", borderwidth=0, padx=16, pady=10, command=self._start_remote_connect)
         btn_connect.pack(fill=tk.X, pady=(0, 8))
 
     # ==========================================
@@ -539,7 +556,7 @@ class BootBridgeTkApp(tk.Tk):
         card = tk.Frame(f, bg=self.T["card_bg"], padx=18, pady=16, highlightbackground=self.T["border"], highlightthickness=1)
         card.pack(fill=tk.BOTH, expand=True)
 
-        tk.Label(card, text="📖  " + self.tr("shortcut_title"), font=("Segoe UI", 11, "bold"), fg=self.T["text_main"], bg=self.T["card_bg"]).pack(anchor="w", pady=(0, 10))
+        tk.Label(card, text=self.tr("shortcut_title"), font=("Segoe UI", 11, "bold"), fg=self.T["text_main"], bg=self.T["card_bg"]).pack(anchor="w", pady=(0, 10))
 
         shortcuts = [
             ("Ctrl + Alt + F", "Toggle Layar Penuh (Fullscreen VM)"),
@@ -568,7 +585,7 @@ class BootBridgeTkApp(tk.Tk):
         hdr_log = tk.Frame(card, bg=self.T["card_bg"])
         hdr_log.pack(fill=tk.X, pady=(0, 8))
 
-        tk.Label(hdr_log, text="🔍  Konsol Log Diagnostik", font=("Segoe UI", 11, "bold"), fg=self.T["text_main"], bg=self.T["card_bg"]).pack(side=tk.LEFT)
+        tk.Label(hdr_log, text="Konsol Log Diagnostik", font=("Segoe UI", 11, "bold"), fg=self.T["text_main"], bg=self.T["card_bg"]).pack(side=tk.LEFT)
         
         btn_clr = tk.Button(hdr_log, text="Bersihkan", font=("Segoe UI", 8), bg=self.T["input_bg"], fg=self.T["text_main"], borderwidth=0, padx=8, pady=2, command=lambda: self.log_box.delete("1.0", tk.END))
         btn_clr.pack(side=tk.RIGHT)
@@ -586,17 +603,17 @@ class BootBridgeTkApp(tk.Tk):
         card = tk.Frame(f, bg=self.T["card_bg"], padx=18, pady=16, highlightbackground=self.T["border"], highlightthickness=1)
         card.pack(fill=tk.BOTH, expand=True)
 
-        tk.Label(card, text="⚙️  " + self.tr("nav_settings"), font=("Segoe UI", 11, "bold"), fg=self.T["text_main"], bg=self.T["card_bg"]).pack(anchor="w", pady=(0, 16))
+        tk.Label(card, text=self.tr("nav_settings"), font=("Segoe UI", 11, "bold"), fg=self.T["text_main"], bg=self.T["card_bg"]).pack(anchor="w", pady=(0, 16))
 
         # Language selection
         row_lang = tk.Frame(card, bg=self.T["card_bg"])
         row_lang.pack(fill=tk.X, pady=(0, 12))
         tk.Label(row_lang, text="Bahasa Aplikasi / Language:", font=("Segoe UI", 9, "bold"), fg=self.T["text_muted"], bg=self.T["card_bg"], width=24, anchor="w").pack(side=tk.LEFT)
         
-        btn_id = tk.Button(row_lang, text="🇮🇩 Bahasa Indonesia", font=("Segoe UI", 9, "bold"), bg=self.T["accent_blue"] if self.current_lang=="id" else self.T["input_bg"], fg="#fff", borderwidth=0, padx=12, pady=4, command=lambda: self.set_language("id"))
+        btn_id = tk.Button(row_lang, text="Bahasa Indonesia", font=("Segoe UI", 9, "bold"), bg=self.T["accent_blue"] if self.current_lang=="id" else self.T["input_bg"], fg="#fff", borderwidth=0, padx=12, pady=4, command=lambda: self.set_language("id"))
         btn_id.pack(side=tk.LEFT, padx=(0, 8))
 
-        btn_en = tk.Button(row_lang, text="🇬🇧 English", font=("Segoe UI", 9, "bold"), bg=self.T["accent_blue"] if self.current_lang=="en" else self.T["input_bg"], fg="#fff", borderwidth=0, padx=12, pady=4, command=lambda: self.set_language("en"))
+        btn_en = tk.Button(row_lang, text="English", font=("Segoe UI", 9, "bold"), bg=self.T["accent_blue"] if self.current_lang=="en" else self.T["input_bg"], fg="#fff", borderwidth=0, padx=12, pady=4, command=lambda: self.set_language("en"))
         btn_en.pack(side=tk.LEFT)
 
         # Theme selection

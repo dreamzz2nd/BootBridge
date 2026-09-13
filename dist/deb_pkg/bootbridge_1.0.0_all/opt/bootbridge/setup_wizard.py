@@ -23,21 +23,21 @@ else:
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
-# Unified Color Palette matching BootBridge Main App Window
+# Unified Color Palette matching BootBridge Main App Window (Dark Orange Theme)
 THEME = {
-    "bg_dark": "#090d16",       # Deepest Navy/Slate (Main Background)
+    "bg_dark": "#0b0f19",       # Deep Charcoal Black (Main Background)
     "bg_card": "#131b2e",       # Card Background
     "bg_input": "#1e293b",      # Input/Button Background
-    "accent_blue": "#2563eb",   # Primary Blue
-    "accent_blue_hover": "#1d4ed8",
-    "accent_cyan": "#06b6d4",   # Accent Cyan
+    "accent_blue": "#ff6c37",   # Dark Orange / Coral Accent
+    "accent_blue_hover": "#e0531f",
+    "accent_cyan": "#ff7d47",   # Warm Orange Accent
     "accent_green": "#10b981",  # Emerald Green
     "accent_red": "#ef4444",    # Danger Red
     "text_main": "#f8fafc",     # Light Text
     "text_muted": "#94a3b8",    # Muted Text
     "border": "#1e293b",        # Subtle Border
-    "sidebar_bg": "#090d16",    # Sidebar Navy
-    "step_active_bg": "#2563eb",
+    "sidebar_bg": "#0b0f19",    # Dark Sidebar
+    "step_active_bg": "#ff6c37",# Active Step Orange Accent
     "step_idle_bg": "#131b2e"
 }
 
@@ -257,8 +257,25 @@ class ModernSetupWizard(tk.Tk):
         brand_frame = tk.Frame(self.sidebar, bg=THEME["sidebar_bg"], pady=20, padx=16)
         brand_frame.pack(fill=tk.X)
 
-        tk.Label(brand_frame, text="⚡ " + APP_NAME, font=("Segoe UI", 15, "bold"), fg=THEME["text_main"], bg=THEME["sidebar_bg"], anchor="w").pack(fill=tk.X)
-        tk.Label(brand_frame, text=f"v{APP_VERSION} Universal Setup", font=("Segoe UI", 9), fg=THEME["text_muted"], bg=THEME["sidebar_bg"], anchor="w").pack(fill=tk.X)
+        header_box = tk.Frame(brand_frame, bg=THEME["sidebar_bg"])
+        header_box.pack(fill=tk.X)
+
+        # Load BootBridge logo icon
+        png_path = os.path.join(BASE_DIR, "assets", "bootbridge.png")
+        self.logo_img = None
+        if os.path.exists(png_path):
+            try:
+                full_img = tk.PhotoImage(file=png_path)
+                w, h = full_img.width(), full_img.height()
+                factor = max(1, w // 28)
+                self.logo_img = full_img.subsample(factor, factor)
+                logo_lbl = tk.Label(header_box, image=self.logo_img, bg=THEME["sidebar_bg"])
+                logo_lbl.pack(side=tk.LEFT, padx=(0, 8))
+            except Exception:
+                pass
+
+        tk.Label(header_box, text=APP_NAME, font=("Segoe UI", 15, "bold"), fg=THEME["text_main"], bg=THEME["sidebar_bg"], anchor="w").pack(side=tk.LEFT)
+        tk.Label(brand_frame, text=f"v{APP_VERSION} Universal Setup", font=("Segoe UI", 9), fg=THEME["text_muted"], bg=THEME["sidebar_bg"], anchor="w").pack(fill=tk.X, pady=(4, 0))
 
         tk.Frame(self.sidebar, bg=THEME["border"], height=1).pack(fill=tk.X, padx=16, pady=12)
 
@@ -287,10 +304,10 @@ class ModernSetupWizard(tk.Tk):
         btn_lang_box = tk.Frame(lang_frame, bg=THEME["sidebar_bg"])
         btn_lang_box.pack(fill=tk.X)
         
-        self.btn_lang_id = tk.Button(btn_lang_box, text="🇮🇩 ID", font=("Segoe UI", 8, "bold"), fg="#fff", bg=THEME["accent_blue"] if self.lang=="id" else THEME["bg_input"], borderwidth=0, padx=10, pady=4, command=lambda: self.set_language("id"))
+        self.btn_lang_id = tk.Button(btn_lang_box, text="ID", font=("Segoe UI", 8, "bold"), fg="#fff", bg=THEME["accent_blue"] if self.lang=="id" else THEME["bg_input"], borderwidth=0, padx=12, pady=4, command=lambda: self.set_language("id"))
         self.btn_lang_id.pack(side=tk.LEFT, padx=(0, 6))
         
-        self.btn_lang_en = tk.Button(btn_lang_box, text="🇬🇧 EN", font=("Segoe UI", 8, "bold"), fg="#fff", bg=THEME["accent_blue"] if self.lang=="en" else THEME["bg_input"], borderwidth=0, padx=10, pady=4, command=lambda: self.set_language("en"))
+        self.btn_lang_en = tk.Button(btn_lang_box, text="EN", font=("Segoe UI", 8, "bold"), fg="#fff", bg=THEME["accent_blue"] if self.lang=="en" else THEME["bg_input"], borderwidth=0, padx=12, pady=4, command=lambda: self.set_language("en"))
         self.btn_lang_en.pack(side=tk.LEFT)
 
     def _build_nav_buttons(self):
@@ -394,9 +411,9 @@ class ModernSetupWizard(tk.Tk):
         pts_box.pack(fill=tk.X)
 
         features = [
-            ("⚡ Akselerasi Native 1:1" if self.lang=="id" else "⚡ 1:1 Native Acceleration", "KVM (Linux), WHPX (Windows), HVF (macOS)"),
-            ("🛡️ Safe & Isolated" if self.lang=="id" else "🛡️ Safe & Isolated", "Mount safety guard, registry safety, no data loss"),
-            ("🔄 Shared Clipboard Dua Arah" if self.lang=="id" else "🔄 Two-Way Shared Clipboard", "Seamless text copy-paste host <-> guest")
+            ("Akselerasi Native 1:1" if self.lang=="id" else "1:1 Native Acceleration", "KVM (Linux), WHPX (Windows), HVF (macOS)"),
+            ("Safe & Isolated" if self.lang=="id" else "Safe & Isolated", "Mount safety guard, registry safety, no data loss"),
+            ("Shared Clipboard Dua Arah" if self.lang=="id" else "Two-Way Shared Clipboard", "Seamless text copy-paste host <-> guest")
         ]
 
         for title_ft, desc_ft in features:
