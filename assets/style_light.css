@@ -197,34 +197,22 @@ button.btn-warning:hover {
     background-color: #ef6c00;
 }
 
-button.btn-success {
-    background-color: #43a047;
-    color: #ffffff;
-    border: 1px solid #43a047;
-    border-radius: 6px;
-    font-weight: 600;
-    font-size: 13px;
-    padding: 10px 18px;
-}
-
-button.btn-success:hover {
-    background-color: #2e7d32;
-}
-
-button.btn-used {
+button.btn-used, button.btn-used:disabled {
     background-color: #e0e0e0;
-    color: #616161;
+    color: #757575;
     border: 1px solid #cccccc;
     border-radius: 6px;
     font-weight: 600;
     font-size: 13px;
     padding: 10px 18px;
+    opacity: 0.85;
 }
 
 button.btn-used:hover {
     background-color: #d6d6d6;
-    color: #424242;
+    color: #616161;
 }
+
 
 
 

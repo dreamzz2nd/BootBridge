@@ -225,9 +225,9 @@ def make_icon_button(icon_name, label_text, style_class=None):
 def set_button_state(btn, label_widget, icon_name, text, state_mode):
     """
     Updates GTK button label, icon, and CSS class based on state_mode:
-    - 'used': Gray button (action currently active/already executed)
-    - 'warning': Orange button (ready to be executed)
-    - 'success': Green button (safety check passed)
+    - 'used': Gray button (action active / already applied)
+    - 'warning': Orange button (action ready to be executed)
+    - 'danger': Red button (emergency / stop action)
     """
     if not btn or not label_widget:
         return
@@ -236,12 +236,13 @@ def set_button_state(btn, label_widget, icon_name, text, state_mode):
     
     ctx.remove_class("btn-warning")
     ctx.remove_class("btn-success")
+    ctx.remove_class("btn-danger")
     ctx.remove_class("btn-used")
 
     if state_mode == "used":
         ctx.add_class("btn-used")
-    elif state_mode == "success":
-        ctx.add_class("btn-success")
+    elif state_mode == "danger":
+        ctx.add_class("btn-danger")
     else:
         ctx.add_class("btn-warning")
 
@@ -251,6 +252,7 @@ def set_button_state(btn, label_widget, icon_name, text, state_mode):
             if isinstance(box_child, Gtk.Image):
                 box_child.set_from_icon_name(icon_name, Gtk.IconSize.BUTTON)
                 break
+
 
 
 def make_icon_card_title(icon_name, title_text):
@@ -1003,9 +1005,10 @@ class BootBridgeApp(Gtk.Window):
                 self.unmount_btn_lbl,
                 "emblem-ok-symbolic",
                 self.tr("unmount_btn_done"),
-                state_mode="success"
+                state_mode="used"
             )
             self.unmount_btn_box.show_all()
+
 
         if safety["is_host_disk"]:
             hdr = self.tr("dualboot_iso_hdr")
