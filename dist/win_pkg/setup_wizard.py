@@ -625,8 +625,16 @@ class ModernSetupWizard(tk.Tk):
             elif "windows" in self.system_os:
                 self.log_msg("Configuring Windows environment...")
                 launcher_bat = os.path.join(target_dir, "bootbridge.bat")
+                exe_path = os.path.join(target_dir, "BootBridge.exe")
                 with open(launcher_bat, "w") as f:
-                    f.write(f'@echo off\ncd /d "{target_dir}"\nstart "" python bootbridge.py %*\n')
+                    f.write(
+                        f'@echo off\ncd /d "{target_dir}"\n'
+                        f'if exist "{exe_path}" (\n'
+                        f'    start "" "{exe_path}" %*\n'
+                        f'    exit /b 0\n'
+                        f')\n'
+                        f'start "" python bootbridge.py %*\n'
+                    )
                 self.log_msg(f"Created launcher: {launcher_bat}")
 
             self.set_progress_val(70, I18N[self.lang]["status_shortcuts"])
@@ -655,9 +663,17 @@ class ModernSetupWizard(tk.Tk):
             if "windows" in self.system_os:
                 desktop_folder = os.path.join(os.path.expanduser("~"), "Desktop")
                 if os.path.exists(desktop_folder):
-                    bat_path = os.path.join(desktop_folder, "BootBridge.bat")
-                    with open(bat_path, "w") as f:
-                        f.write(f'@echo off\ncd /d "{target_dir}"\npython bootbridge.py\n')
+                    exe_path = os.path.join(target_dir, "BootBridge.exe")
+                    shortcut_bat = os.path.join(desktop_folder, "BootBridge.bat")
+                    with open(shortcut_bat, "w") as f:
+                        f.write(
+                            f'@echo off\ncd /d "{target_dir}"\n'
+                            f'if exist "{exe_path}" (\n'
+                            f'    start "" "{exe_path}"\n'
+                            f'    exit /b 0\n'
+                            f')\n'
+                            f'start "" python bootbridge.py\n'
+                        )
                     self.log_msg("Created Desktop shortcut on Windows.")
             elif "linux" in self.system_os:
                 desktop_folder = os.path.expanduser("~/Desktop")
@@ -672,7 +688,22 @@ class ModernSetupWizard(tk.Tk):
 
     def _create_menu_shortcut(self, target_dir):
         try:
-            if "linux" in self.system_os:
+            if "windows" in self.system_os:
+                start_menu = os.path.join(os.path.expanduser("~"), "AppData", "Roaming", "Microsoft", "Windows", "Start Menu", "Programs")
+                if os.path.exists(start_menu):
+                    exe_path = os.path.join(target_dir, "BootBridge.exe")
+                    shortcut_bat = os.path.join(start_menu, "BootBridge.bat")
+                    with open(shortcut_bat, "w") as f:
+                        f.write(
+                            f'@echo off\ncd /d "{target_dir}"\n'
+                            f'if exist "{exe_path}" (\n'
+                            f'    start "" "{exe_path}"\n'
+                            f'    exit /b 0\n'
+                            f')\n'
+                            f'start "" python bootbridge.py\n'
+                        )
+                    self.log_msg("Registered Start Menu shortcut on Windows.")
+            elif "linux" in self.system_os:
                 app_dir = os.path.expanduser("~/.local/share/applications")
                 os.makedirs(app_dir, exist_ok=True)
                 desk_file = os.path.join(app_dir, "bootbridge.desktop")

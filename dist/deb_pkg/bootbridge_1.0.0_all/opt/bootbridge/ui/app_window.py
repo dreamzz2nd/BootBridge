@@ -112,7 +112,7 @@ class BootBridgeApp(Gtk.Window):
     def build_ui(self):
         # HeaderBar
         self.header = Gtk.HeaderBar()
-        self.header.set_show_close_button(True)
+        self.header.set_show_close_button(False)
         self.header.props.title = "BootBridge"
         self.header.props.subtitle = self.tr("app_subtitle")
         self.set_titlebar(self.header)
