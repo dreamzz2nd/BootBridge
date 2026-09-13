@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/bootbridge.png" width="128" height="128" alt="BootBridge Logo" />
+
 # BootBridge
 
 ### *Lightweight, Safe & Zero-Reboot Physical Dual-Boot Launcher for Linux*
@@ -39,7 +41,7 @@
   - [3. Desktop Menu Integration](#3-optional-desktop-menu-integration)
 - [Usage Guide](#usage-guide)
 - [Troubleshooting & FAQ](#troubleshooting--faq)
-  - [Disabling Windows Fast Startup](#1-disabling-windows-fast-startup-critical)
+  - [Disabling / Enabling Windows Fast Startup](#1-disabling--enabling-windows-fast-startup)
   - [Fixing "Preparing Automatic Repair"](#2-fixing-preparing-automatic-repair)
 - [Keyboard Shortcuts Reference](#keyboard-shortcuts-reference)
 - [Contributing & License](#contributing--license)
@@ -58,10 +60,12 @@ With BootBridge, your physical Windows partition is booted natively inside a hig
 
 - **Zero-Reboot Dual Booting**: Boot your physical Windows drive inside Linux at near-native speed.
 - **Mount Safety Guard**: Built-in protection protocol that verifies disk mount states, warns against shared host partition access, and safely unmounts Linux-mounted NTFS drives to prevent data corruption.
+- **Fast Startup & Offline Registry Modifier**: One-click Fast Startup enablement (`HiberbootEnabled = 1`) and reset via direct offline REGF Windows registry hive modification.
+- **Mutually Exclusive Smart Button States**: Dynamic button state indicators (Orange for ready-to-use actions, Gray for applied/active states) with automatic persistence across app launches in `config.json`.
+- **Modular Clean Architecture**: Highly structured Python codebase separated into `core/`, `ui/`, `ui/pages/`, and `ui/components.py` for maximum maintainability.
 - **KVM & Hyper-V Acceleration**: Configures KVM hardware virtualization with a comprehensive suite of Hyper-V CPU enlightenments (`hv_relaxed`, `hv_spinlocks`, `hv_vapic`, `hv_time`, `hv_synic`, `hv_stimer`, `hv_reset`, `hv_vpindex`, `hv_runtime`, `hv_tlbflush`, `hv_ipi`) to prevent Windows kernel timer desynchronization and BSODs.
 - **QXL Paravirtualized Graphics**: Employs QXL graphics acceleration for flawless OVMF UEFI GOP framebuffer rendering without visual artifacts or stride glitches.
 - **Hardware Auto-Recommendation**: Dynamically analyzes host total RAM and CPU core count, calculating optimal safe default allocations with visual scale markers (`Recommended`).
-- **One-Click NTFS Repair (`ntfsfix`)**: Integrated graphical utility to clear dirty volume flags and Fast Startup hibernation locks with elevated permissions.
 - **TPM 2.0 Emulator (`swtpm`)**: Automatic integration with `swtpm` daemon for full Windows 11 compatibility.
 - **Fullscreen Mode & Interactive Shortcuts**: One-click direct fullscreen mode and interactive keyboard shortcut reference (`Ctrl + Alt + F` / `Ctrl + Alt + G`).
 
@@ -207,6 +211,7 @@ update-desktop-database ~/.local/share/applications/
 3. **Verify Safety Guard Status**:
    - If NTFS partitions are currently mounted by Linux, click **`Safe Unmount Linux Partitions`**.
    - If Windows was hibernated or locked by Fast Startup, click **`Reset Status NTFS / Fast Startup`**.
+   - To re-enable Fast Startup for native dual-booting, click **`Enable Fast Startup`**.
 
 4. **Review Hardware Allocation**:
    - BootBridge automatically sets the **Recommended** RAM allocation (e.g. 3 GB for 8 GB systems) and CPU cores to keep your Linux host system responsive.
@@ -218,18 +223,15 @@ update-desktop-database ~/.local/share/applications/
 
 ## Troubleshooting & FAQ
 
-### 1. Disabling Windows Fast Startup (CRITICAL)
+### 1. Disabling / Enabling Windows Fast Startup
 
 > [!IMPORTANT]
 > When Windows is shut down physically with **Fast Startup** enabled, Windows hibernates the kernel to `hiberfil.sys` and locks the NTFS filesystem. Booting QEMU with a hibernated physical hardware state forces Windows into an Automatic Repair boot loop.
 
-**Resolution Steps:**
-1. Boot into your physical Windows OS natively (standard dual-boot reboot).
-2. Open **Command Prompt as Administrator** and execute:
-   ```cmd
-   powercfg /h off
-   ```
-3. Shut down Windows cleanly (**Shutdown**, do not use Sleep or Hibernate).
+**Resolution:**
+- Use the built-in **`Reset Status NTFS / Fast Startup`** button in BootBridge to automatically clear hibernation volume locks.
+- Alternatively, boot into physical Windows and run `powercfg /h off` in CMD as Administrator.
+- When you want to return to native Windows fast booting, click **`Enable Fast Startup`** in BootBridge.
 
 ---
 
