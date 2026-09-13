@@ -219,9 +219,9 @@ class BootBridgeApp(Gtk.Window):
         bottom_bar.get_style_context().add_class("bottom-bar")
 
         self.progress_bar = Gtk.ProgressBar()
-        self.progress_bar.set_show_text(True)
-        self.progress_bar.set_text(self.tr("progress_ready"))
+        self.progress_bar.set_show_text(False)
         bottom_bar.pack_start(self.progress_bar, False, False, 0)
+
 
         controls_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
         
@@ -280,10 +280,8 @@ class BootBridgeApp(Gtk.Window):
         if hasattr(self, "start_btn_lbl"): self.start_btn_lbl.set_text(self.tr("start_btn"))
         if hasattr(self, "stop_btn_lbl"): self.stop_btn_lbl.set_text(self.tr("stop_btn"))
 
-        if not self.launcher.is_running and hasattr(self, "progress_bar"):
-            self.progress_bar.set_text(self.tr("progress_ready"))
-
         self.refresh_disks()
+
 
     def update_dependency_ui(self):
         missing = self.deps.get("missing_packages", [])
@@ -531,7 +529,6 @@ class BootBridgeApp(Gtk.Window):
             self.start_btn.set_sensitive(False)
             self.stop_btn.set_sensitive(True)
             self.progress_bar.set_fraction(0.5)
-            self.progress_bar.set_text(self.tr("progress_booting"))
 
     def on_stop_vm_clicked(self, widget):
         self.launcher.stop_vm()
@@ -542,13 +539,12 @@ class BootBridgeApp(Gtk.Window):
                 self.start_btn.set_sensitive(False)
                 self.stop_btn.set_sensitive(True)
                 self.progress_bar.set_fraction(1.0)
-                self.progress_bar.set_text(self.tr("progress_running"))
             else:
                 self.start_btn.set_sensitive(True)
                 self.stop_btn.set_sensitive(False)
                 self.progress_bar.set_fraction(0.0)
-                self.progress_bar.set_text(self.tr("progress_ready"))
         GLib.idle_add(update_ui)
+
 
     def log_message(self, message):
         def append_log():
