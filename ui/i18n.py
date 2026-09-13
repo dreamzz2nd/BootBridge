@@ -49,6 +49,18 @@ TRANSLATIONS = {
             "• <b>Shared Clipboard (Copy-Paste):</b> Gunakan <b><tt>Ctrl + C</tt></b> &amp; <b><tt>Ctrl + V</tt></b> untuk menyalin/merekat teks secara langsung antara Linux Host dan Windows VM.\n"
             "• <b>Lepas / Tangkap Mouse:</b> Tekan <b><tt>Ctrl + Alt + G</tt></b> jika kursor kaku atau ingin melepas kursor dari VM."
         ),
+        "clipboard_card_title": "Cara Mengaktifkan Fitur Copy - Paste (Linux ↔ Windows VM)",
+        "clipboard_markup": (
+            "<b>Kenapa Fitur Copy - Paste Belum Berjalan?</b>\n\n"
+            "Di sisi sistem Linux, BootBridge sudah berhasil mengaktifkan jalur hardware serial <b><tt>qemu-vdagent</tt></b>.\n"
+            "Namun, di dalam <b>Windows (di VM kamu)</b>, sistem Windows membutuhkan driver <b>SPICE Guest Tools</b> agar bisa merespon clipboard Linux.\n\n"
+            "<b>Langkah Mudah Mengaktifkannya (Hanya Sekali):</b>\n"
+            "1. Jalankan VM Windows kamu seperti biasa.\n"
+            "2. Buka Browser (Chrome/Edge/Brave) di <b>dalam Windows VM</b>.\n"
+            "3. Download dan Install file resmi berikut:\n"
+            "   <b><tt>https://www.spice-space.org/download/binaries/spice-guest-tools/spice-guest-tools-latest.exe</tt></b>\n"
+            "4. Selesai! Setelah di-install, fungsi Copy &amp; Paste (<b>Ctrl+C / Ctrl+V</b>) langsung aktif otomatis dua arah."
+        ),
         "help_title": "Panduan Troubleshooting Boot Windows",
         "help_markup": (
             "<b>Jika Windows stuck di 'Preparing Automatic Repair':</b>\n\n"
@@ -123,6 +135,18 @@ TRANSLATIONS = {
             "• <b>Toggle Fullscreen:</b> Press <b><tt>Ctrl + Alt + F</tt></b> inside VM window to toggle Fullscreen mode.\n"
             "• <b>Shared Clipboard (Copy-Paste):</b> Use <b><tt>Ctrl + C</tt></b> &amp; <b><tt>Ctrl + V</tt></b> to copy/paste text seamlessly between Linux Host and Windows VM.\n"
             "• <b>Release / Grab Mouse:</b> Press <b><tt>Ctrl + Alt + G</tt></b> to ungrab/release mouse pointer from VM."
+        ),
+        "clipboard_card_title": "How to Enable Shared Clipboard (Linux ↔ Windows VM)",
+        "clipboard_markup": (
+            "<b>Why is Copy-Paste Not Working Yet?</b>\n\n"
+            "On the Linux side, BootBridge has enabled the <b><tt>qemu-vdagent</tt></b> virtual hardware.\n"
+            "However inside <b>Windows (the VM guest)</b>, Windows requires the <b>SPICE Guest Tools</b> driver to sync clipboard data.\n\n"
+            "<b>How to Enable in 1 Easy Step:</b>\n"
+            "1. Start your Windows VM as usual.\n"
+            "2. Open a web browser inside <b>Windows VM</b>.\n"
+            "3. Download &amp; install the official installer:\n"
+            "   <b><tt>https://www.spice-space.org/download/binaries/spice-guest-tools/spice-guest-tools-latest.exe</tt></b>\n"
+            "4. Done! After installation, Copy &amp; Paste (<b>Ctrl+C / Ctrl+V</b>) between Linux and Windows works automatically!"
         ),
         "help_title": "Windows Boot Troubleshooting & Fix Guide",
         "help_markup": (
