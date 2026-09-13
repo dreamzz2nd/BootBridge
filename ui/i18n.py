@@ -149,15 +149,16 @@ TRANSLATIONS = {
         "remote_dynres_chk": "Aktifkan Penyesuaian Resolusi Otomatis (Dynamic Resolution)",
         "connect_remote_btn": "SAMBUNGKAN SEKARANG (1-KLIK)",
         "disconnect_remote_btn": "HENTIKAN KONEKSI REMOTE",
-        "remote_guide_title": "Panduan Praktis Cara Meremote PC Windows (Untuk Orang Awam)",
+        "remote_guide_title": "Panduan Alur Remote Desktop 7 Langkah (Gaya AnyDesk)",
         "remote_guide_markup": (
-            "<b>Cara Mudah Mengakses Laptop / PC Windows Lain:</b>\n\n"
-            "1. <b>Aktifkan Remote Desktop di PC Windows Target:</b>\n"
-            "   Di PC Windows yang mau di-remote, buka <b>Settings</b> -> <b>System</b> -> <b>Remote Desktop</b> -> Aktifkan tombol <b>Enable Remote Desktop</b>.\n\n"
-            "2. <b>Pindai Otomatis di BootBridge:</b>\n"
-            "   Klik tombol <b>'Pindai Jaringan Wi-Fi'</b> di atas. BootBridge akan otomatis menemukan PC Windows tersebut tanpa kamu harus mengetik nomor IP!\n\n"
-            "3. <b>Masukkan Username &amp; Password:</b>\n"
-            "   Isi Username dan Password login Windows target, lalu klik tombol <b>SAMBUNGKAN SEKARANG (1-KLIK)</b>. Selesai!"
+            "<b>Alur Kerja Remote Desktop 7 Langkah (Sederhana & Mudah):</b>\n\n"
+            "<b>1. Siapkan Komponen:</b> Pastikan komponen client remote sudah terpasang (1-klik pasang otomatis).\n"
+            "<b>2. Jalankan Aplikasi:</b> Buka BootBridge di komputer kamu.\n"
+            "<b>3. Catat ID Perangkat Anda:</b> ID / Alamat IP unik kamu ditampilkan di banner atas. Bagikan ID ini jika orang lain ingin meremote komputer kamu.\n"
+            "<b>4. Connect ke Komputer Lain (Attended Access):</b> Masukkan ID / IP komputer tujuan di kolom 'ID Komputer Partner', lalu klik tombol <b>SAMBUNGKAN SEKARANG</b>.\n"
+            "<b>5. Setup Unattended Access (Opsional):</b> Masukkan Password login Windows target agar bisa terhubung kapan saja tanpa perlu persetujuan di sisi target.\n"
+            "<b>6. Kontrol Perangkat Remote:</b> Setelah terhubung, kamu bisa langsung mengontrol mouse, keyboard, clipboard dua arah, dan layar secara penuh.\n"
+            "<b>7. Keamanan Terjamin:</b> Semua koneksi dienkripsi dan terlindungi."
         ),
     },
     "en": {
