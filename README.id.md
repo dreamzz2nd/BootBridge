@@ -17,11 +17,17 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/dreamzz2nd/BootBridge/archive/refs/heads/main.zip">
-    <img src="https://img.shields.io/badge/Unduh-Paket%20Terbaru%20(ZIP)-brightgreen?style=for-the-badge&logo=github" alt="Unduh Paket Terbaru ZIP" />
+  <a href="https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/BootBridge-v1.0.0-Windows-Package.zip">
+    <img src="https://img.shields.io/badge/Unduh-Paket%20Windows%20(ZIP)-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Unduh Paket Windows" />
   </a>
-  <a href="https://github.com/dreamzz2nd/BootBridge/releases">
-    <img src="https://img.shields.io/badge/Rilis-Semua%20Paket-blue?style=for-the-badge&logo=github" alt="Rilis Semua Paket" />
+  <a href="https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/BootBridge-v1.0.0-macOS-Package.zip">
+    <img src="https://img.shields.io/badge/Unduh-Paket%20macOS%20(ZIP)-000000?style=for-the-badge&logo=apple&logoColor=white" alt="Unduh Paket macOS" />
+  </a>
+  <a href="https://github.com/dreamzz2nd/BootBridge/releases/download/v1.0.0/BootBridge-v1.0.0-Linux-x64-Package.tar.gz">
+    <img src="https://img.shields.io/badge/Unduh-Paket%20Linux%20(TAR.GZ)-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Unduh Paket Linux" />
+  </a>
+  <a href="https://github.com/dreamzz2nd/BootBridge/releases/tag/v1.0.0">
+    <img src="https://img.shields.io/badge/Rilis-v1.0.0%20(Semua%20Paket)-brightgreen?style=for-the-badge&logo=github" alt="GitHub Release v1.0.0" />
   </a>
 </p>
 
