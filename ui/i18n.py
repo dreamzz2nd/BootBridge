@@ -25,8 +25,8 @@ TRANSLATIONS = {
         "unmount_btn_done": "Partisi Unmounted (Aman)",
         "fix_ntfs_btn": "Reset Status NTFS / Fast Startup",
         "fix_ntfs_btn_done": "Status NTFS Clean",
-        "enable_fast_btn": "Aktifkan Fast Startup",
-        "enable_fast_btn_done": "Fast Startup Aktif",
+        "enable_fast_btn": "Matikan Fast Startup (Default / Aman)",
+        "enable_fast_btn_done": "Fast Startup Nonaktif (Aman)",
 
         "mount_active_hdr": "PROTEKSI MOUNT AKTIF:",
         "mount_active_msg": "Partisi Windows sedang di-mount oleh Linux. Harap unmount terlebih dahulu untuk mencegah kerusakan file NTFS.",
@@ -52,15 +52,13 @@ TRANSLATIONS = {
         ),
         "clipboard_card_title": "Cara Mengaktifkan Fitur Copy - Paste (Linux ↔ Windows VM)",
         "clipboard_markup": (
-            "<b>Kenapa Fitur Copy - Paste Belum Berjalan?</b>\n\n"
-            "Di sisi sistem Linux, BootBridge sudah berhasil mengaktifkan jalur hardware serial <b><tt>qemu-vdagent</tt></b>.\n"
-            "Namun, di dalam <b>Windows (di VM kamu)</b>, sistem Windows membutuhkan driver <b>SPICE Guest Tools</b> agar bisa merespon clipboard Linux.\n\n"
-            "<b>Langkah Mudah Mengaktifkannya (Hanya Sekali):</b>\n"
-            "1. Jalankan VM Windows kamu seperti biasa.\n"
-            "2. Buka Browser (Chrome/Edge/Brave) di <b>dalam Windows VM</b>.\n"
-            "3. Download dan Install file resmi berikut:\n"
-            "   <b><tt>https://www.spice-space.org/download/binaries/spice-guest-tools/spice-guest-tools-latest.exe</tt></b>\n"
-            "4. Selesai! Setelah di-install, fungsi Copy &amp; Paste (<b>Ctrl+C / Ctrl+V</b>) langsung aktif otomatis dua arah."
+            "<b>Otomatisasi Driver Copy-Paste oleh BootBridge:</b>\n\n"
+            "BootBridge sudah mengaktifkan jalur hardware serial <b><tt>qemu-vdagent</tt></b> dan <b>meng-embed drive USB virtual</b> secara otomatis di dalam Windows VM kamu!\n\n"
+            "<b>Langkah Aktivasi (Tanpa Perlu Download Browser):</b>\n"
+            "1. Jalankan VM Windows kamu via BootBridge.\n"
+            "2. Buka <b>File Explorer</b> di dalam Windows VM -> buka <b>Drive Removable/USB (D: atau E:)</b>.\n"
+            "3. Klik 2x file installer <b><tt>spice-guest-tools-latest.exe</tt></b> yang sudah disiapkan di drive tersebut.\n"
+            "4. Selesai! Setelah install, fungsi Copy &amp; Paste (<b>Ctrl+C / Ctrl+V</b>) langsung aktif otomatis dua arah."
         ),
         "help_title": "Panduan Troubleshooting Boot Windows",
         "help_markup": (
@@ -125,8 +123,8 @@ TRANSLATIONS = {
         "unmount_btn_done": "Partitions Unmounted (Safe)",
         "fix_ntfs_btn": "Reset NTFS Status / Fast Startup",
         "fix_ntfs_btn_done": "NTFS Status Clean",
-        "enable_fast_btn": "Enable Fast Startup",
-        "enable_fast_btn_done": "Fast Startup Active",
+        "enable_fast_btn": "Disable Fast Startup (Default / Safe)",
+        "enable_fast_btn_done": "Fast Startup Disabled (Safe)",
 
         "mount_active_hdr": "MOUNT PROTECTION ACTIVE:",
         "mount_active_msg": "Windows partitions are currently mounted by Linux. Please unmount them first to prevent NTFS file corruption.",
@@ -152,15 +150,13 @@ TRANSLATIONS = {
         ),
         "clipboard_card_title": "How to Enable Shared Clipboard (Linux ↔ Windows VM)",
         "clipboard_markup": (
-            "<b>Why is Copy-Paste Not Working Yet?</b>\n\n"
-            "On the Linux side, BootBridge has enabled the <b><tt>qemu-vdagent</tt></b> virtual hardware.\n"
-            "However inside <b>Windows (the VM guest)</b>, Windows requires the <b>SPICE Guest Tools</b> driver to sync clipboard data.\n\n"
-            "<b>How to Enable in 1 Easy Step:</b>\n"
-            "1. Start your Windows VM as usual.\n"
-            "2. Open a web browser inside <b>Windows VM</b>.\n"
-            "3. Download &amp; install the official installer:\n"
-            "   <b><tt>https://www.spice-space.org/download/binaries/spice-guest-tools/spice-guest-tools-latest.exe</tt></b>\n"
-            "4. Done! After installation, Copy &amp; Paste (<b>Ctrl+C / Ctrl+V</b>) between Linux and Windows works automatically!"
+            "<b>Automatic Copy-Paste Driver Integration by BootBridge:</b>\n\n"
+            "BootBridge has automatically enabled <b><tt>qemu-vdagent</tt></b> hardware channels and <b>auto-mounted a virtual USB driver disk</b> inside your Windows VM!\n\n"
+            "<b>Activation Steps (No Browser Download Needed):</b>\n"
+            "1. Launch your Windows VM via BootBridge.\n"
+            "2. Open <b>File Explorer</b> inside Windows VM -> open the <b>Removable USB Drive (D: or E:)</b>.\n"
+            "3. Double-click <b><tt>spice-guest-tools-latest.exe</tt></b> which BootBridge provided automatically on that drive.\n"
+            "4. Done! Copy &amp; Paste (<b>Ctrl+C / Ctrl+V</b>) is now active bidirectionally."
         ),
         "help_title": "Windows Boot Troubleshooting & Fix Guide",
         "help_markup": (

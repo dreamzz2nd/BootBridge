@@ -452,12 +452,12 @@ class BootBridgeApp(Gtk.Window):
             return
 
         for p in ntfs_parts:
-            self.log_message(f"Mengaktifkan Fast Startup untuk partisi {p['path']}...")
-            success, msg = SafetyChecker.enable_fast_startup(p["path"])
+            self.log_message(f"Mematikan Fast Startup & mengembalikan ke settingan default/aman untuk partisi {p['path']}...")
+            success, msg = SafetyChecker.disable_fast_startup(p["path"])
             self.log_message(msg)
             if success:
-                self.config["fast_startup_active"] = True
-                self.config["ntfs_reset_done"] = False
+                self.config["fast_startup_active"] = False
+                self.config["ntfs_reset_done"] = True
                 save_config(self.config)
                 self.update_safety_button_styles()
 

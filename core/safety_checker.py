@@ -154,13 +154,14 @@ class SafetyChecker:
             return False, f"Error ntfsfix: {str(e)}"
 
     @staticmethod
-    def enable_fast_startup(part_path):
+    def disable_fast_startup(part_path):
         """
-        Enables Fast Startup for a target Windows NTFS partition:
+        Disables Fast Startup for a target Windows NTFS partition (restores default clean shutdown):
         1. Mounts partition temporarily if not already mounted.
-        2. Modifies HiberbootEnabled & HibernateEnabled DWORD in Windows SYSTEM registry hive offline.
-        3. Generates Enable_Fast_Startup.bat and .reg files on root of Windows partition.
-        4. Cleans up temporary mount.
+        2. Restores SYSTEM hive backup if present, OR modifies HiberbootEnabled & HibernateEnabled DWORD to 0 in Windows SYSTEM registry hive offline.
+        3. Runs ntfsfix to clear dirty/hibernation flags on NTFS.
+        4. Generates Disable_Fast_Startup.bat and .reg files on root of Windows partition.
+        5. Cleans up temporary mount.
         """
         was_mounted_by_us = False
         mountpoint = None
@@ -229,7 +230,10 @@ class SafetyChecker:
             if system_hive_path and os.path.exists(system_hive_path):
                 try:
                     bak_path = system_hive_path + ".bak_bootbridge"
-                    if not os.path.exists(bak_path):
+                    if os.path.exists(bak_path):
+                        shutil.copy2(bak_path, system_hive_path)
+                        registry_updated = True
+                    else:
                         shutil.copy2(system_hive_path, bak_path)
 
                     with open(system_hive_path, "rb") as f:
@@ -243,7 +247,7 @@ class SafetyChecker:
                             if pos == -1:
                                 break
                             if pos >= 16 and hive_data[pos-16:pos-14] == b"vk":
-                                hive_data[pos-8:pos-4] = b"\x01\x00\x00\x00"
+                                hive_data[pos-8:pos-4] = b"\x00\x00\x00\x00"
                                 modified = True
                             pos += len(target_name)
 
@@ -267,28 +271,28 @@ class SafetyChecker:
                     cmd = [chntpw_bin, "-e", system_hive_path]
                     input_script = "cd ControlSet001\\Control\\Session Manager\\Power\n" \
                                    "nv 4 HiberbootEnabled\n" \
-                                   "ed HiberbootEnabled\n1\n" \
+                                   "ed HiberbootEnabled\n0\n" \
                                    "cd \\ControlSet001\\Control\\Power\n" \
                                    "nv 4 HibernateEnabled\n" \
-                                   "ed HibernateEnabled\n1\n" \
+                                   "ed HibernateEnabled\n0\n" \
                                    "s\ny\nq\n"
                     subprocess.run(cmd, input=input_script, text=True, capture_output=True)
                     registry_updated = True
                 except Exception as e:
                     print(f"[SafetyChecker] Warning running chntpw: {e}")
 
-            # Generate helper scripts on Windows drive
-            bat_path = os.path.join(mountpoint, "Enable_Fast_Startup.bat")
-            reg_path = os.path.join(mountpoint, "Enable_Fast_Startup.reg")
+            # Generate helper scripts on Windows drive to turn off Fast Startup
+            bat_path = os.path.join(mountpoint, "Disable_Fast_Startup.bat")
+            reg_path = os.path.join(mountpoint, "Disable_Fast_Startup.reg")
 
             bat_content = (
                 "@echo off\r\n"
-                "echo Enabling Windows Fast Startup...\r\n"
-                "powercfg /h on\r\n"
-                "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Power\" /v HiberbootEnabled /t REG_DWORD /d 1 /f\r\n"
-                "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Power\" /v HibernateEnabled /t REG_DWORD /d 1 /f\r\n"
+                "echo Disabling Windows Fast Startup (Recommended for Dual-Boot)...\r\n"
+                "powercfg /h off\r\n"
+                "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Power\" /v HiberbootEnabled /t REG_DWORD /d 0 /f\r\n"
+                "reg add \"HKLM\\SYSTEM\\CurrentControlSet\\Control\\Power\" /v HibernateEnabled /t REG_DWORD /d 0 /f\r\n"
                 "echo.\r\n"
-                "echo Fast Startup is now ENABLED in Windows!\r\n"
+                "echo Fast Startup is now DISABLED in Windows (Safe for Dual-Boot)!\r\n"
                 "pause\r\n"
             )
             with open(bat_path, "w", newline="\r\n") as f:
@@ -297,16 +301,19 @@ class SafetyChecker:
             reg_content = (
                 "Windows Registry Editor Version 5.00\r\n\r\n"
                 "[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Power]\r\n"
-                "\"HiberbootEnabled\"=dword:00000001\r\n\r\n"
+                "\"HiberbootEnabled\"=dword:00000000\r\n\r\n"
                 "[HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Power]\r\n"
-                "\"HibernateEnabled\"=dword:00000001\r\n"
+                "\"HibernateEnabled\"=dword:00000000\r\n"
             )
             with open(reg_path, "w", newline="\r\n") as f:
                 f.write(reg_content)
 
-            msg = f"Fast Startup berhasil diaktifkan untuk partisi {part_path}!\n" \
-                  f"• Status HiberbootEnabled diatur ke 1 pada Registry Windows.\n" \
-                  f"• File helper '{os.path.basename(bat_path)}' & '{os.path.basename(reg_path)}' telah dibuat di C:\\."
+            # Also clean NTFS dirty/hibernation flags
+            SafetyChecker.fix_ntfs_dirty_flag(part_path)
+
+            msg = f"Fast Startup berhasil DIMATIKAN (dikembalikan ke settingan default/aman) untuk partisi {part_path}!\n" \
+                  f"• Status HiberbootEnabled & HibernateEnabled diatur ke 0 pada Registry Windows.\n" \
+                  f"• Booting ke Windows fisik sekarang aman tanpa error 'Preparing Automatic Repair'!"
 
             return True, msg
 
@@ -316,6 +323,12 @@ class SafetyChecker:
                     subprocess.run(["udisksctl", "unmount", "-b", part_path], capture_output=True, text=True)
                 except Exception:
                     pass
+
+    @staticmethod
+    def enable_fast_startup(part_path):
+        """Backward compatibility wrapper calling disable_fast_startup to enforce safe dual-boot state."""
+        return SafetyChecker.disable_fast_startup(part_path)
+
 
 
 if __name__ == "__main__":
